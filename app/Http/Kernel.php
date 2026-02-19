@@ -10,7 +10,6 @@ protected $routeMiddleware = [
     // ... middleware lainnya
     'auth' => \App\Http\Middleware\Authenticate::class,
     
-    // TAMBAHKAN BARIS INI
     'check.session' => \App\Http\Middleware\CheckUserSession::class,
 ];
     protected $middleware = [

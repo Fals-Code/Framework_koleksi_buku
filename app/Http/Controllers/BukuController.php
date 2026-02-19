@@ -20,8 +20,6 @@ class BukuController extends Controller
         return view('buku.create', compact('kategoris'));
     }
 
-    
-
     public function store(Request $request)
     {
         $request->validate([
@@ -31,8 +29,10 @@ class BukuController extends Controller
             'idkategori' => 'required|exists:kategoris,idkategori',
         ]);
 
-        Buku::create($request->all());
-        return redirect()->route('buku.index')->with('success', 'Buku berhasil ditambahkan.');
+        $buku = Buku::create($request->all());
+        $this->addNotification('Buku Baru', 'Buku "' . $buku->judul . '" berhasil ditambahkan.');
+        
+        return redirect()->route('buku.index');
     }
 
     public function edit($id)
@@ -53,13 +53,41 @@ class BukuController extends Controller
 
         $buku = Buku::findOrFail($id);
         $buku->update($request->all());
-        return redirect()->route('buku.index')->with('success', 'Buku berhasil diupdate.');
+        $this->addNotification('Update Buku', 'Data buku "' . $buku->judul . '" telah diperbarui.');
+
+        return redirect()->route('buku.index');
     }
 
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);
+        $judul = $buku->judul;
         $buku->delete();
-        return redirect()->route('buku.index')->with('success', 'Buku berhasil dihapus.');
+        $this->addNotification('Hapus Buku', 'Buku "' . $judul . '" telah dihapus.');
+
+        return redirect()->route('buku.index');
+    }
+
+    public function getNextKode($idkategori)
+    {
+        $count = Buku::where('idkategori', $idkategori)->count();
+        $kategori = Kategori::find($idkategori);
+        if (!$kategori) return response()->json(['kode' => '']);
+        $nama = strtoupper($kategori->nama_kategori);
+        $inisial = (strlen($nama) >= 3) ? $nama[0].$nama[2] : substr($nama, 0, 2);
+        $nextNumber = str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+        return response()->json(['kode' => $inisial . '-' . $nextNumber]);
+    }
+
+    private function addNotification($title, $message)
+    {
+        $notifications = session()->get('notifications', []);
+        array_unshift($notifications, [
+            'title' => $title,
+            'message' => $message,
+            'time' => now()->format('H:i'),
+            'unread' => true
+        ]);
+        session()->put('notifications', array_slice($notifications, 0, 5));
     }
 }

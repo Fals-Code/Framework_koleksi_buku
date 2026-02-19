@@ -11,16 +11,14 @@ class CheckUserSession
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Pengecekan: Apakah user sudah login DAN session custom ada?
-        if (Auth::check() && $request->session()->has('custom_user_data')) {
+        if (Auth::check()) {
             return $next($request);
         }
 
-        // Jika tidak ada session, paksa logout dan kembali ke login
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('error', 'Session tidak valid, silahkan login kembali.');
+        return redirect('/')->with('error', 'Session tidak valid, silahkan login kembali.');
     }
 }

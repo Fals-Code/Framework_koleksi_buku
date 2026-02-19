@@ -2,45 +2,79 @@
 
 @section('content')
 <div class="page-header">
-  <h3 class="page-title"> Daftar Kategori </h3>
-  <nav aria-label="breadcrumb">
-    <a href="{{ route('kategori.create') }}" class="btn btn-gradient-primary btn-fw">+ Tambah Kategori</a>
-  </nav>
+    <h3 class="page-title">
+        <span class="page-title-icon bg-gradient-primary text-white me-2">
+            <i class="mdi mdi-format-list-bulleted"></i>
+        </span> Manajemen Kategori
+    </h3>
+    <nav aria-label="breadcrumb">
+        <a href="{{ route('kategori.create') }}" class="btn btn-gradient-primary btn-icon-text" onclick="btnLoading(this)">
+            <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah Kategori
+        </a>
+    </nav>
 </div>
+
 <div class="row">
-  <div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-      <div class="card-body">
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th> No </th>
-              <th> Nama Kategori </th>
-              <th> Aksi </th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($kategoris as $key => $kategori)
-            <tr>
-              <td> {{ $key+1 }} </td>
-              <td> {{ $kategori->nama_kategori }} </td>
-              <td>
-                <a href="{{ route('kategori.edit', $kategori->idkategori) }}" class="btn btn-gradient-warning btn-sm">Edit</a>
-                <form action="{{ route('kategori.destroy', $kategori->idkategori) }}" method="POST" style="display:inline-block">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-gradient-danger btn-sm" onclick="return confirm('Yakin hapus?')">Hapus</button>
-                </form>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Daftar Kategori Buku</h4>
+                <p class="card-description"> Kelola kategori untuk mempermudah pengelompokan koleksi pustaka. </p>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr class="bg-light">
+                                <th style="width: 10%"> No </th>
+                                <th style="width: 60%"> Nama Kategori </th>
+                                <th style="width: 30%" class="text-center"> Aksi </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($kategoris as $key => $kategori)
+                            <tr>
+                                <td> {{ $key+1 }} </td>
+                                <td class="font-weight-bold"> 
+                                    <i class="mdi mdi-tag-outline text-primary me-2"></i> {{ $kategori->nama_kategori }} 
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center">
+                                        <a href="{{ route('kategori.edit', $kategori->idkategori) }}" class="btn btn-gradient-warning btn-sm btn-icon-text me-2" onclick="btnLoading(this)">
+                                            <i class="mdi mdi-pencil btn-icon-prepend"></i> Edit
+                                        </a>
+                                        <form action="{{ route('kategori.destroy', $kategori->idkategori) }}" method="POST" class="d-inline" onsubmit="return confirmDelete(this)">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-gradient-danger btn-sm btn-icon-text">
+                                                <i class="mdi mdi-delete btn-icon-prepend"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 text-muted small">
+                    Total Kategori: <strong>{{ $kategoris->count() }}</strong> data ditemukan.
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 @endsection
+
+@push('script-page')
+<script>
+    function confirmDelete(form) {
+        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+            const btn = form.querySelector('button[type="submit"]');
+            btnLoading(btn);
+            return true;
+        }
+        return false;
+    }
+</script>
+@endpush

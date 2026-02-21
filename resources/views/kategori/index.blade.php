@@ -8,7 +8,7 @@
         </span> Manajemen Kategori
     </h3>
     <nav aria-label="breadcrumb">
-        <a href="{{ route('kategori.create') }}" class="btn btn-gradient-primary btn-icon-text" onclick="btnLoading(this)">
+        <a href="{{ route('kategori.create') }}" class="btn btn-gradient-primary btn-icon-text">
             <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah Kategori
         </a>
     </nav>
@@ -31,7 +31,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($kategoris as $key => $kategori)
+                            @forelse($kategoris as $key => $kategori)
                             <tr>
                                 <td> {{ $key+1 }} </td>
                                 <td class="font-weight-bold"> 
@@ -39,10 +39,11 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center">
-                                        <a href="{{ route('kategori.edit', $kategori->idkategori) }}" class="btn btn-gradient-warning btn-sm btn-icon-text me-2" onclick="btnLoading(this)">
+                                        <a href="{{ route('kategori.edit', $kategori->id) }}" class="btn btn-gradient-warning btn-sm btn-icon-text me-2">
                                             <i class="mdi mdi-pencil btn-icon-prepend"></i> Edit
                                         </a>
-                                        <form action="{{ route('kategori.destroy', $kategori->idkategori) }}" method="POST" class="d-inline" onsubmit="return confirmDelete(this)">
+                                        
+                                        <form action="{{ route('kategori.destroy', $kategori->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-gradient-danger btn-sm btn-icon-text">
@@ -52,7 +53,11 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Belum ada data kategori.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -65,16 +70,3 @@
     </div>
 </div>
 @endsection
-
-@push('script-page')
-<script>
-    function confirmDelete(form) {
-        if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-            const btn = form.querySelector('button[type="submit"]');
-            btnLoading(btn);
-            return true;
-        }
-        return false;
-    }
-</script>
-@endpush

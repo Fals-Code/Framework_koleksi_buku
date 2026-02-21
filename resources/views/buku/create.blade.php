@@ -34,13 +34,13 @@
                                 </span>
                             </div>
                             <select class="form-control" id="selectKategori" name="idkategori" required>
-                                <option value="" data-nama="">-- Pilih Kategori --</option>
-                                @foreach($kategoris as $kategori)
-                                    <option value="{{ $kategori->idkategori }}" data-nama="{{ $kategori->nama_kategori }}">
-                                        {{ $kategori->nama_kategori }}
-                                    </option>
-                                @endforeach
-                            </select>
+    <option value="">-- Pilih Kategori --</option>
+    @foreach($kategoris as $kategori)
+        <option value="{{ $kategori->id }}" data-nama="{{ $kategori->nama_kategori }}">
+            {{ $kategori->nama_kategori }}
+        </option>
+    @endforeach
+</select>
                         </div>
                     </div>
 
@@ -108,7 +108,7 @@
                     inputKode.value = "Menghasilkan kode...";
                     iconKode.className = "mdi mdi-refresh mdi-spin"; // Efek putar pada icon
                     
-                    fetch(`/get-next-kode/${idKategori}`)
+                    fetch("{{ url('get-next-kode') }}/" + idKategori)
                         .then(response => response.json())
                         .then(data => {
                             inputKode.value = data.kode;

@@ -35,34 +35,32 @@
                         </thead>
                         <tbody>
                             @foreach($bukus as $key => $buku)
-                            <tr>
-                                <td> {{ $key+1 }} </td>
-                                <td class="text-primary font-weight-bold"> {{ $buku->kode }} </td>
-                                <td class="text-wrap" style="max-width: 250px;"> {{ $buku->judul }} </td>
-                                <td> 
-                                    <i class="mdi mdi-account text-muted me-1"></i> {{ $buku->pengarang }} 
-                                </td>
-                                <td>
-                                    <label class="badge badge-gradient-info text-dark">
-                                        {{ $buku->kategori->nama_kategori }}
-                                    </label>
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center">
-                                        <a href="{{ route('buku.edit', $buku->idbuku) }}" class="btn btn-gradient-warning btn-sm btn-icon-text me-2" onclick="btnLoading(this)">
-                                            <i class="mdi mdi-pencil btn-icon-prepend"></i> Edit
-                                        </a>
-                                        <form action="{{ route('buku.destroy', $buku->idbuku) }}" method="POST" class="d-inline" onsubmit="return confirmDeleteBuku(this)">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-gradient-danger btn-sm btn-icon-text">
-                                                <i class="mdi mdi-delete btn-icon-prepend"></i> Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
+<tr>
+    <td> {{ $key+1 }} </td>
+    <td class="text-primary font-weight-bold"> {{ $buku->kode }} </td>
+    <td class="text-wrap" style="max-width: 250px;"> {{ $buku->judul }} </td>
+    <td> {{ $buku->pengarang }} </td>
+    <td>
+        <label class="badge badge-gradient-info text-dark">
+            {{ $buku->kategori->nama_kategori ?? 'Tanpa Kategori' }}
+        </label>
+    </td>
+    <td class="text-center">
+        <div class="d-flex justify-content-center">
+            <a href="{{ route('buku.edit', $buku->id) }}" class="btn btn-gradient-warning btn-sm btn-icon-text me-2">
+                <i class="mdi mdi-pencil btn-icon-prepend"></i> Edit
+            </a>
+            <form action="{{ route('buku.destroy', $buku->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus buku ini?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-gradient-danger btn-sm btn-icon-text">
+                    <i class="mdi mdi-delete btn-icon-prepend"></i> Hapus
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>
+@endforeach
                         </tbody>
                     </table>
                 </div>

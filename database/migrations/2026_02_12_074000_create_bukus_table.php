@@ -10,12 +10,21 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('bukus', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('bukus', function (Blueprint $table) {
+        $table->id();
+        $table->string('kode', 20);
+        $table->string('judul', 500);
+        $table->string('pengarang', 200);
+        
+        // Tambahkan kolom idkategori sebagai foreign key
+        // Pastikan ini ada agar getNextKode tidak error lagi
+        $table->unsignedBigInteger('idkategori');
+        $table->foreign('idkategori')->references('id')->on('kategoris')->onDelete('cascade');
+        
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

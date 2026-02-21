@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use App\Notifications\SystemNotification;
 
 class BukuController extends Controller
 {
@@ -26,11 +27,17 @@ class BukuController extends Controller
             'kode' => 'required|string|max:20',
             'judul' => 'required|string|max:500',
             'pengarang' => 'required|string|max:200',
-            'idkategori' => 'required|exists:kategoris,idkategori',
+            'idkategori' => 'required|exists:kategoris,id', // Perbaikan: kolom 'id'
         ]);
 
         $buku = Buku::create($request->all());
-        $this->addNotification('Buku Baru', 'Buku "' . $buku->judul . '" berhasil ditambahkan.');
+
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Buku Baru',
+            'message' => 'Buku "' . $buku->judul . '" berhasil ditambahkan.',
+            'link' => route('buku.index'),
+            'type' => 'success'
+        ]));
         
         return redirect()->route('buku.index');
     }
@@ -48,12 +55,18 @@ class BukuController extends Controller
             'kode' => 'required|string|max:20',
             'judul' => 'required|string|max:500',
             'pengarang' => 'required|string|max:200',
-            'idkategori' => 'required|exists:kategoris,idkategori',
+            'idkategori' => 'required|exists:kategoris,id',
         ]);
 
         $buku = Buku::findOrFail($id);
         $buku->update($request->all());
-        $this->addNotification('Update Buku', 'Data buku "' . $buku->judul . '" telah diperbarui.');
+
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Update Buku',
+            'message' => 'Data buku "' . $buku->judul . '" telah diperbarui.',
+            'link' => route('buku.index'),
+            'type' => 'info'
+        ]));
 
         return redirect()->route('buku.index');
     }
@@ -63,31 +76,30 @@ class BukuController extends Controller
         $buku = Buku::findOrFail($id);
         $judul = $buku->judul;
         $buku->delete();
-        $this->addNotification('Hapus Buku', 'Buku "' . $judul . '" telah dihapus.');
+
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Hapus Buku',
+            'message' => 'Buku "' . $judul . '" telah dihapus.',
+            'link' => route('buku.index'),
+            'type' => 'danger'
+        ]));
 
         return redirect()->route('buku.index');
     }
 
     public function getNextKode($idkategori)
     {
+        // Perbaikan: Mencari berdasarkan kolom 'idkategori' di tabel bukus
         $count = Buku::where('idkategori', $idkategori)->count();
         $kategori = Kategori::find($idkategori);
+        
         if (!$kategori) return response()->json(['kode' => '']);
+        
         $nama = strtoupper($kategori->nama_kategori);
+        // Mengambil 2 huruf inisial
         $inisial = (strlen($nama) >= 3) ? $nama[0].$nama[2] : substr($nama, 0, 2);
-        $nextNumber = str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+        $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT); // Gunakan 3 digit agar lebih rapi
+        
         return response()->json(['kode' => $inisial . '-' . $nextNumber]);
-    }
-
-    private function addNotification($title, $message)
-    {
-        $notifications = session()->get('notifications', []);
-        array_unshift($notifications, [
-            'title' => $title,
-            'message' => $message,
-            'time' => now()->format('H:i'),
-            'unread' => true
-        ]);
-        session()->put('notifications', array_slice($notifications, 0, 5));
     }
 }

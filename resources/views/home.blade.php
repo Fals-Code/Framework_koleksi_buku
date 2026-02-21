@@ -34,7 +34,7 @@
                 <img src="{{ asset('assets/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle-image" />
                 <h4 class="font-weight-normal mb-3">Total Kategori <i class="mdi mdi-format-list-bulleted mdi-24px float-end"></i>
                 </h4>
-                <h2 class="mb-5">{{ \App\Models\Kategori::count() }} Grup</h2>
+                <h2 class="mb-5">{{ \App\Models\Kategori::count() }} Kategori</h2>
                 <p class="card-text">Terorganisir secara sistematis</p>
             </div>
         </div>

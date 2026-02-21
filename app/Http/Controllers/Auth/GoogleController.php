@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\SystemNotification;
 
 class GoogleController extends Controller
 {
@@ -91,7 +92,12 @@ class GoogleController extends Controller
             session()->forget('otp_user_id');
             $request->session()->regenerate();
 
-            $this->addNotification('Login Berhasil', 'Selamat Datang, ' . $user->name . '! Anda berhasil masuk ke sistem.');
+            $user->notify(new SystemNotification([
+                'title' => 'Login Berhasil',
+                'message' => 'Selamat Datang, ' . $user->name . '! Anda berhasil masuk ke sistem.',
+                'link' => route('home'),
+                'type' => 'success'
+            ]));
 
             return redirect()->intended('/home');
         }
@@ -101,25 +107,20 @@ class GoogleController extends Controller
 
     public function logout(Request $request)
     {
-        $user_name = Auth::user()->name ?? 'User';
+        $user = Auth::user();
+        $user_name = $user->name ?? 'User';
+
+        $user->notify(new SystemNotification([
+            'title' => 'Logout Berhasil',
+            'message' => 'Terima kasih ' . $user_name . ', Anda telah keluar dengan aman.',
+            'link' => url('/'),
+            'type' => 'info'
+        ]));
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $this->addNotification('Logout Berhasil', 'Terima kasih ' . $user_name . ', Anda telah keluar dengan aman.');
-
         return redirect('/');
-    }
-
-    private function addNotification($title, $message)
-    {
-        $notifications = session()->get('notifications', []);
-        array_unshift($notifications, [
-            'title' => $title,
-            'message' => $message,
-            'time' => now()->format('H:i'),
-            'unread' => true
-        ]);
-        session()->put('notifications', array_slice($notifications, 0, 5));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Buku;
+use App\Notifications\SystemNotification;
 
 class PDFController extends Controller
 {
@@ -18,7 +19,12 @@ class PDFController extends Controller
             'tanggal_acara'    => '19 Februari 2026',
         ];
 
-        $this->addNotification('Cetak Sertifikat', 'Sertifikat sedang diproses. Silakan cek tab baru browser Anda.');
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Cetak Sertifikat',
+            'message' => 'Sertifikat "' . $data['nama_penerima'] . '" berhasil dibuat.',
+            'link' => '#',
+            'type' => 'info'
+        ]));
 
         $pdf = Pdf::loadView('pdf.sertifikat', $data)->setPaper('a4', 'landscape');
         return $pdf->stream('Sertifikat_Pelatihan.pdf');
@@ -38,21 +44,14 @@ class PDFController extends Controller
             'lokasi_acara'  => 'Aula Kampus FIKKIA Universitas Airlangga',
         ];
 
-        $this->addNotification('Cetak Undangan', 'Surat undangan sedang diproses dan akan segera ditampilkan.');
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Cetak Undangan',
+            'message' => 'Surat undangan seminar nasional berhasil diproses.',
+            'link' => '#',
+            'type' => 'info'
+        ]));
 
         $pdf = Pdf::loadView('pdf.undangan', $data)->setPaper('a4', 'portrait');
         return $pdf->stream('Surat_Undangan.pdf');
-    }
-
-    private function addNotification($title, $message)
-    {
-        $notifications = session()->get('notifications', []);
-        array_unshift($notifications, [
-            'title' => $title,
-            'message' => $message,
-            'time' => now()->format('H:i'),
-            'unread' => true
-        ]);
-        session()->put('notifications', array_slice($notifications, 0, 5));
     }
 }

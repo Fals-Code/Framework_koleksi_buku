@@ -6,6 +6,7 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -32,10 +33,8 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);
     
-    Route::get('/notifications/clear', function() {
-        session()->forget('notifications');
-        return back();
-    })->name('notifications.clear');
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
     
     Route::get('/cetak-sertifikat', [PDFController::class, 'cetakSertifikat'])->name('cetak.sertifikat');
     Route::get('/cetak-undangan', [PDFController::class, 'cetakUndangan'])->name('cetak.undangan');

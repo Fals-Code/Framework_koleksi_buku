@@ -27,7 +27,7 @@ class BukuController extends Controller
             'kode' => 'required|string|max:20',
             'judul' => 'required|string|max:500',
             'pengarang' => 'required|string|max:200',
-            'idkategori' => 'required|exists:kategoris,id', // Perbaikan: kolom 'id'
+            'idkategori' => 'required|exists:kategoris,id',
         ]);
 
         $buku = Buku::create($request->all());
@@ -39,7 +39,8 @@ class BukuController extends Controller
             'type' => 'success'
         ]));
         
-        return redirect()->route('buku.index');
+        return redirect()->route('buku.index')
+            ->with('success', 'Buku baru berhasil disimpan ke sistem!');
     }
 
     public function edit($id)
@@ -68,7 +69,8 @@ class BukuController extends Controller
             'type' => 'info'
         ]));
 
-        return redirect()->route('buku.index');
+        return redirect()->route('buku.index')
+            ->with('success', 'Data buku berhasil diperbarui!');
     }
 
     public function destroy($id)
@@ -84,21 +86,20 @@ class BukuController extends Controller
             'type' => 'danger'
         ]));
 
-        return redirect()->route('buku.index');
+        return redirect()->route('buku.index')
+            ->with('success', 'Buku berhasil dihapus dari sistem.');
     }
 
     public function getNextKode($idkategori)
     {
-        // Perbaikan: Mencari berdasarkan kolom 'idkategori' di tabel bukus
         $count = Buku::where('idkategori', $idkategori)->count();
         $kategori = Kategori::find($idkategori);
         
         if (!$kategori) return response()->json(['kode' => '']);
         
         $nama = strtoupper($kategori->nama_kategori);
-        // Mengambil 2 huruf inisial
         $inisial = (strlen($nama) >= 3) ? $nama[0].$nama[2] : substr($nama, 0, 2);
-        $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT); // Gunakan 3 digit agar lebih rapi
+        $nextNumber = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
         
         return response()->json(['kode' => $inisial . '-' . $nextNumber]);
     }

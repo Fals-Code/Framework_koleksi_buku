@@ -1,13 +1,14 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
   <ul class="nav">
-    <li class="nav-item nav-profile">
+    <li class="nav-item nav-profile mb-2">
       <a href="#" class="nav-link">
         <div class="nav-profile-image">
           <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=b66dff&color=fff" alt="profile" />
           <span class="login-status online"></span>
         </div>
         <div class="nav-profile-text d-flex flex-column" style="min-width: 0; width: 100%;">
-          <span class="font-weight-bold mb-1">{{ Auth::user()->name }}</span>
+          <span class="font-weight-bold mb-1 text-dark">{{ Auth::user()->name }}</span>
+          <small class="text-muted">Administrator</small>
         </div>
         <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
       </a>
@@ -20,6 +21,10 @@
       </a>
     </li>
     
+    <li class="nav-item nav-category mt-2">
+       <span class="nav-link text-muted small fw-bold">DATA MASTER</span>
+    </li>
+    
     <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kategori.index') }}" onclick="btnLoading(this)">
         <span class="menu-title">Kategori</span>
@@ -29,22 +34,33 @@
 
     <li class="nav-item {{ request()->routeIs('buku.*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('buku.index') }}" onclick="btnLoading(this)">
-        <span class="menu-title">Buku</span>
+        <span class="menu-title">Koleksi Buku</span>
         <i class="mdi mdi-book-open-page-variant menu-icon"></i>
       </a>
     </li>
 
-    <li class="nav-item {{ request()->is('cetak-sertifikat') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('cetak.sertifikat') }}" target="_blank" onclick="notifCetak('Sertifikat')">
-        <span class="menu-title">Cetak Sertifikat</span>
-        <i class="mdi mdi-certificate menu-icon"></i>
+    <li class="nav-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('barang.index') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Tag Harga UMKM</span>
+        <i class="mdi mdi-tag-multiple menu-icon"></i>
       </a>
     </li>
 
-    <li class="nav-item {{ request()->is('cetak-undangan') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('cetak.undangan') }}" target="_blank" onclick="notifCetak('Undangan')">
-        <span class="menu-title">Cetak Undangan</span>
-        <i class="mdi mdi-email-open menu-icon"></i>
+    <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('laporan.buku') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('laporan.buku') }}" target="_blank" onclick="notifCetak('Laporan Buku')">
+        <span class="menu-title">Laporan Koleksi</span>
+        <i class="mdi mdi-file-document-outline menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('laporan.label') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('laporan.label') }}" target="_blank" onclick="notifCetak('Label Buku')">
+        <span class="menu-title">Label Buku</span>
+        <i class="mdi mdi-barcode-scan menu-icon"></i>
       </a>
     </li>
   </ul>
@@ -52,9 +68,14 @@
 
 <script>
   function notifCetak(nama) {
-    Toast.fire({
+    Swal.fire({
       icon: 'success',
-      title: nama + ' sedang diproses!'
+      title: 'Mencetak...',
+      text: nama + ' sedang diproses dalam tab baru!',
+      timer: 2500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
     });
   }
 </script>

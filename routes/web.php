@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\BarangController; // Tambahkan ini
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -31,11 +32,19 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     Route::resource('kategori', KategoriController::class);
     Route::resource('buku', BukuController::class);
     
+    Route::resource('barang', BarangController::class);
+    Route::post('/barang/cetak', [BarangController::class, 'cetakLabel'])->name('barang.cetak');
+    
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);
     
+    Route::post('/notifications/clear', [App\Http\Controllers\HomeController::class, 'clearAll'])->name('notifications.clear');
+    Route::post('/notifications/{id}/read', [App\Http\Controllers\HomeController::class, 'markAsRead']);
     Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::get('/notifications/clear', [NotificationController::class, 'clearAll'])->name('notifications.clear');
     
-    Route::get('/cetak-sertifikat', [PDFController::class, 'cetakSertifikat'])->name('cetak.sertifikat');
-    Route::get('/cetak-undangan', [PDFController::class, 'cetakUndangan'])->name('cetak.undangan');
+    Route::get('/laporan-buku', [PDFController::class, 'cetakLaporanBuku'])->name('laporan.buku');
+    Route::get('/label-buku', [PDFController::class, 'cetakLabelBuku'])->name('laporan.label');
+
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+Route::put('/profile/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });

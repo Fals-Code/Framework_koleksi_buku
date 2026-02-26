@@ -1,157 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Koleksi Buku</title>
+    <title>VOKASI PERPUS | Sistem Inventaris</title>
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/ti-icons/css/themify-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/font-awesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      .transition-all { transition: all 0.5s ease; }
-      
-      #preloader {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: #ffffff;
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      
-      .loader-circle {
-        width: 50px;
-        height: 50px;
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid #b66dff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      .btn-loading {
-        position: relative;
-        color: transparent !important;
-        pointer-events: none;
-      }
-
-      .btn-loading::after {
-        content: "";
-        position: absolute;
-        width: 16px; height: 16px;
-        top: 0; left: 0; right: 0; bottom: 0;
-        margin: auto;
-        border: 2px solid transparent;
-        border-top-color: #ffffff;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
+        :root { --primary-gradient: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%); }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu.navbar-dropdown {
+            top: 100% !important; right: 0 !important; left: auto !important; margin-top: 10px !important;
+            position: absolute !important; display: none; border: none; box-shadow: 0 5px 25px rgba(0,0,0,0.1); z-index: 2000;
+        }
+        .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu.navbar-dropdown.show {
+            display: block !important; opacity: 1 !important; visibility: visible !important; animation: dropdownFade 0.3s ease;
+        }
+        @keyframes dropdownFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { border-radius: 15px !important; border: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
+        .bg-gradient-primary { background: var(--primary-gradient) !important; }
+        .pulse-animation { animation: pulse-red 2s infinite; border-radius: 50%; }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(254, 114, 146, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(254, 114, 146, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(254, 114, 146, 0); }
+        }
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .loader-circle { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #b66dff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media print {
+            .navbar, .sidebar, .footer, .btn, .search-field { display: none !important; }
+            .main-panel { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .content-wrapper { padding: 0 !important; }
+            .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
     </style>
     @stack('style-page')
-  </head>
-  <body>
-    <div id="preloader">
-      <div class="text-center">
-        <div class="loader-circle mb-2"></div>
-        <p class="text-muted small">Memuat Sistem...</p>
-      </div>
-    </div>
-
+</head>
+<body>
+    <div id="preloader"><div class="text-center"><div class="loader-circle mb-2"></div><p style="font-size: 12px; font-weight: 600; color: #b66dff;">VOKASI PERPUS</p></div></div>
     <div class="container-scroller">
-      @include('layouts.navbar')
-      <div class="container-fluid page-body-wrapper">
-        @include('layouts.sidebar')
-        <div class="main-panel">
-          <div class="content-wrapper">
-            @yield('content')
-          </div>
-          @include('layouts.footer')
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="detailNotifModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow">
-          <div id="notifHeader" class="modal-header bg-gradient-primary text-white transition-all">
-            <h5 class="modal-title d-flex align-items-center">
-              <span id="badge-status" class="badge bg-warning text-dark me-2" style="font-size: 10px;">DETAIL</span>
-              Notifikasi Sistem
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center p-4">
-            <div id="notifIconBox">
-              <i class="mdi mdi-bell-ring text-primary mb-3" style="font-size: 50px;"></i>
+        @include('layouts.navbar')
+        <div class="container-fluid page-body-wrapper">
+            @include('layouts.sidebar')
+            <div class="main-panel">
+                <div class="content-wrapper">@yield('content')</div>
+                @include('layouts.footer')
             </div>
-            <h4 id="notifTitleDisplay" class="font-weight-bold"></h4>
-            <p id="notifMessageDisplay" class="text-muted mt-3" style="line-height: 1.6;"></p>
-            <div class="mt-4 pt-2 border-top">
-              <small id="notifTimeDisplay" class="text-muted"></small>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-gradient-primary btn-sm px-4" data-bs-dismiss="modal">Tutup</button>
-          </div>
         </div>
-      </div>
     </div>
-
+    <div class="modal fade" id="detailNotifModal" tabindex="-1" aria-hidden="true" style="z-index: 2050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                <div class="modal-header border-0 bg-gradient-primary text-white p-4" style="border-radius: 25px 25px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="mdi mdi-bell-outline me-2"></i> Detail Aktivitas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-5">
+                    <div class="mb-4"><i id="notifIcon" class="mdi mdi-information-variant text-primary" style="font-size: 80px;"></i></div>
+                    <h3 id="notifTitleDisplay" class="fw-bold mb-3"></h3>
+                    <p id="notifMessageDisplay" class="text-muted fs-5"></p>
+                    <div class="badge bg-light text-dark rounded-pill px-3 py-2 mt-4"><i class="mdi mdi-clock-outline me-1"></i> <span id="notifTimeDisplay"></span></div>
+                </div>
+                <div class="modal-footer border-0 p-4 justify-content-center">
+                    <button type="button" class="btn btn-gradient-primary btn-lg rounded-pill px-5" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
-    <script src="{{ asset('assets/vendors/chart.js/chart.umd.js') }}"></script>
-    <script src="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
+    <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
     <script src="{{ asset('assets/js/misc.js') }}"></script>
-    <script src="{{ asset('assets/js/settings.js') }}"></script>
-    <script src="{{ asset('assets/js/todolist.js') }}"></script>
-    <script src="{{ asset('assets/js/jquery.cookie.js') }}"></script>
-    
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script>
-      window.addEventListener('load', function() {
-        const preloader = document.getElementById('preloader');
-        preloader.style.transition = 'opacity 0.5s ease';
-        preloader.style.opacity = '0';
-        setTimeout(() => {
-          preloader.style.display = 'none';
-        }, 500);
-      });
-
-      function btnLoading(el) {
-        el.classList.add('btn-loading');
-      }
-
-      function showNotifDetail(index) {
-        const notifications = @json(session('notifications') ?? []);
-        const n = notifications[index];
-        
-        if(n) {
-          document.getElementById('notifTitleDisplay').innerText = n.title;
-          document.getElementById('notifMessageDisplay').innerText = n.message;
-          document.getElementById('notifTimeDisplay').innerText = 'Waktu: ' + n.time + ' WIB';
-          
-          const header = document.getElementById('notifHeader');
-          const iconBox = document.getElementById('notifIconBox');
-          
-          header.className = 'modal-header transition-all ' + (n.unread ? 'bg-gradient-primary' : 'bg-secondary');
-          iconBox.innerHTML = n.unread 
-            ? '<i class="mdi mdi-bell-ring text-primary mb-3" style="font-size: 50px;"></i>' 
-            : '<i class="mdi mdi-bell-check text-muted mb-3" style="font-size: 50px;"></i>';
-
-          var myModal = new bootstrap.Modal(document.getElementById('detailNotifModal'));
-          myModal.show();
+        let currentNotifId = null;
+        $(document).ready(function() {
+            $('.dropdown-toggle').on('click', function(e) {
+                e.preventDefault();
+                var $menu = $(this).next('.dropdown-menu');
+                $('.dropdown-menu').not($menu).removeClass('show');
+                $menu.toggleClass('show');
+                e.stopPropagation();
+            });
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.nav-item.dropdown').length) { $('.dropdown-menu').removeClass('show'); }
+            });
+            const pre = document.getElementById('preloader');
+            if(pre) { setTimeout(() => { pre.style.opacity = '0'; setTimeout(() => pre.style.display = 'none', 500); }, 300); }
+            @if(session('success'))
+                Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", showConfirmButton: false, timer: 1500, iconColor: '#b66dff' });
+            @endif
+            @if(session('error'))
+                Swal.fire({ icon: 'error', title: 'Kesalahan!', text: "{{ session('error') }}", confirmButtonColor: '#b66dff' });
+            @endif
+            $('#detailNotifModal').on('hidden.bs.modal', function () {
+                if (currentNotifId) {
+                    $.ajax({
+                        url: `/notifications/${currentNotifId}/read`,
+                        method: 'POST',
+                        data: { _token: '{{ csrf_token() }}' },
+                        success: function() { currentNotifId = null; }
+                    });
+                }
+            });
+        });
+        function showNotifDetail(title, message, time, id = null) {
+            currentNotifId = id;
+            $('#notifTitleDisplay').text(title);
+            $('#notifMessageDisplay').text(message);
+            $('#notifTimeDisplay').text(time);
+            var myModal = new bootstrap.Modal(document.getElementById('detailNotifModal'));
+            myModal.show();
         }
-      }
+        function confirmDelete(url) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?', text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#b66dff', cancelButtonColor: '#fe72af', confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let form = document.createElement('form');
+                    form.action = url; form.method = 'POST';
+                    form.innerHTML = `@csrf @method('DELETE')`;
+                    document.body.appendChild(form); form.submit();
+                }
+            });
+        }
+        function btnLoading(el) { $(el).addClass('disabled').html('<span class="spinner-border spinner-border-sm me-2"></span> Loading...'); }
     </script>
     @stack('script-page')
-  </body>
+</body>
 </html>

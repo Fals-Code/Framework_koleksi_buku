@@ -1,52 +1,98 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .card-floating { animation: floating 4s ease-in-out infinite; }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.4) !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .neon-text {
+        text-shadow: 0 0 10px rgba(182, 109, 255, 0.5);
+    }
+
+    .progress-custom { height: 8px; border-radius: 10px; background: rgba(0,0,0,0.05); }
+
+    .icon-overlay {
+        position: absolute;
+        bottom: -20px;
+        right: -10px;
+        font-size: 100px;
+        color: rgba(255, 255, 255, 0.15);
+        transform: rotate(-15deg);
+    }
+    .text-truncate-custom {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+</style>
+
 <div class="page-header">
     <h3 class="page-title">
         <span class="page-title-icon bg-gradient-primary text-white me-2">
-            <i class="mdi mdi-home"></i>
-        </span> Dashboard Overview
+            <i class="mdi mdi-cube-outline"></i>
+        </span> 
+        <span class="neon-text">Dashboard</span>
     </h3>
     <nav aria-label="breadcrumb">
-        <ul class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">
-                <span></span>Statistik Real-time <i class="mdi mdi-check-decagram icon-sm text-primary align-middle"></i>
-            </li>
-        </ul>
+        <div class="badge badge-outline-primary rounded-pill p-3">
+            <i class="mdi mdi-refresh me-2"></i> Sistem Sinkron: <strong>Aktif</strong>
+        </div>
     </nav>
 </div>
 
 <div class="row">
     <div class="col-md-4 stretch-card grid-margin">
-        <div class="card bg-gradient-danger card-img-holder text-white">
+        <div class="card bg-gradient-danger card-img-holder text-white card-floating">
             <div class="card-body">
                 <img src="{{ asset('assets/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle-image" />
-                <h4 class="font-weight-normal mb-3">Total Koleksi Buku <i class="mdi mdi-book-open-page-variant mdi-24px float-end"></i>
-                </h4>
-                <h2 class="mb-5">{{ number_format(\App\Models\Buku::count(), 0, ',', '.') }} Judul</h2>
-                <p class="card-text">Peningkatan {{ rand(1, 5) }}% bulan ini</p>
+                <i class="mdi mdi-book-multiple icon-overlay"></i>
+                <h4 class="font-weight-normal mb-3">Inventory Buku <i class="mdi mdi-chart-line mdi-24px float-end"></i></h4>
+                <h2 class="mb-4 fw-bold">{{ number_format($totalBuku, 0, ',', '.') }} Judul</h2>
+                <p class="small mb-0">Total pustaka terverifikasi</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-4 stretch-card grid-margin">
-        <div class="card bg-gradient-info card-img-holder text-white">
+        <div class="card bg-gradient-info card-img-holder text-white card-floating" style="animation-delay: 0.5s;">
             <div class="card-body">
                 <img src="{{ asset('assets/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle-image" />
-                <h4 class="font-weight-normal mb-3">Total Kategori <i class="mdi mdi-format-list-bulleted mdi-24px float-end"></i>
-                </h4>
-                <h2 class="mb-5">{{ \App\Models\Kategori::count() }} Kategori</h2>
-                <p class="card-text">Terorganisir secara sistematis</p>
+                <i class="mdi mdi-folder-open icon-overlay"></i>
+                <h4 class="font-weight-normal mb-3">Sektor Kategori <i class="mdi mdi-filter-variant mdi-24px float-end"></i></h4>
+                <h2 class="mb-4 fw-bold">{{ $totalKategori }} Kelompok</h2>
+                <p class="small mb-0">Klaster data terintegrasi</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-4 stretch-card grid-margin">
-        <div class="card bg-gradient-success card-img-holder text-white">
+        <div class="card bg-gradient-success card-img-holder text-white card-floating" style="animation-delay: 1s;">
             <div class="card-body">
                 <img src="{{ asset('assets/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle-image" />
-                <h4 class="font-weight-normal mb-3">Status Keamanan <i class="mdi mdi-shield-check mdi-24px float-end"></i>
-                </h4>
-                <h2 class="mb-5">Verified</h2>
-                <p class="card-text">Login: {{ Auth::user()->name }}</p>
+                <i class="mdi mdi-database-check icon-overlay"></i>
+                <h4 class="font-weight-normal mb-3">Smart Inventaris <i class="mdi mdi-tag-multiple mdi-24px float-end"></i></h4>
+                <h2 class="mb-4 fw-bold">{{ number_format($stats['total_asset'], 0, ',', '.') }} Item</h2>
+                <div class="d-flex align-items-center">
+                    <div class="dot bg-white rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                    <p class="small mb-0 text-uppercase fw-bold">Nilai: Rp {{ number_format($stats['total_nilai'], 0, ',', '.') }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -54,34 +100,55 @@
 
 <div class="row">
     <div class="col-md-7 grid-margin stretch-card">
-        <div class="card">
+        <div class="card glass-card shadow-lg">
             <div class="card-body">
-                <div class="clearfix">
-                    <h4 class="card-title float-left">Akses Cepat Manajemen</h4>
-                    <p class="text-muted">Kelola data perpustakaan digital Anda dengan satu klik.</p>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-6">
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('buku.create') }}" class="btn btn-outline-primary btn-icon-text" onclick="btnLoading(this)">
-                                <i class="mdi mdi-plus-circle-outline btn-icon-prepend"></i> Tambah Buku </a>
+                <h4 class="card-title fw-bold text-primary mb-4">
+                    <i class="mdi mdi-flash-circle me-2"></i> Akses Cepat Terintegrasi
+                </h4>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" style="cursor: pointer;" onclick="location.href='{{ route('barang.index') }}'">
+                            <div class="rounded-circle bg-light-primary p-3 me-3 text-primary">
+                                <i class="mdi mdi-plus-box mdi-24px"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Kelola Barang</h6>
+                                <small class="text-muted">Database Aset</small>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('kategori.index') }}" class="btn btn-outline-info btn-icon-text" onclick="btnLoading(this)">
-                                <i class="mdi mdi-folder-outline btn-icon-prepend"></i> Lihat Kategori </a>
+                    <div class="col-sm-6">
+                        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" style="cursor: pointer;" onclick="window.open('{{ route('barang.cetak') }}', '_blank')">
+                            <div class="rounded-circle bg-light-info p-3 me-3 text-info">
+                                <i class="mdi mdi-barcode-scan mdi-24px"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Cetak Label</h6>
+                                <small class="text-muted">Barcode Generator</small>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-4 border-top pt-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="mdi mdi-account-circle-outline text-primary me-2"></i>
-                        <span class="text-dark fw-bold">{{ Auth::user()->email }}</span>
+
+                <div class="mt-4 p-3 bg-white rounded-3 border">
+                    <h6 class="fw-bold mb-3"><i class="mdi mdi-chart-bar text-primary me-2"></i> Grafik Aktivitas Inventaris</h6>
+                    <div style="height: 200px;">
+                        <canvas id="inventoryChart"></canvas>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="mdi mdi-shield-lock-outline text-success me-2"></i>
-                        <span class="text-muted small">Enkripsi OTP Aktif (Session ID: {{ substr(session()->getId(), 0, 10) }}...)</span>
+                </div>
+
+                <div class="mt-4 p-3 rounded-4 bg-gradient-light border">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=b66dff&color=fff" class="rounded-circle" width="45">
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-bold">{{ Auth::user()->email }}</p>
+                                <p class="small text-muted mb-0"><i class="mdi mdi-key-variant text-warning"></i> Secure Session ID: <span class="text-dark">{{ substr(session()->getId(), 0, 12) }}...</span></p>
+                            </div>
+                        </div>
+                        <div class="badge badge-primary rounded-pill">Operator: {{ Auth::user()->name }}</div>
                     </div>
                 </div>
             </div>
@@ -89,39 +156,37 @@
     </div>
 
     <div class="col-md-5 grid-margin stretch-card">
-        <div class="card">
+        <div class="card shadow-lg border-0 bg-dark text-white" style="border-radius: 20px;">
             <div class="card-body">
-                <h4 class="card-title">Laporan & Sertifikasi</h4>
-                <div class="list-wrapper">
-                    <ul class="d-flex flex-column todo-list todo-list-custom">
-                        <li class="d-flex align-items-center justify-content-between w-100 mb-2">
-                            <div class="form-check mb-0">
-                                <label class="form-check-label text-dark">
-                                    Surat Undangan <i class="input-helper"></i>
-                                </label>
+                <h4 class="card-title text-white mb-4">Market & Analytics Center</h4>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div class="p-3 border border-secondary rounded-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="mdi mdi-star text-warning mdi-36px me-3"></i>
+                            <div>
+                                <h6 class="mb-0 text-white fw-bold">Produk Premium</h6>
+                                <small class="text-secondary text-truncate-custom" style="max-width: 150px;">{{ $stats['termahal']->nama ?? '-' }}</small>
                             </div>
-                            <a href="{{ route('cetak.undangan') }}" target="_blank" 
-                               class="btn btn-gradient-success btn-sm btn-icon-text" 
-                               onclick="notifCetak('Undangan')">
-                                <i class="mdi mdi-printer btn-icon-prepend"></i> Cetak
-                            </a>
-                        </li>
-                        <li class="d-flex align-items-center justify-content-between w-100">
-                            <div class="form-check mb-0">
-                                <label class="form-check-label text-dark">
-                                    Sertifikat Digital <i class="input-helper"></i>
-                                </label>
+                        </div>
+                        <span class="badge badge-outline-warning">Rp {{ number_format($stats['termahal']->harga ?? 0, 0, ',', '.') }}</span>
+                    </div>
+
+                    <div class="p-3 border border-secondary rounded-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="mdi mdi-tag-heart text-success mdi-36px me-3"></i>
+                            <div>
+                                <h6 class="mb-0 text-white fw-bold">Produk Ekonomis</h6>
+                                <small class="text-secondary text-truncate-custom" style="max-width: 150px;">{{ $stats['termurah']->nama ?? '-' }}</small>
                             </div>
-                            <a href="{{ route('cetak.sertifikat') }}" target="_blank" 
-                               class="btn btn-gradient-info btn-sm btn-icon-text" 
-                               onclick="notifCetak('Sertifikat')">
-                                <i class="mdi mdi-printer btn-icon-prepend"></i> Cetak
-                            </a>
-                        </li>
-                    </ul>
+                        </div>
+                        <span class="badge badge-outline-success">Rp {{ number_format($stats['termurah']->harga ?? 0, 0, ',', '.') }}</span>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <p class="small text-muted italic">*Laporan dicetak dalam format PDF standar A4.</p>
+
+                <div class="mt-5 text-center p-3 bg-secondary rounded-3" style="--bs-bg-opacity: .1;">
+                    <i class="mdi mdi-information-outline text-info"></i>
+                    <p class="small mb-0 italic mt-2">Seluruh laporan diproses secara enkripsi oleh server Vokasi UNAIR.</p>
                 </div>
             </div>
         </div>
@@ -129,8 +194,54 @@
 </div>
 
 <div class="row">
-    <div class="col-12 text-center py-2">
-        <p class="text-muted small">Sesi dimulai pada: <strong>{{ date('d F Y, H:i') }} WIB</strong> | Koleksi Buku v2.0</p>
+    <div class="col-12 text-center">
+        <div class="py-3 px-4 d-inline-block rounded-pill bg-white shadow-sm border">
+            <span class="text-muted small">
+                <i class="mdi mdi-clock-fast text-primary me-1"></i> 
+                Sistem dimulai: <span class="text-dark fw-bold">{{ date('d F Y') }}</span> 
+                | Status: <span class="text-success fw-bold">ONLINE</span>
+            </span>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var canvas = document.getElementById('inventoryChart');
+        if (canvas) {
+            var ctx = canvas.getContext('2d');
+            
+            // Mengambil data dari controller secara aman
+            var chartLabels = {!! json_encode($labels ?? []) !!};
+            var chartData = {!! json_encode($totals ?? []) !!};
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Input Barang',
+                        data: chartData,
+                        borderColor: '#b66dff',
+                        backgroundColor: 'rgba(182, 109, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    });
+</script>
 @endsection

@@ -15,42 +15,43 @@ class HomeController extends Controller
     }
 
     public function index()
-    {
-        $totalAsset = DB::table('barang')->count();
-        $totalNilai = DB::table('barang')->sum('harga') ?? 0;
-        $termahal = DB::table('barang')->orderBy('harga', 'desc')->first();
-        $termurah = DB::table('barang')->orderBy('harga', 'asc')->first();
+{
+    $totalAsset = DB::table('barang')->count();
+    $totalNilai = DB::table('barang')->sum('harga') ?? 0;
+    $termahal = DB::table('barang')->orderBy('harga', 'desc')->first();
+    $termurah = DB::table('barang')->orderBy('harga', 'asc')->first();
 
-        $stats = [
-            'total_asset' => $totalAsset,
-            'total_nilai' => $totalNilai,
-            'termahal'    => $termahal,
-            'termurah'    => $termurah,
-        ];
+    $stats = [
+        'total_asset' => $totalAsset,
+        'total_nilai' => $totalNilai,
+        'termahal'    => $termahal,
+        'termurah'    => $termurah,
+    ];
 
-        $labels = [];
-        $totals = [];
-        $hasCreatedAt = Schema::hasColumn('barang', 'created_at');
+    $labels = [];
+    $totals = [];
+    
+    $hasTimestamp = Schema::hasColumn('barang', 'timestamp');
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $labels[] = $date->format('d M'); 
-            
-            if ($hasCreatedAt) {
-                $count = DB::table('barang')
-                            ->whereDate('created_at', $date->format('Y-m-d'))
-                            ->count();
-            } else {
-                $count = 0;
-            }
-            $totals[] = $count;
+    for ($i = 6; $i >= 0; $i--) {
+        $date = Carbon::now()->subDays($i);
+        $labels[] = $date->format('d M'); 
+        
+        if ($hasTimestamp) {
+            $count = DB::table('barang')
+                        ->whereDate('timestamp', $date->format('Y-m-d'))
+                        ->count();
+        } else {
+            $count = 0;
         }
-
-        $totalBuku = Schema::hasTable('bukus') ? DB::table('bukus')->count() : 0;
-        $totalKategori = Schema::hasTable('kategoris') ? DB::table('kategoris')->count() : 0;
-
-        return view('home', compact('stats', 'totalBuku', 'totalKategori', 'labels', 'totals'));
+        $totals[] = $count;
     }
+
+    $totalBuku = Schema::hasTable('bukus') ? DB::table('bukus')->count() : 0;
+    $totalKategori = Schema::hasTable('kategoris') ? DB::table('kategoris')->count() : 0;
+
+    return view('home', compact('stats', 'totalBuku', 'totalKategori', 'labels', 'totals'));
+}
 
     public function markAsRead($id)
     {

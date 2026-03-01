@@ -56,13 +56,6 @@
         <i class="mdi mdi-file-document-outline menu-icon"></i>
       </a>
     </li>
-
-    <li class="nav-item {{ request()->routeIs('laporan.label') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('laporan.label') }}" target="_blank" onclick="notifCetak('Label Buku')">
-        <span class="menu-title">Label Buku</span>
-        <i class="mdi mdi-barcode-scan menu-icon"></i>
-      </a>
-    </li>
   </ul>
 </nav>
 

@@ -9,11 +9,13 @@ use App\Notifications\SystemNotification;
 
 class BukuController extends Controller
 {
-    public function index()
-    {
-        $bukus = Buku::with('kategori')->get();
-        return view('buku.index', compact('bukus'));
-    }
+public function index()
+{
+    $bukus = Buku::with('kategori')->latest()->get();
+    $kategoris = \App\Models\Kategori::all();
+
+    return view('buku.index', compact('bukus', 'kategoris'));
+}
 
     public function create()
     {
@@ -103,4 +105,37 @@ class BukuController extends Controller
         
         return response()->json(['kode' => $inisial . '-' . $nextNumber]);
     }
+
+public function cetakLabel(Request $request)
+{
+    $ids = $request->query('id');
+    
+    if ($ids) {
+        $idArray = explode(',', $ids);
+        $bukus = Buku::with('kategori')->whereIn('id', $idArray)->get();
+    } else {
+        $bukus = Buku::with('kategori')->get();
+    }
+
+    return view('buku.cetak_label', compact('bukus'));
+}
+
+public function bulkDelete(Request $request)
+{
+    $ids = $request->ids;
+    if ($ids) {
+        // Hapus buku berdasarkan array ID yang dikirim
+        Buku::whereIn('id', explode(',', $ids))->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Buku terpilih berhasil dihapus.'
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Tidak ada data yang dipilih.'
+    ], 400);
+}
 }

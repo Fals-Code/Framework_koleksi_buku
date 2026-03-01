@@ -6,30 +6,37 @@
         body { 
             font-family: sans-serif; 
             margin: 0; 
-            padding-top: 1.2cm; /* Margin atas kertas TnJ 108 */
-            padding-left: 0.5cm; /* Margin kiri kertas TnJ 108 */
+            padding-top: 1.2cm;
+            padding-left: 0.5cm;
         }
         
         table {
-            border-spacing: 2mm 1mm; /* Jarak antar kolom dan baris */
+            border-spacing: 2mm 1mm;
             table-layout: fixed;
             width: 100%;
+            border-collapse: separate;
         }
 
         .label-box {
-            width: 3.8cm; /* Lebar standar TnJ 108 */
-            height: 1.9cm; /* Tinggi standar TnJ 108 */
-            border: 0.1pt solid #eee; /* Garis bantu, hapus jika sudah pas */
+            width: 3.8cm;
+            height: 1.9cm;
+            border: none; 
             text-align: center;
             vertical-align: middle;
             overflow: hidden;
             padding: 5px;
         }
 
-        .empty-box { border: none; }
+        .empty-box { border: none !important; }
 
         .id-barang { font-size: 7pt; color: #888; }
-        .nama-barang { font-size: 9pt; font-weight: bold; margin: 2px 0; display: block; }
+        .nama-barang { 
+            font-size: 9pt; 
+            font-weight: bold; 
+            margin: 2px 0; 
+            display: block;
+            line-height: 1.1; 
+        }
         .harga-barang { font-size: 11pt; font-weight: bold; color: #000; }
     </style>
 </head>
@@ -40,13 +47,12 @@
             $totalCols = 5; 
         @endphp
 
-        {{-- Loop untuk baris --}}
         @for ($row = 0; $row < 8; $row++)
             <tr>
                 @for ($col = 0; $col < $totalCols; $col++)
                     @php $currentSlot++; @endphp
                     
-                    <td class="label-box {{ $currentSlot <= $skipSlots ? 'empty-box' : '' }}">
+                    <td class="label-box">
                         @if ($currentSlot > $skipSlots && count($items) > 0)
                             @php $item = $items->shift(); @endphp
                             <div class="id-barang">{{ $item->id_barang }}</div>

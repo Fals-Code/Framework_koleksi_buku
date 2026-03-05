@@ -6,6 +6,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
@@ -63,7 +64,6 @@ public function cetakLabel(Request $request)
     ]);
 
     $ids = $request->ids;
-    // Menggunakan whereIn dan mengurutkan sesuai urutan ID yang dikirim
     $items = Barang::whereIn('id_barang', $ids)
              ->orderByRaw("FIELD(id_barang, " . implode(',', $ids) . ")")
              ->get();
@@ -80,9 +80,46 @@ public function cetakLabel(Request $request)
     return $pdf->setPaper('a4', 'portrait')->stream('Tag_Harga.pdf');
 }
     
-    public function destroy($id)
-    {
-        Barang::findOrFail($id)->delete();
-        return response()->json(['success' => 'Data berhasil dihapus']);
+public function destroy($id)
+{
+    $deleted = DB::table('barang')->where('id_barang', $id)->delete();
+
+    if ($deleted) {
+        return response()->json(['message' => 'Data berhasil dihapus!']);
     }
+
+    return response()->json(['message' => 'Gagal menghapus data'], 404);
+}
+
+public function update(Request $request, $id)
+{
+    try {
+        // Validasi data (Sesuai modul: Nama & Harga Required)
+        $request->validate([
+            'nama' => 'required',
+            'harga' => 'required|numeric'
+        ]);
+
+        // Gunakan DB Table 'barang' dan pastikan primary key-nya 'id_barang'
+        $affected = \DB::table('barang')
+            ->where('id_barang', $id)
+            ->update([
+                'nama' => $request->nama,
+                'harga' => $request->harga,
+                'timestamp' => now() // Gunakan kolom timestamp Anda
+            ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data berhasil diubah'
+        ]);
+        
+    } catch (\Exception $e) {
+        // Ini akan mengirimkan pesan error asli ke console log browser jika gagal
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 }

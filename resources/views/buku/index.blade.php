@@ -152,7 +152,11 @@ display: none;
                         <tr>
                             <td class="col-checkbox"><input type="checkbox" class="sub_chk form-check-input-custom" data-id="{{ $buku->id }}"></td>
 
-                            <td class="col-no">{{ $key+1 }}</td>
+                            <td class="col-no text-center">
+                                <span class="badge badge-light text-dark fw-bold rounded-pill border">
+                                {{ $key+1 }}
+                                </span>
+                            </td>
 
                             <td><span class="code-tag">{{ $buku->kode }}</span></td>
 

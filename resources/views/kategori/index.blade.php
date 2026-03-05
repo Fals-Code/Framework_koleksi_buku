@@ -160,7 +160,7 @@
     </div>
 </div>
 
-{{-- Script Search Sederhana --}}
+
 <script>
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toUpperCase();

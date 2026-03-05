@@ -37,6 +37,8 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     
     Route::resource('barang', BarangController::class);
     Route::post('/barang/cetak', [BarangController::class, 'cetakLabel'])->name('barang.cetak');
+    Route::put('/barang/{id}', [BarangController::class, 'update'])->name('barang.update');
+    Route::delete('/barang/{id}', [BarangController::class, 'destroy'])->name('barang.destroy');
     
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);
     

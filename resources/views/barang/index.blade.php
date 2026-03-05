@@ -2,6 +2,14 @@
 
 @section('content')
 <style>
+
+    #tabelBarang tbody tr {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#tabelBarang tbody tr:hover {
+    background-color: rgba(182, 109, 255, 0.05) !important;
+}
     /* Fix Z-Index agar Modal tidak tertutup backdrop hitam */
     .modal { z-index: 1060 !important; }
     .modal-backdrop { z-index: 1050 !important; }
@@ -134,6 +142,33 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalEditBarang" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Detail / Ubah Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditBarang">
+                    <div class="form-group mb-3">
+                        <label class="small fw-bold">ID BARANG</label>
+                        <input type="text" id="edit_id" class="form-control form-control-custom bg-light" readonly> </div>
+                    <div class="form-group mb-3">
+                        <label class="small fw-bold">NAMA BARANG</label>
+                        <input type="text" id="edit_nama" class="form-control form-control-custom" required> </div>
+                    <div class="form-group mb-4">
+                        <label class="small fw-bold">HARGA BARANG</label>
+                        <input type="number" id="edit_harga" class="form-control form-control-custom" required> </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="button" id="btnUpdate" class="btn btn-gradient-primary w-100 fw-bold rounded-pill">UBAH</button> <button type="button" id="btnHapusModal" class="btn btn-gradient-danger w-100 fw-bold rounded-pill">HAPUS</button> </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('script-page')
@@ -142,38 +177,32 @@
         window.selectedIds = new Set();
 
         var table = $('#tabelBarang').DataTable({
-            processing: true, serverSide: true,
+            processing: true,
+            serverSide: true,
             ajax: "{{ route('barang.index') }}",
             columns: [
-    { data: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
-    { 
-        data: 'id_barang', 
-        name: 'id_barang', // Nama kolom di database
-        render: d => `<span class="id-tag">#${d}</span>` 
-    },
-    { 
-        data: 'nama', 
-        name: 'nama', // Nama kolom di database
-        className: 'fw-bold text-dark' 
-    },
-    { 
-        data: 'harga', 
-        name: 'harga',
-        className: 'text-end', 
-        render: d => `<span class="price-tag">${d}</span>` 
-    },
-    { 
-        data: 'timestamp', 
-        name: 'timestamp'
-    },
-    { 
-        data: 'id_barang',
-        orderable: false,
-        className: 'text-center',
-        render: id => `<button type="button" onclick="hapusBarang(${id})" class="btn btn-link p-0 text-danger"><i class="mdi mdi-delete-outline fs-5"></i></button>`
-    }
-],
-order: [[4, 'desc']],
+                { data: 'checkbox', orderable: false, searchable: false, className: 'text-center' },
+                { 
+                    data: 'id_barang', 
+                    name: 'id_barang',
+                    render: d => `<span class="id-tag">#${d}</span>` 
+                },
+                { data: 'nama', name: 'nama', className: 'fw-bold text-dark' },
+                { 
+                    data: 'harga', 
+                    name: 'harga',
+                    className: 'text-end', 
+                    render: d => `<span class="price-tag">${d}</span>` 
+                },
+                { data: 'timestamp', name: 'timestamp' },
+                { 
+                    data: 'id_barang',
+                    orderable: false,
+                    className: 'text-center',
+                    render: id => `<button type="button" onclick="hapusBarang(${id})" class="btn btn-link p-0 text-danger"><i class="mdi mdi-delete-outline fs-5"></i></button>`
+                }
+            ],
+            order: [[4, 'desc']],
             language: {
                 processing: '<div class="spinner-grow text-primary"></div>',
                 paginate: { previous: "←", next: "→" }
@@ -184,6 +213,60 @@ order: [[4, 'desc']],
                 });
                 updateUI();
             }
+        });
+
+        $('#tabelBarang tbody').on('click', 'td:not(:first-child):not(:last-child)', function() {
+            var data = table.row($(this).parents('tr')).data();
+            $('#edit_id').val(data.id_barang);
+            $('#edit_nama').val(data.nama);
+            $('#edit_harga').val(data.harga.toString().replace(/[^0-9]/g, '')); 
+            $('#modalEditBarang').modal('show');
+        });
+$(document).on('click', '#btnUpdate', function(e) {
+    e.preventDefault();
+    let btn = $(this);
+    let id = $('#edit_id').val();
+    let nama = $('#edit_nama').val();
+    let harga = $('#edit_harga').val();
+
+    if(!nama || !harga) {
+        document.getElementById('formEditBarang').reportValidity();
+        return;
+    }
+
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+    $.ajax({
+        url: "/barang/" + id,
+        type: "POST", // Tetap POST
+        data: {
+            _token: "{{ csrf_token() }}",
+            _method: "PUT", // Tapi Laravel membacanya sebagai PUT
+            nama: nama,
+            harga: harga
+        },
+        success: function(response) {
+            $('#modalEditBarang').modal('hide');
+            // 'table' harus sesuai dengan nama variabel DataTable Anda
+            if ($.fn.DataTable.isDataTable('#tabelBarang')) {
+                $('#tabelBarang').DataTable().ajax.reload(null, false);
+            }
+            Swal.fire('Berhasil!', 'Data diperbarui', 'success');
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText); 
+            Swal.fire('Error 500', 'Terjadi kesalahan di server. Cek log Laravel!', 'error');
+        },
+        complete: function() {
+            btn.prop('disabled', false).text('UBAH');
+        }
+    });
+});
+
+        $(document).on('click', '#btnHapusModal', function() {
+            let id = $('#edit_id').val();
+            $('#modalEditBarang').modal('hide');
+            hapusBarang(id);
         });
 
         function updateUI() {
@@ -202,17 +285,14 @@ order: [[4, 'desc']],
 
         $('#btnBukaModalCetak').click(function() {
             if (window.selectedIds.size === 0) {
-                Swal.fire({ icon: 'warning', title: 'Pilih Barang!', text: 'Centang minimal satu barang.', confirmButtonColor: '#b66dff' });
+                Swal.fire({ icon: 'warning', title: 'Pilih Barang!', text: 'Centang minimal satu barang.' });
             } else {
                 $('#modalKoordinat').modal('show');
             }
         });
 
-        // Update preview koordinat di dalam modal
         $('input[name="x_coord"], input[name="y_coord"]').on('input', function() {
-            let x = $('input[name="x_coord"]').val();
-            let y = $('input[name="y_coord"]').val();
-            $('#slotPreview').text(`(${x}, ${y})`);
+            $('#slotPreview').text(`(${$('input[name="x_coord"]').val()}, ${$('input[name="y_coord"]').val()})`);
         });
 
         $('#formCetakLabel').submit(function() {
@@ -225,12 +305,10 @@ order: [[4, 'desc']],
 
     function hapusBarang(id) {
         Swal.fire({
-            title: 'Hapus data ini?',
-            text: "Data yang dihapus tidak bisa dikembalikan!",
+            title: 'Hapus data?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#b66dff',
-            cancelButtonColor: '#fe7c96',
             confirmButtonText: 'Ya, Hapus!'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -239,7 +317,7 @@ order: [[4, 'desc']],
                     type: "DELETE",
                     data: { _token: "{{ csrf_token() }}" },
                     success: function() {
-                        $('#tabelBarang').DataTable().ajax.reload();
+                        $('#tabelBarang').DataTable().ajax.reload(null, false);
                         Swal.fire('Terhapus!', 'Data berhasil dibuang.', 'success');
                     }
                 });

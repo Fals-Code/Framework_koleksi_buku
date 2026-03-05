@@ -58,16 +58,17 @@ public function cetakLabel(Request $request)
 {
     $request->validate([
         'ids' => 'required|array',
-        'x_coord' => 'required|numeric|min:1|max:5',
-        'y_coord' => 'required|numeric|min:1|max:8',
+        'x_coord' => 'required|integer|min:1|max:5',
+        'y_coord' => 'required|integer|min:1|max:8',
     ]);
 
     $ids = $request->ids;
-    $idsOrdered = implode(',', $ids);
+    // Menggunakan whereIn dan mengurutkan sesuai urutan ID yang dikirim
     $items = Barang::whereIn('id_barang', $ids)
-             ->orderByRaw("FIELD(id_barang, $idsOrdered)")
+             ->orderByRaw("FIELD(id_barang, " . implode(',', $ids) . ")")
              ->get();
     
+    // Logika ini sudah benar: X1,Y1 = 0 skip. X2,Y1 = 1 skip.
     $skipSlots = (($request->y_coord - 1) * 5) + ($request->x_coord - 1);
 
     $pdf = Pdf::loadView('pdf.tnj108', [
@@ -75,7 +76,8 @@ public function cetakLabel(Request $request)
         'skipSlots' => $skipSlots
     ]);
 
-    return $pdf->setPaper('a4', 'portrait')->stream('Tag_Harga_UMKM.pdf');
+    // Paksa ukuran A4
+    return $pdf->setPaper('a4', 'portrait')->stream('Tag_Harga.pdf');
 }
     
     public function destroy($id)

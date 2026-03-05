@@ -111,24 +111,14 @@ display: none;
 <div class="card-body">
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-
 <h4 class="card-title mb-0">Database Judul Terdaftar</h4>
-
 <div class="search-box">
-
 <div class="input-group input-group-sm">
-
 <input type="text" id="searchInput" class="form-control border-primary" placeholder="Cari judul atau pengarang...">
-
 <button class="btn btn-primary btn-sm"><i class="mdi mdi-magnify"></i></button>
-
 </div>
-
 </div>
-
 </div>
-
-
 
             <div class="table-responsive">
 
@@ -159,9 +149,7 @@ display: none;
                     <tbody>
 
                         @forelse($bukus as $key => $buku)
-
                         <tr>
-
                             <td class="col-checkbox"><input type="checkbox" class="sub_chk form-check-input-custom" data-id="{{ $buku->id }}"></td>
 
                             <td class="col-no">{{ $key+1 }}</td>

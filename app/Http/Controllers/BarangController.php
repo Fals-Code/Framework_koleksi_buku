@@ -122,4 +122,9 @@ public function update(Request $request, $id)
         ], 500);
     }
 }
+
+public function latihan()
+{
+    return view('latihan');
+}
 }

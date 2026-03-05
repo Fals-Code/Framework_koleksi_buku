@@ -46,6 +46,13 @@
       </a>
     </li>
 
+<li class="nav-item {{ request()->routeIs('latihan.*') ? 'active' : '' }}">
+  <a class="nav-link" href="{{ route('latihan.index') }}" onclick="btnLoading(this)">
+    <span class="menu-title">Warehouse System</span>
+    <i class="mdi mdi-archive menu-icon "></i>
+  </a>
+</li>
+
     <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>
     </li>

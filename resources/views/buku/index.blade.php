@@ -100,6 +100,11 @@ display: none;
     
     <button class="btn btn-light btn-icon-text shadow-sm" id="btnCancelSelect">Batal</button>
 </div>
+
+    <a href="{{ route('buku.create') }}" class="btn btn-gradient-primary btn-icon-text shadow-sm" onclick="btnLoading(this)">
+        <i class="mdi mdi-book-plus btn-icon-prepend"></i> Registrasi Baru
+    </a>
+</div>
 </div>
 
 <div class="row">

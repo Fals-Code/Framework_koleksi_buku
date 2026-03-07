@@ -2,61 +2,83 @@
 
 @section('content')
 <style>
+.id-capsule {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(182, 109, 255, 0.05);
+        padding: 6px 16px;
+        border-radius: 100px;
+        border: 1px solid rgba(182, 109, 255, 0.2);
+        z-index: 10;
+        backdrop-filter: blur(4px);
+    }
+
+    .id-label {
+        font-size: 10px;
+        font-weight: 800;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .id-value {
+        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        color: #b66dff;
+    }
     @keyframes border-glow-purple {
         0% { box-shadow: 0 0 5px rgba(182, 109, 255, 0.2); }
-        50% { box-shadow: 0 0 20px rgba(182, 109, 255, 0.5); }
+        50% { box-shadow: 0 0 15px rgba(182, 109, 255, 0.4); }
         100% { box-shadow: 0 0 5px rgba(182, 109, 255, 0.2); }
     }
 
     .edit-mode-card {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: #ffffff !important;
         border-radius: 20px !important;
-        border-left: 5px solid #b66dff !important; /* Warna Ungu Buku */
-        transition: all 0.3s ease;
+        border: none !important;
+        border-left: 6px solid #b66dff !important;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
-    .edit-mode-card:hover {
-        transform: translateY(-5px);
+    .form-group:hover label {
+        color: #b66dff;
+        transform: translateX(5px);
+        transition: all 0.3s;
     }
 
     .form-control-edit {
         border-radius: 12px !important;
-        padding: 12px 15px !important;
-        border: 1px solid #e0e0e0 !important;
-        height: auto !important;
-        transition: all 0.2s;
+        padding: 12px 18px !important;
+        border: 1px solid #ebedf2 !important;
+        background-color: #fcfcfd !important;
+        transition: all 0.3s ease;
     }
 
     .form-control-edit:focus {
+        background-color: #ffffff !important;
         border-color: #b66dff !important;
-        animation: border-glow-purple 2s infinite;
-        background-color: #f8f0ff !important;
-        outline: none;
+        box-shadow: 0 8px 20px rgba(182, 109, 255, 0.15) !important;
     }
 
-    .status-badge-edit {
-        position: absolute;
-        top: -10px;
-        right: 20px;
-        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
-        color: white;
-        padding: 5px 18px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: bold;
-        z-index: 10;
-        box-shadow: 0 4px 10px rgba(182, 109, 255, 0.3);
+    .analytics-card {
+        background: linear-gradient(45deg, #191c24 0%, #2c2e33 100%) !important;
+        overflow: hidden;
     }
 
-    .bg-light-purple {
-        background-color: #f3e5f5;
+    .impact-item {
+        transition: transform 0.3s;
+        cursor: default;
     }
 
-    .input-group-text-purple {
-        background: linear-gradient(135deg, #b66dff 0%, #8e24aa 100%);
-        color: white;
-        border: none;
-        border-radius: 12px 0 0 12px !important;
+    .impact-item:hover {
+        transform: scale(1.02);
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
     }
 </style>
 
@@ -80,7 +102,10 @@
 <div class="row">
     <div class="col-md-8 grid-margin stretch-card">
         <div class="card edit-mode-card shadow-lg position-relative">
-            <div class="status-badge-edit text-uppercase">UUID: #BKS-{{ $buku->id }}</div>
+<div class="id-capsule">
+    <span class="id-label">Ref Code</span>
+    <span class="id-value">{{ $buku->kode }}</span>
+</div>
             
             <div class="card-body p-4 p-md-5">
                 <div class="d-flex align-items-center mb-4">

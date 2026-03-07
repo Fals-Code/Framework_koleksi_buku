@@ -207,7 +207,32 @@
                 }
             });
         }
-        function btnLoading(el) { $(el).addClass('disabled').html('<span class="spinner-border spinner-border-sm me-2"></span> Loading...'); }
+        function btnLoading(el) {
+    const $el = $(el);
+    if ($el.hasClass('disabled')) return;
+
+    const originalContent = $el.html();
+    const originalHeight = $el.outerHeight();
+    const originalWidth = $el.outerWidth();
+
+    $el.css({
+        'min-height': originalHeight + 'px',
+        'min-width': originalWidth + 'px'
+    });
+
+    $el.addClass('disabled').prop('disabled', true);
+    
+    $el.html(`
+        <div class="d-flex align-items-center justify-content-center">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Memproses...</span>
+        </div>
+    `);
+
+    if ($el.closest('form').length > 0) {
+        $el.closest('form').submit();
+    }
+}
     </script>
     @stack('script-page')
 </body>

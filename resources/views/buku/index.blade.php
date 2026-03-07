@@ -89,19 +89,16 @@ display: none;
         <i class="mdi mdi-checkbox-marked-outline btn-icon-prepend"></i> Mode Pilih
     </button>
 
-    <div id="printActionGroup" class="d-none animate__animated animate__fadeIn">
-        <button class="btn btn-gradient-info btn-icon-text shadow-sm" id="btnPrintSelected">
-            <i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (<span id="countSelected">0</span>)
-        </button>
-        <button class="btn btn-gradient-danger btn-icon-text shadow-sm" id="btnBulkDelete">
-            <i class="mdi mdi-delete-sweep btn-icon-prepend"></i> Hapus Masal
-        </button>
-        <button class="btn btn-light btn-icon-text shadow-sm" id="btnCancelSelect">Batal</button>
-    </div>
-
-    <a href="{{ route('buku.create') }}" class="btn btn-gradient-primary btn-icon-text shadow-sm" onclick="btnLoading(this)">
-        <i class="mdi mdi-book-plus btn-icon-prepend"></i> Registrasi Baru
-    </a>
+<div id="printActionGroup" class="d-none animate__animated animate__fadeIn">
+    <button class="btn btn-gradient-info btn-icon-text shadow-sm" id="btnPrintSelected" onclick="btnLoading(this)">
+        <i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (<span id="countSelected">0</span>)
+    </button>
+    
+    <button class="btn btn-gradient-danger btn-icon-text shadow-sm" id="btnBulkDelete">
+        <i class="mdi mdi-delete-sweep btn-icon-prepend"></i> Hapus Masal
+    </button>
+    
+    <button class="btn btn-light btn-icon-text shadow-sm" id="btnCancelSelect">Batal</button>
 </div>
 </div>
 
@@ -327,7 +324,7 @@ $(document).ready(function() {
         $(".sub_chk").prop('checked', $(this).prop('checked'));
     });
 
-    $('#btnPrintSelected').on('click', function() {
+$('#btnPrintSelected').on('click', function() {
         var selectedIds = [];
         $(".sub_chk:checked").each(function() {
             selectedIds.push($(this).attr('data-id'));
@@ -335,13 +332,22 @@ $(document).ready(function() {
 
         if (selectedIds.length <= 0) {
             Swal.fire({ icon: 'warning', title: 'Pilih Buku', text: 'Silakan centang buku yang ingin dicetak labelnya.', confirmButtonColor: '#b66dff' });
+            // Reset loading jika batal
+            $(this).removeClass('disabled').html('<i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (' + selectedIds.length + ')');
         } else {
             var url = "{{ route('buku.cetak_label') }}?id=" + selectedIds.join(",");
             window.open(url, '_blank');
+            
+            // Beri jeda sebentar lalu kembalikan tombol ke status awal
+            setTimeout(() => {
+                $(this).removeClass('disabled').html('<i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (' + selectedIds.length + ')');
+            }, 1000);
         }
     });
 
+    // Hapus Masal (Bulk Delete)
     $('#btnBulkDelete').on('click', function() {
+        var btn = $(this);
         var selectedIds = [];
         $(".sub_chk:checked").each(function() {
             selectedIds.push($(this).attr('data-id'));
@@ -362,6 +368,8 @@ $(document).ready(function() {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
+                btnLoading(btn);
+
                 $.ajax({
                     url: "{{ route('buku.bulkDelete') }}",
                     type: 'DELETE',
@@ -378,6 +386,8 @@ $(document).ready(function() {
                     },
                     error: function () {
                         Swal.fire('Gagal!', 'Terjadi kesalahan sistem.', 'error');
+                        // Reset loader jika gagal
+                        btn.removeClass('disabled').html('<i class="mdi mdi-delete-sweep btn-icon-prepend"></i> Hapus Masal');
                     }
                 });
             }

@@ -2,7 +2,6 @@
 
 @section('content')
 <style>
-    /* Animasi Fade In */
     .fade-in-up {
         animation: fadeInUp 0.5s ease-out;
     }
@@ -140,9 +139,9 @@
                         <a href="{{ route('buku.index') }}" class="btn btn-light btn-lg px-4 rounded-pill shadow-sm" onclick="btnLoading(this)">
                             <i class="mdi mdi-arrow-left me-1"></i> Kembali
                         </a>
-                        <button type="submit" id="btnSubmitBuku" class="btn btn-gradient-primary btn-lg px-5 rounded-pill shadow">
-                            <i class="mdi mdi-content-save-all me-1"></i> Simpan Koleksi
-                        </button>
+<button type="submit" id="btnSubmitBuku" class="btn btn-gradient-primary btn-lg px-5 rounded-pill shadow" onclick="btnLoading(this)">
+    <i class="mdi mdi-content-save-all me-1"></i> Simpan Koleksi
+</button>
                     </div>
                 </form>
             </div>

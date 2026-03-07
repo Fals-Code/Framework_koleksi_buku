@@ -147,14 +147,15 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 d-flex gap-2">
-                        <button type="submit" class="btn btn-gradient-primary btn-lg text-white px-4 fw-bold shadow-sm">
-                            <i class="mdi mdi-content-save btn-icon-prepend"></i> Simpan Perubahan
-                        </button>
-                        <a href="{{ route('buku.index') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
-                            <i class="mdi mdi-arrow-left"></i> Batal
-                        </a>
-                    </div>
+<div class="mt-5 d-flex gap-2">
+    <button type="submit" class="btn btn-gradient-primary btn-lg text-white px-4 fw-bold shadow-sm" onclick="btnLoading(this)">
+        <i class="mdi mdi-content-save btn-icon-prepend"></i> Simpan Perubahan
+    </button>
+    
+    <a href="{{ route('buku.index') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm" onclick="btnLoading(this)">
+        <i class="mdi mdi-arrow-left"></i> Batal
+    </a>
+</div>
                 </form>
             </div>
         </div>

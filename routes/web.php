@@ -25,25 +25,28 @@ Route::get('auth/otp', function () {
 
 Route::post('auth/otp/verify', [GoogleController::class, 'verifyOtp'])->name('otp.verify');
 
+
 Auth::routes();
+
+Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
 
 Route::middleware(['auth', 'check.session'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-    
+
     Route::resource('kategori', KategoriController::class);
     Route::resource('buku', BukuController::class);
     Route::get('/buku-cetak-label', [BukuController::class, 'cetakLabel'])->name('buku.cetak_label');
-    Route::delete('/buku/bulk-delete', [App\Http\Controllers\BukuController::class, 'bulkDelete'])->name('buku.bulkDelete');
-    
+    Route::delete('/buku/bulk-delete', [BukuController::class, 'bulkDelete'])->name('buku.bulkDelete');
+
     Route::resource('barang', BarangController::class);
     Route::post('/barang/cetak', [BarangController::class, 'cetakLabel'])->name('barang.cetak');
     Route::put('/barang/{id}', [BarangController::class, 'update'])->name('barang.update');
     Route::delete('/barang/{id}', [BarangController::class, 'destroy'])->name('barang.destroy');
-
     Route::get('/warehouse-system', [BarangController::class, 'latihan'])->name('latihan.index');
     
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);
-    
+
     Route::post('/notifications/clear', [HomeController::class, 'clearAll'])->name('notifications.clear');
     Route::post('/notifications/{id}/read', [HomeController::class, 'markAsRead']);
     Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');

@@ -18,9 +18,23 @@
       .form-control-lg { border-radius: 10px !important; font-size: 0.9rem; border: 1px solid #e8eff9; padding: 1rem 1.5rem; }
       .brand-logo img { width: 150px; }
       .modal-content { border-radius: 20px; border: none; }
+      #loginLoader {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: none;
+        align-items: center; justify-content: center;
+        z-index: 9999; backdrop-filter: blur(4px);
+      }
     </style>
   </head>
   <body>
+    <div id="loginLoader">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+            <p class="mt-3 fw-bold text-dark">Mohon Tunggu...</p>
+        </div>
+    </div>
+
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper full-page-wrapper">
         <div class="content-wrapper d-flex align-items-center auth auth-bg-1">
@@ -33,7 +47,7 @@
                 <h4 class="text-dark font-weight-bold mt-3">Welcome back!</h4>
                 <h6 class="font-weight-light text-muted">Please sign in to continue.</h6>
                 
-                <form class="pt-4" method="POST" action="{{ route('login') }}">
+                <form class="pt-4" id="loginForm" method="POST" action="{{ route('login') }}">
                   @csrf
                   <div class="form-group mb-3">
                     <label class="small font-weight-bold">Email Address</label>
@@ -48,16 +62,21 @@
                   </div>
                   
                   <div class="mt-4 d-grid gap-2">
-                    <button type="submit" class="btn btn-gradient-primary btn-lg font-weight-medium">
+                    <button type="submit" id="btnLogin" class="btn btn-gradient-primary btn-lg font-weight-medium">
                       <i class="mdi mdi-login me-2"></i>SIGN IN
                     </button>
                   </div>
 
                   <div class="text-center mt-3 text-muted small">— Or login with —</div>
                   <div class="mt-3 d-grid gap-2">
-                    <a href="{{ route('google.login') }}" class="btn btn-google btn-lg">
+                    <a href="{{ route('google.login') }}" id="btnGoogle" class="btn btn-google btn-lg">
                       <img src="https://authjs.dev/img/providers/google.svg" width="18" class="me-2" alt="Google"> Google Account
                     </a>
+                  </div>
+
+                  <div class="text-center mt-4 font-weight-light text-muted">
+                    Don't have an account? 
+                    <a href="{{ route('register') }}" id="btnToRegister" class="text-primary fw-bold" style="text-decoration: none; transition: 0.3s;">Create</a>
                   </div>
                 </form>
               </div>
@@ -77,12 +96,8 @@
           </div>
           <div class="modal-body text-center p-5">
             <i class="mdi {{ session('error') || $errors->any() ? 'mdi-alert-circle-outline text-danger' : 'mdi-checkbox-marked-circle-outline text-success' }}" style="font-size: 60px;"></i>
-            <h3 class="mt-3">
-                {{ session('error') ? 'Oops!' : 'Informasi' }}
-            </h3>
-            <p class="text-muted">
-                {{ session('status') ?? session('error') ?? 'Terdapat kesalahan pada input Anda.' }}
-            </p>
+            <h3 class="mt-3">{{ session('error') ? 'Oops!' : 'Informasi' }}</h3>
+            <p class="text-muted">{{ session('status') ?? session('error') ?? 'Terdapat kesalahan pada input Anda.' }}</p>
           </div>
           <div class="modal-footer justify-content-center border-0">
             <button type="button" class="btn btn-secondary px-5" data-bs-dismiss="modal">Tutup</button>
@@ -95,11 +110,35 @@
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const loader = document.getElementById('loginLoader');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnGoogle = document.getElementById('btnGoogle');
+        const btnToRegister = document.getElementById('btnToRegister');
+
         var modalEl = document.getElementById('notifModal');
         if (modalEl) {
             var myModal = new bootstrap.Modal(modalEl);
             myModal.show();
         }
+
+        loginForm.addEventListener('submit', function() {
+            loader.style.display = 'flex'; // Overlay Muncul
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> SIGNING IN...`;
+        });
+
+        btnGoogle.addEventListener('click', function(e) {
+            loader.style.display = 'flex';
+            this.classList.add('disabled');
+            this.innerHTML = `<span class="spinner-border spinner-border-sm me-2 text-primary"></span> Connecting...`;
+        });
+
+        btnToRegister.addEventListener('click', function() {
+            loader.style.display = 'flex';
+            this.style.pointerEvents = 'none';
+            this.innerHTML = `<span class="spinner-border spinner-border-sm me-1 text-primary"></span> Preparing...`;
+        });
       });
     </script>
   </body>

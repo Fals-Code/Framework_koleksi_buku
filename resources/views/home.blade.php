@@ -230,7 +230,6 @@
         if (canvas) {
             var ctx = canvas.getContext('2d');
             
-            // Mengambil data dari controller secara aman
             var chartLabels = {!! json_encode($labels ?? []) !!};
             var chartData = {!! json_encode($totals ?? []) !!};
 

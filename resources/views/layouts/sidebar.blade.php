@@ -8,7 +8,6 @@
         </div>
         <div class="nav-profile-text d-flex flex-column" style="min-width: 0; width: 100%;">
           <span class="font-weight-bold mb-1 text-dark">{{ Auth::user()->name }}</span>
-          <small class="text-muted">Administrator</small>
         </div>
       </a>
     </li>

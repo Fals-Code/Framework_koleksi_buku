@@ -28,11 +28,65 @@
             70% { box-shadow: 0 0 0 10px rgba(254, 114, 146, 0); }
             100% { box-shadow: 0 0 0 0 rgba(254, 114, 146, 0); }
         }
-        #preloader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .loader-circle { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #b66dff; border-radius: 50%; animation: spin 1s linear infinite; }
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.loader-wrapper {
+    text-align: center;
+    position: relative;
+}
+
+.loader-circle {
+    width: 60px;
+    height: 60px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #b66dff;
+    border-right: 3px solid #b66dff;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 1s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+}
+
+.loader-logo {
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 2px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.loader-logo .vokasi { color: #343a40; }
+.loader-logo .perpus { color: #b66dff; }
+
+.loader-line {
+    width: 40px;
+    height: 2px;
+    background: var(--primary-gradient);
+    margin: 8px auto 0;
+    border-radius: 2px;
+    animation: lineGrow 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes lineGrow {
+    0%, 100% { width: 10px; opacity: 0.2; }
+    50% { width: 50px; opacity: 1; }
+}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
             .navbar, .sidebar, .footer, .btn, .search-field { display: none !important; }
@@ -44,7 +98,16 @@
     @stack('style-page')
 </head>
 <body>
-    <div id="preloader"><div class="text-center"><div class="loader-circle mb-2"></div><p style="font-size: 12px; font-weight: 600; color: #b66dff;">VOKASI PERPUS</p></div></div>
+    <div id="preloader">
+    <div class="loader-wrapper">
+        <div class="loader-circle"></div>
+        <div class="loader-logo">
+            <span class="vokasi">VOKASI</span>
+            <span class="perpus">PERPUS</span>
+        </div>
+        <div class="loader-line"></div>
+    </div>
+</div>
     <div class="container-scroller">
         @include('layouts.navbar')
         <div class="container-fluid page-body-wrapper">
@@ -83,6 +146,17 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script>
+        $(window).on('load', function() {
+            const pre = document.getElementById('preloader');
+            if(pre) {
+                setTimeout(() => {
+                    pre.style.opacity = '0';
+                    setTimeout(() => {
+                        pre.style.display = 'none';
+                    }, 500);
+                }, 600); 
+            }
+        });
         let currentNotifId = null;
         $(document).ready(function() {
             $('.dropdown-toggle').on('click', function(e) {
@@ -95,8 +169,6 @@
             $(document).on('click', function (e) {
                 if (!$(e.target).closest('.nav-item.dropdown').length) { $('.dropdown-menu').removeClass('show'); }
             });
-            const pre = document.getElementById('preloader');
-            if(pre) { setTimeout(() => { pre.style.opacity = '0'; setTimeout(() => pre.style.display = 'none', 500); }, 300); }
             @if(session('success'))
                 Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", showConfirmButton: false, timer: 1500, iconColor: '#b66dff' });
             @endif

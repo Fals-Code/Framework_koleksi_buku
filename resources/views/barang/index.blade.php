@@ -2,62 +2,77 @@
 
 @section('content')
 <style>
+    .content-wrapper { animation: fadeIn 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    #tabelBarang tbody tr {
-    cursor: pointer;
-    transition: background 0.2s;
-}
-#tabelBarang tbody tr:hover {
-    background-color: rgba(182, 109, 255, 0.05) !important;
-}
-    /* Fix Z-Index agar Modal tidak tertutup backdrop hitam */
-    .modal { z-index: 1060 !important; }
-    .modal-backdrop { z-index: 1050 !important; }
-
-    .content-wrapper { animation: fadeIn 0.8s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    
     .barang-card {
-        border: none !important; border-radius: 25px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
-        transition: all 0.3s ease; background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
+        border: none !important;
+        border-radius: 20px !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.03) !important;
+        background: #ffffff;
     }
-    .bg-gradient-sultan { background: linear-gradient(to right, #da8cff, #9a55ff) !important; }
 
+    .form-control-custom {
+        border-radius: 12px !important;
+        border: 1.5px solid #f0f0f0 !important;
+        padding: 12px 15px !important;
+        transition: all 0.3s;
+        background: #fff !important;
+    }
+    .form-control-custom:focus {
+        border-color: #b66dff !important;
+        box-shadow: 0 0 0 0.2rem rgba(182, 109, 255, 0.1) !important;
+    }
+
+    #tabelBarang tbody tr { cursor: pointer; transition: 0.2s; }
+    #tabelBarang tbody tr:hover { background-color: rgba(182, 109, 255, 0.03) !important; }
+    
     .table-modern thead th {
-        background: #f8f9fa; border: none !important; color: #343a40;
-        font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-        font-size: 0.75rem; padding: 15px !important;
-    }
-    .table-modern tbody td { padding: 12px 15px !important; vertical-align: middle !important; border-top: 1px solid #f2f2f2 !important; }
-    
-    .price-tag { color: #2ecc71; font-weight: 800; font-family: 'Monaco', monospace; }
-    .id-tag { background: #f0edf7; color: #b66dff; padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; }
-    
-    .badge-dot {
-        height: 8px; width: 8px; background-color: #b66dff;
-        border-radius: 50%; display: inline-block;
-        box-shadow: 0 0 8px rgba(182, 109, 255, 0.8);
+        background: #fcfcfc;
+        border-bottom: 2px solid #f0f0f0 !important;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 1px;
     }
 
-    .custom-checkbox { width: 18px; height: 18px; border-radius: 4px; cursor: pointer; accent-color: #b66dff; }
-    .form-control-custom { border-radius: 12px !important; border: 1.5px solid #ebebeb !important; padding: 12px 15px !important; }
+    .price-tag { color: #27ae60; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .id-tag { 
+        background: rgba(182, 109, 255, 0.1); 
+        color: #b66dff; 
+        padding: 4px 10px; 
+        border-radius: 6px; 
+        font-weight: bold; 
+        font-size: 12px;
+    }
+
+.processing-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+}
 </style>
 
 <div class="page-header flex-wrap">
     <div class="header-left">
         <h3 class="page-title text-dark fw-bold">
-            <span class="page-title-icon bg-gradient-sultan text-white me-2 shadow-sm">
+            <span class="page-title-icon bg-gradient-primary text-white me-2 shadow-sm">
                 <i class="mdi mdi-tag-multiple"></i>
             </span> Smart UMKM Labeler
         </h3>
     </div>
     <div class="header-right d-flex flex-wrap mt-2 mt-sm-0">
         <div class="d-flex align-items-center me-3">
-            <span class="badge badge-gradient-primary p-2 px-3 shadow-sm" id="selectedCount">0 Barang Terpilih</span>
+            <span class="badge bg-light text-primary p-2 px-3 border" id="selectedCount" style="border-radius: 10px;">0 Barang Terpilih</span>
         </div>
-        <button type="button" id="btnBukaModalCetak" class="btn btn-gradient-info btn-icon-text fw-bold shadow-sm rounded-pill">
+        <button type="button" id="btnBukaModalCetak" class="btn btn-gradient-info btn-icon-text fw-bold shadow-sm rounded-pill px-4">
             <i class="mdi mdi-printer btn-icon-prepend"></i> Cetak Massal
         </button>
     </div>
@@ -67,43 +82,41 @@
     <div class="col-md-4 grid-margin stretch-card">
         <div class="card barang-card">
             <div class="card-body">
-                <h4 class="card-title mb-4"><i class="mdi mdi-database-plus text-primary me-2"></i>Input Inventaris</h4>
+                <h5 class="fw-bold mb-4 text-dark">
+                    <i class="mdi mdi-database-plus text-primary me-2"></i>Tambah Inventaris
+                </h5>
                 <form action="{{ route('barang.store') }}" method="POST">
                     @csrf
                     <div class="form-group mb-3">
-                        <label class="small fw-bold text-muted text-uppercase">Nama Produk</label>
-                        <input type="text" name="nama" class="form-control form-control-custom" placeholder="Kripik Tempe" required>
+                        <label class="small fw-bold text-muted">NAMA PRODUK</label>
+                        <input type="text" name="nama" class="form-control form-control-custom" placeholder="Contoh: Kripik Tempe" required>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="small fw-bold text-muted text-uppercase">Harga Jual</label>
+                        <label class="small fw-bold text-muted">HARGA JUAL</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-0">Rp</span>
-                            <input type="number" name="harga" class="form-control form-control-custom" placeholder="0" required>
+                            <span class="input-group-text bg-light border-0" style="border-radius: 12px 0 0 12px;">Rp</span>
+                            <input type="number" name="harga" class="form-control form-control-custom" style="border-radius: 0 12px 12px 0 !important;" placeholder="0" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-gradient-primary btn-lg w-100 fw-bold shadow rounded-pill">SIMPAN DATA</button>
+                    <button type="submit" class="btn btn-gradient-primary btn-lg w-100 fw-bold shadow-sm rounded-pill py-3">
+                        <i class="mdi mdi-content-save me-2"></i>SIMPAN DATA
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="col-md-8 grid-margin stretch-card">
+<div class="col-md-8 grid-margin stretch-card">
         <div class="card barang-card">
             <div class="card-body">
                 <div class="table-responsive">
                     <form id="formCetakLabel" action="{{ route('barang.cetak') }}" method="POST" target="_blank">
                         @csrf
                         <table class="table table-modern w-100" id="tabelBarang">
-                            <thead>
-                                <tr>
-                                    <th width="30"><input type="checkbox" id="checkAll" class="custom-checkbox"></th>
-                                    <th>ID Barang</th>
-                                    <th>Produk</th>
-                                    <th class="text-end">Harga</th>
-                                    <th>Ditambahkan</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
+<thead>
+    <tr>
+        <th width="30"><input type="checkbox" id="checkAll"></th> <th>Ref ID</th> <th>Produk</th> <th class="text-end">Harga</th> <th>Added At</th> </tr>
+</thead>
                             <tbody></tbody>
                         </table>
                     </form>
@@ -135,7 +148,9 @@
                 </div>
             </div>
             <div class="modal-footer border-0 p-3 bg-light" style="border-radius: 0 0 30px 30px;">
-                <button type="submit" form="formCetakLabel" class="btn btn-gradient-info w-100 btn-lg fw-bold rounded-pill">GENERATE PDF</button>
+                <button type="submit" id="btnGeneratePDF" form="formCetakLabel" class="btn btn-gradient-info w-100 btn-lg fw-bold rounded-pill">
+    GENERATE PDF
+</button>
                 <button type="button" class="btn btn-link w-100 text-muted small" data-bs-dismiss="modal">Batal</button>
             </div>
         </div>
@@ -176,7 +191,7 @@
     $(document).ready(function() {
         window.selectedIds = new Set();
 
-        var table = $('#tabelBarang').DataTable({
+        const tableBarang = $('#tabelBarang').DataTable({
             processing: true,
             serverSide: true,
             ajax: "{{ route('barang.index') }}",
@@ -194,13 +209,7 @@
                     className: 'text-end', 
                     render: d => `<span class="price-tag">${d}</span>` 
                 },
-                { data: 'timestamp', name: 'timestamp' },
-                { 
-                    data: 'id_barang',
-                    orderable: false,
-                    className: 'text-center',
-                    render: id => `<button type="button" onclick="hapusBarang(${id})" class="btn btn-link p-0 text-danger"><i class="mdi mdi-delete-outline fs-5"></i></button>`
-                }
+                { data: 'timestamp', name: 'timestamp' }
             ],
             order: [[4, 'desc']],
             language: {
@@ -209,70 +218,45 @@
             },
             drawCallback: function() {
                 $('.barang-checkbox').addClass('custom-checkbox').each(function() {
-                    if (window.selectedIds.has($(this).val())) $(this).prop('checked', true);
+                    if (window.selectedIds.has($(this).val())) {
+                        $(this).prop('checked', true);
+                    }
                 });
                 updateUI();
             }
         });
 
-        $('#tabelBarang tbody').on('click', 'td:not(:first-child):not(:last-child)', function() {
-            var data = table.row($(this).parents('tr')).data();
-            $('#edit_id').val(data.id_barang);
-            $('#edit_nama').val(data.nama);
-            $('#edit_harga').val(data.harga.toString().replace(/[^0-9]/g, '')); 
-            $('#modalEditBarang').modal('show');
-        });
-$(document).on('click', '#btnUpdate', function(e) {
-    e.preventDefault();
-    let btn = $(this);
-    let id = $('#edit_id').val();
-    let nama = $('#edit_nama').val();
-    let harga = $('#edit_harga').val();
-
-    if(!nama || !harga) {
-        document.getElementById('formEditBarang').reportValidity();
-        return;
-    }
-
-    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
-
-    $.ajax({
-        url: "/barang/" + id,
-        type: "POST", // Tetap POST
-        data: {
-            _token: "{{ csrf_token() }}",
-            _method: "PUT", // Tapi Laravel membacanya sebagai PUT
-            nama: nama,
-            harga: harga
-        },
-        success: function(response) {
-            $('#modalEditBarang').modal('hide');
-            // 'table' harus sesuai dengan nama variabel DataTable Anda
-            if ($.fn.DataTable.isDataTable('#tabelBarang')) {
-                $('#tabelBarang').DataTable().ajax.reload(null, false);
+        $('#tabelBarang tbody').on('click', 'td:not(:first-child)', function() {
+            const data = tableBarang.row($(this).parents('tr')).data();
+            if(data) {
+                $('#edit_id').val(data.id_barang);
+                $('#edit_nama').val(data.nama);
+                // Menghapus format Rupiah agar hanya angka yang masuk ke input
+                const cleanHarga = data.harga.toString().replace(/[^0-9]/g, '');
+                $('#edit_harga').val(cleanHarga); 
+                $('#modalEditBarang').modal('show');
             }
-            Swal.fire('Berhasil!', 'Data diperbarui', 'success');
-        },
-        error: function(xhr) {
-            console.error(xhr.responseText); 
-            Swal.fire('Error 500', 'Terjadi kesalahan di server. Cek log Laravel!', 'error');
-        },
-        complete: function() {
-            btn.prop('disabled', false).text('UBAH');
-        }
-    });
-});
-
-        $(document).on('click', '#btnHapusModal', function() {
-            let id = $('#edit_id').val();
-            $('#modalEditBarang').modal('hide');
-            hapusBarang(id);
         });
 
-        function updateUI() {
-            let count = window.selectedIds.size;
-            $('#selectedCount').text(count + ' Terpilih').toggleClass('badge-gradient-danger', count === 0);
-        }
+        $('form[action*="barang.store"]').submit(function() {
+            let btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Menyimpan...');
+            return true;
+        });
+
+        $('#formCetakLabel').submit(function() {
+            let btn = $('#btnGeneratePDF');
+            let originalText = btn.html();
+            $('.temp-ids').remove();
+            window.selectedIds.forEach(id => $(this).append(`<input type="hidden" class="temp-ids" name="ids[]" value="${id}">`));
+            
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Rendering...');
+            setTimeout(function() {
+                btn.prop('disabled', false).html(originalText);
+                $('#modalKoordinat').modal('hide');
+            }, 3000);
+            return true;
+        });
 
         $('#tabelBarang tbody').on('change', '.barang-checkbox', function() {
             this.checked ? window.selectedIds.add($(this).val()) : window.selectedIds.delete($(this).val());
@@ -291,15 +275,43 @@ $(document).on('click', '#btnUpdate', function(e) {
             }
         });
 
+        $('#btnHapusModal').on('click', function() {
+            let id = $('#edit_id').val();
+            $('#modalEditBarang').modal('hide');
+            hapusBarang(id);
+        });
+
         $('input[name="x_coord"], input[name="y_coord"]').on('input', function() {
             $('#slotPreview').text(`(${$('input[name="x_coord"]').val()}, ${$('input[name="y_coord"]').val()})`);
         });
+    });
 
-        $('#formCetakLabel').submit(function() {
-            $('.temp-ids').remove();
-            window.selectedIds.forEach(id => $(this).append(`<input type="hidden" class="temp-ids" name="ids[]" value="${id}">`));
-            $('#modalKoordinat').modal('hide');
-            return true;
+    function updateUI() {
+        let count = window.selectedIds.size;
+        $('#selectedCount').text(count + ' Terpilih').toggleClass('badge-gradient-danger', count === 0);
+    }
+
+    $(document).on('click', '#btnUpdate', function(e) {
+        e.preventDefault();
+        let id = $('#edit_id').val();
+        Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+        $.ajax({
+            url: "/barang/" + id,
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                _method: "PUT",
+                nama: $('#edit_nama').val(),
+                harga: $('#edit_harga').val()
+            },
+            success: function() {
+                Swal.close();
+                $('#modalEditBarang').modal('hide');
+                $('#tabelBarang').DataTable().ajax.reload(null, false);
+                Swal.fire('Berhasil!', 'Data diperbarui.', 'success');
+            },
+            error: function() { Swal.fire('Gagal!', 'Terjadi kesalahan.', 'error'); }
         });
     });
 
@@ -312,6 +324,7 @@ $(document).on('click', '#btnUpdate', function(e) {
             confirmButtonText: 'Ya, Hapus!'
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({ title: 'Menghapus...', didOpen: () => { Swal.showLoading(); } });
                 $.ajax({
                     url: "/barang/" + id,
                     type: "DELETE",

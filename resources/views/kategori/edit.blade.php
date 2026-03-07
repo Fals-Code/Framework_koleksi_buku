@@ -60,6 +60,43 @@
         background: rgba(255, 255, 255, 0.05);
         border-radius: 10px;
     }
+
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-top: -10px;
+        margin-left: -10px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff; /* Spinner putih di atas background oranye */
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @keyframes border-glow {
+        0% { box-shadow: 0 0 5px rgba(255, 159, 67, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(255, 159, 67, 0.5); }
+        100% { box-shadow: 0 0 5px rgba(255, 159, 67, 0.2); }
+    }
+
+    .edit-mode-card {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-radius: 20px !important;
+        border-left: 5px solid #ff9f43 !important;
+        transition: all 0.3s ease;
+    }
 </style>
 
 <div class="page-header flex-wrap">
@@ -82,7 +119,6 @@
 <div class="row">
     <div class="col-md-8 grid-margin stretch-card">
         <div class="card edit-mode-card shadow-lg position-relative">
-            {{-- Status Badge menggunakan ID Dokumen yang konsisten --}}
             <div class="status-badge-edit text-uppercase">ID DOKUMEN: #CAT-{{ $kategori->id }}</div>
             
             <div class="card-body p-4 p-md-5">
@@ -96,13 +132,13 @@
                     </div>
                 </div>
                 
-                <form class="forms-sample" action="{{ route('kategori.update', $kategori->id) }}" method="POST">
+                <form id="editKategoriForm" class="forms-sample" action="{{ route('kategori.update', $kategori->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     
                     <div class="form-group mb-4">
                         <label for="nama_kategori" class="fw-bold mb-2 text-dark">Identitas Kategori Baru</label>
-                        <div class="input-group shadow-sm" style="border-radius: 12px;">
+                        <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-gradient-warning text-white border-0" style="border-radius: 12px 0 0 12px; height: 100%;">
                                     <i class="mdi mdi-label-variant-outline"></i>
@@ -113,24 +149,18 @@
                                    id="nama_kategori" 
                                    name="nama_kategori" 
                                    value="{{ old('nama_kategori', $kategori->nama_kategori) }}" 
-                                   placeholder="Contoh: Sains & Teknologi"
                                    required>
                         </div>
                         @error('nama_kategori')
                             <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
                         @enderror
-                        
-                        <div class="mt-3 d-flex align-items-center bg-light p-2 rounded border" style="border-style: dashed !important;">
-                            <i class="mdi mdi-information-outline text-warning me-2"></i>
-                            <span class="text-muted small">Value Saat Ini: <code class="text-dark fw-bold">"{{ $kategori->nama_kategori }}"</code></span>
-                        </div>
                     </div>
 
                     <div class="mt-5 d-flex gap-2">
-                        <button type="submit" class="btn btn-gradient-warning btn-lg text-white px-4 fw-bold shadow-sm">
+                        <button type="submit" id="btnUpdate" class="btn btn-gradient-warning btn-lg text-white px-4 fw-bold shadow-sm">
                             <i class="mdi mdi-refresh btn-icon-prepend"></i> Terapkan Perubahan
                         </button>
-                        <a href="{{ route('kategori.index') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm">
+                        <a href="{{ route('kategori.index') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm" onclick="btnLoading(this)">
                             <i class="mdi mdi-arrow-left btn-icon-prepend"></i> Kembali
                         </a>
                     </div>
@@ -169,4 +199,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function btnLoading(btn) {
+        btn.classList.add('btn-loading');
+        if(btn.tagName === 'A') {
+            btn.style.pointerEvents = 'none';
+        }
+    }
+
+    document.getElementById('editKategoriForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('btnUpdate');
+
+        if (this.checkValidity()) {
+            btnLoading(btn);
+        }
+    });
+</script>
 @endsection

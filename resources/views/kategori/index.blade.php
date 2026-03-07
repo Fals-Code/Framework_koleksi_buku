@@ -2,69 +2,58 @@
 
 @section('content')
 <style>
-    .table-container {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
     }
 
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        top: 50%;
+        left: 50%;
+        margin-top: -9px;
+        margin-left: -9px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .action-btn.btn-loading::after {
+        border: 2px solid rgba(182, 109, 255, 0.2);
+        border-top-color: #b66dff;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .table-container { background: white; border-radius: 15px; overflow: hidden; }
     .custom-table thead th {
         background-color: #f8f9fa;
-        border-top: none !important;
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 1px;
         font-weight: 700;
-        color: #343a40;
         padding: 20px 15px !important;
     }
-
-    .custom-table tbody tr {
-        transition: all 0.3s ease;
-    }
-
     .custom-table tbody tr:hover {
         background-color: rgba(182, 109, 255, 0.05) !important;
         transform: scale(1.002);
     }
-
-    .action-btn {
-        transition: all 0.2s;
-        border-radius: 8px !important;
-        width: 35px;
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .action-btn { 
+        transition: all 0.2s; border-radius: 8px !important; 
+        width: 35px; height: 35px; display: flex; 
+        align-items: center; justify-content: center; 
     }
-
-    .action-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .search-wrapper {
-        position: relative;
-        max-width: 300px;
-    }
-
-    .search-wrapper i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #b66dff;
-    }
-
-    .search-input {
-        padding-left: 35px !important;
-        border-radius: 20px !important;
-        border: 1px solid #ebedf2 !important;
-    }
-
-    .bg-light-primary {
-        background-color: #f3e8ff;
-    }
+    .search-wrapper { position: relative; max-width: 300px; }
+    .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #b66dff; }
+    .search-input { padding-left: 35px !important; border-radius: 20px !important; }
+    .bg-light-primary { background-color: #f3e8ff; }
 </style>
 
 <div class="page-header flex-wrap">
@@ -117,16 +106,13 @@
                                         <div class="bg-light-primary p-2 rounded-3 me-3 text-primary shadow-sm">
                                             <i class="mdi mdi-bookmark-outline"></i>
                                         </div>
-                                        <div>
-                                            <span class="fw-bold d-block text-dark">{{ $kategori->nama_kategori }}</span>
-                                        </div>
+                                        <span class="fw-bold text-dark">{{ $kategori->nama_kategori }}</span>
                                     </div>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
                                         <a href="{{ route('kategori.edit', $kategori->id ?? $kategori->idkategori) }}" 
                                            class="btn btn-inverse-warning btn-icon action-btn" 
-                                           title="Edit Data"
                                            onclick="btnLoading(this)">
                                             <i class="mdi mdi-pencil-outline"></i>
                                         </a>
@@ -134,10 +120,10 @@
                                         <form action="{{ route('kategori.destroy', $kategori->id ?? $kategori->idkategori) }}" 
                                               method="POST" 
                                               class="d-inline" 
-                                              onsubmit="return confirm('Sistem Keamanan: Anda yakin ingin menghapus data ini?')">
+                                              onsubmit="return handleConfirm(this)">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-inverse-danger btn-icon action-btn" title="Hapus Data">
+                                            <button type="submit" class="btn btn-inverse-danger btn-icon action-btn">
                                                 <i class="mdi mdi-trash-can-outline"></i>
                                             </button>
                                         </form>
@@ -160,19 +146,28 @@
     </div>
 </div>
 
-
 <script>
+    function btnLoading(btn) {
+        btn.classList.add('btn-loading');
+        if(btn.tagName === 'A') btn.style.pointerEvents = 'none';
+    }
+
+    function handleConfirm(form) {
+        if (confirm('Sistem Keamanan: Anda yakin ingin menghapus data ini?')) {
+            const btn = form.querySelector('button');
+            btnLoading(btn);
+            return true;
+        }
+        return false;
+    }
+
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toUpperCase();
         let rows = document.querySelector("#categoryTable tbody").rows;
         
         for (let i = 0; i < rows.length; i++) {
-            let col = rows[i].cells[1].textContent.toUpperCase();
-            if (col.indexOf(filter) > -1) {
-                rows[i].style.display = "";
-            } else {
-                rows[i].style.display = "none";
-            }      
+            let col = rows[i].cells[1] ? rows[i].cells[1].textContent.toUpperCase() : "";
+            rows[i].style.display = col.indexOf(filter) > -1 ? "" : "none";
         }
     });
 </script>

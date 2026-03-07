@@ -2,10 +2,32 @@
 
 @section('content')
 <style>
-    .animated-content {
-        animation: fadeInUp 0.6s ease-out;
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
     }
 
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-top: -10px;
+        margin-left: -10px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .animated-content { animation: fadeInUp 0.6s ease-out; }
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -16,25 +38,6 @@
         border-radius: 20px !important;
         border: 1px solid rgba(182, 109, 255, 0.1) !important;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-        overflow: hidden;
-    }
-
-    .custom-input-group {
-        transition: all 0.3s ease;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .form-control-lg:focus {
-        border-color: #b66dff !important;
-        box-shadow: 0 0 15px rgba(182, 109, 255, 0.2) !important;
-        background-color: #fff !important;
-    }
-
-    .btn-neon {
-        transition: all 0.4s ease;
-        position: relative;
-        overflow: hidden;
     }
 
     .btn-neon:hover {
@@ -45,17 +48,6 @@
     .tips-card {
         border-radius: 20px !important;
         background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%) !important;
-        border: none !important;
-        position: relative;
-    }
-
-    .floating-icon-bg {
-        position: absolute;
-        right: -10px;
-        bottom: -10px;
-        font-size: 8rem;
-        color: rgba(255, 255, 255, 0.1);
-        transform: rotate(-15deg);
     }
 </style>
 
@@ -88,7 +80,7 @@
                         </div>
                     </div>
 
-                    <form class="forms-sample" action="{{ route('kategori.store') }}" method="POST" onsubmit="btnLoading(document.getElementById('btnSubmit'))">
+                    <form class="forms-sample" action="{{ route('kategori.store') }}" method="POST" id="categoryForm">
                         @csrf
                         
                         <div class="form-group mb-4">
@@ -105,9 +97,6 @@
                                        required 
                                        autocomplete="off">
                             </div>
-                            <small class="text-muted mt-2 d-block">
-                                <i class="mdi mdi-information-outline me-1"></i> Gunakan huruf kapital di setiap awal kata (Title Case).
-                            </small>
                         </div>
 
                         <hr class="my-4" style="opacity: 0.1;">
@@ -127,39 +116,31 @@
         
         <div class="col-md-4 grid-margin stretch-card">
             <div class="card tips-card text-white shadow-lg">
-                <div class="card-body p-4">
-                    <i class="mdi mdi-lightbulb-on-outline floating-icon-bg"></i>
-                    
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="rounded-circle bg-white p-2 me-3" style="--bs-bg-opacity: 0.2;">
-                            <i class="mdi mdi-shield-check text-white"></i>
-                        </div>
-                        <h4 class="mb-0">Quality Control</h4>
-                    </div>
-                    
-                    <div class="tips-item mb-4">
-                        <h6 class="fw-bold mb-2 text-warning">Efisiensi Pencarian</h6>
-                        <p class="small" style="line-height: 1.6; opacity: 0.9;">
-                            Kategori yang terstruktur membantu algoritma pencarian bekerja 40% lebih cepat bagi mahasiswa.
-                        </p>
-                    </div>
-
-                    <div class="tips-item mb-4">
-                        <h6 class="fw-bold mb-2 text-warning">Penamaan Unik</h6>
-                        <p class="small" style="line-height: 1.6; opacity: 0.9;">
-                            Hindari penamaan yang mirip (Contoh: "Sains" dan "Ilmu Sains"). Pilih satu yang paling baku.
-                        </p>
-                    </div>
-
-                    <div class="mt-5 pt-3 border-top border-secondary">
-                        <div class="d-flex align-items-center">
-                            <i class="mdi mdi-account-circle me-2"></i>
-                            <span class="small italic">Operator: {{ Auth::user()->name }}</span>
-                        </div>
-                    </div>
+                <div class="card-body p-4 text-center">
+                    <i class="mdi mdi-lightbulb-on-outline" style="font-size: 5rem; opacity: 0.5;"></i>
+                    <h4 class="mt-3">Quality Control</h4>
+                    <p class="small">Kategori yang terstruktur membantu pengelompokan buku menjadi lebih rapi dan mudah ditemukan.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function btnLoading(btn) {
+        if (btn.type === 'submit') {
+            const form = btn.closest('form');
+            if (!form.checkValidity()) return;
+        }
+        
+        btn.classList.add('btn-loading');
+        if(btn.tagName === 'A') {
+            btn.style.pointerEvents = 'none';
+        }
+    }
+
+    document.getElementById('categoryForm').addEventListener('submit', function() {
+        btnLoading(document.getElementById('btnSubmit'));
+    });
+</script>
 @endsection

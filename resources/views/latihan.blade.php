@@ -88,7 +88,6 @@ $(document).ready(function() {
     $('#btnTambahRak').click(function() {
         let val = $('#inputRak').val().trim();
         if(val !== "") {
-            // Sesuai modul: Gunakan new Option(text, value)
             $('#selectRak').append(new Option(val, val));
             $('#inputRak').val('');
             

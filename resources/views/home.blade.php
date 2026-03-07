@@ -8,6 +8,19 @@
         100% { transform: translateY(0px); }
     }
 
+    .transition-all {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+.spinner-border-sm {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 0.15em;
+}
+
     .card-floating { animation: floating 4s ease-in-out infinite; }
     .glass-card {
         background: rgba(255, 255, 255, 0.4) !important;
@@ -105,30 +118,35 @@
                 <h4 class="card-title fw-bold text-primary mb-4">
                     <i class="mdi mdi-flash-circle me-2"></i> Akses Cepat Terintegrasi
                 </h4>
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" style="cursor: pointer;" onclick="location.href='{{ route('barang.index') }}'">
-                            <div class="rounded-circle bg-light-primary p-3 me-3 text-primary">
-                                <i class="mdi mdi-plus-box mdi-24px"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Kelola Barang</h6>
-                                <small class="text-muted">Database Aset</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" style="cursor: pointer;" onclick="window.open('{{ route('barang.cetak') }}', '_blank')">
-                            <div class="rounded-circle bg-light-info p-3 me-3 text-info">
-                                <i class="mdi mdi-barcode-scan mdi-24px"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Cetak Label</h6>
-                                <small class="text-muted">Barcode Generator</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="row g-3">
+    <div class="col-sm-6">
+        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" 
+             style="cursor: pointer;" 
+             onclick="btnLoading(this); setTimeout(() => { location.href='{{ route('barang.index') }}' }, 50);">
+            <div class="rounded-circle bg-light-primary p-3 me-3 text-primary icon-container">
+                <i class="mdi mdi-plus-box mdi-24px"></i>
+            </div>
+            <div>
+                <h6 class="mb-0 fw-bold menu-title">Kelola Barang</h6>
+                <small class="text-muted">Database Aset</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div class="p-4 rounded-3 border bg-white d-flex align-items-center hover-shadow transition-all" 
+             style="cursor: pointer;" 
+             onclick="btnLoading(this); setTimeout(() => { window.open('{{ route('barang.cetak') }}', '_blank'); location.reload(); }, 100);">
+            <div class="rounded-circle bg-light-info p-3 me-3 text-info icon-container">
+                <i class="mdi mdi-barcode-scan mdi-24px"></i>
+            </div>
+            <div>
+                <h6 class="mb-0 fw-bold menu-title">Cetak Label</h6>
+                <small class="text-muted">Barcode Generator</small>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <div class="mt-4 p-3 bg-white rounded-3 border">
                     <h6 class="fw-bold mb-3"><i class="mdi mdi-chart-bar text-primary me-2"></i> Grafik Aktivitas Inventaris</h6>

@@ -10,7 +10,6 @@
           <span class="font-weight-bold mb-1 text-dark">{{ Auth::user()->name }}</span>
           <small class="text-muted">Administrator</small>
         </div>
-        <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
       </a>
     </li>
     

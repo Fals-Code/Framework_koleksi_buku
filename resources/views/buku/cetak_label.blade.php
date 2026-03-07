@@ -13,10 +13,40 @@
             background-color: #f4f4f9;
             margin: 0;
             padding: 0;
-            /* Memaksa browser mencetak warna latar belakang */
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
+
+        .btn-print {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-print:hover {
+    background: #e5ac00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+.btn-print:active {
+    transform: translateY(0);
+}
+
+.spinner-print {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(0,45,85,0.3);
+    border-top: 3px solid #002d55;
+    border-radius: 50%;
+    animation: spinPrint 0.8s linear infinite;
+}
+
+@keyframes spinPrint {
+    to { transform: rotate(360deg); }
+}
         
         .preview-header {
             background: #002d55;
@@ -28,16 +58,6 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-        }
-
-        .btn-print {
-            background: #ffc107;
-            color: #002d55;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
         }
 
         .page-simulate {
@@ -66,6 +86,7 @@
             box-sizing: border-box;
             position: relative;
             page-break-inside: avoid;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .label-header {
@@ -76,7 +97,6 @@
             padding: 8px 2px;
             font-weight: bold;
             text-transform: uppercase;
-            /* Penting untuk mencetak header biru */
             -webkit-print-color-adjust: exact !important;
         }
 
@@ -131,15 +151,20 @@
 </head>
 <body>
 
-    <div class="preview-header">
-        <div>
-            <h3 style="margin:0">Pratinjau Label Buku</h3>
-            <small>Jumlah terpilih: {{ count($bukus) }} item</small>
+<div class="preview-header">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="background: #ffc107; color: #002d55; width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         </div>
-        <button class="btn-print" onclick="window.print()">
-            ⎙ CETAK SEKARANG
-        </button>
+        <div>
+            <h3 style="margin:0; font-family: 'Segoe UI', sans-serif;">Pratinjau Label Buku</h3>
+            <small style="opacity: 0.8;">Siap mencetak {{ count($bukus) }} label koleksi</small>
+        </div>
     </div>
+    <button class="btn-print" id="btnPrintFinal" onclick="startPrint()">
+        <span>⎙ CETAK SEKARANG</span>
+    </button>
+</div>
 
     <div class="page-simulate">
         <div class="label-container">
@@ -167,5 +192,25 @@
         </div>
     </div>
 
+    <script>
+function startPrint() {
+    const btn = document.getElementById('btnPrintFinal');
+    const originalHTML = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner-print"></div> Menyiapkan Dokumen...';
+    btn.style.opacity = '0.8';
+
+    setTimeout(() => {
+        window.print();
+        
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            btn.style.opacity = '1';
+        }, 1000);
+    }, 800);
+}
+</script>
 </body>
 </html>

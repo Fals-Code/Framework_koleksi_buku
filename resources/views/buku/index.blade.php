@@ -118,163 +118,88 @@ display: none;
 </div>
 
             <div class="table-responsive">
-
                 <table class="table table-hover table-modern">
-
                     <thead>
-
                         <tr>
-
                             <th class="col-checkbox" style="width: 5%"><input type="checkbox" id="checkAll" class="form-check-input-custom"></th>
-
                             <th class="col-no" style="width: 5%">No</th>
-
                             <th style="width: 15%">Kode Buku</th>
-
                             <th style="width: 25%">Detail Buku</th>
-
                             <th style="width: 20%">Penulis</th>
-
                             <th style="width: 15%">Kategori</th>
-
                             <th class="col-opsi text-center" style="width: 15%">Opsi</th>
-
                         </tr>
-
                     </thead>
-
                     <tbody>
 
                         @forelse($bukus as $key => $buku)
                         <tr>
                             <td class="col-checkbox"><input type="checkbox" class="sub_chk form-check-input-custom" data-id="{{ $buku->id }}"></td>
-
                             <td class="col-no text-center">
                                 <span class="badge badge-light text-dark fw-bold rounded-pill border">
                                 {{ $key+1 }}
                                 </span>
                             </td>
-
                             <td><span class="code-tag">{{ $buku->kode }}</span></td>
-
                             <td>
-
                                 <div class="book-title-cell text-wrap" style="max-width: 280px;">
-
                                     {{ $buku->judul }}
-
                                 </div>
-
                             </td>
-
                             <td>
-
                                 <div class="d-flex align-items-center">
-
                                     <div class="bg-light-info rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-
                                         <i class="mdi mdi-account text-info small"></i>
-
                                     </div>
-
                                     <span>{{ $buku->pengarang }}</span>
-
                                 </div>
-
                             </td>
-
                             <td>
-
                                 <span class="badge badge-category {{ $buku->kategori ? 'badge-gradient-info' : 'badge-gradient-secondary text-white' }}">
-
                                     <i class="mdi mdi-tag-outline me-1"></i>
-
                                     {{ $buku->kategori->nama_kategori ?? 'Uncategorized' }}
-
                                 </span>
-
                             </td>
-
                             <td class="col-opsi text-center">
-
                                 <div class="d-flex justify-content-center gap-2">
-
                                     <a href="{{ route('buku.edit', $buku->id) }}" class="btn btn-inverse-warning btn-action" title="Edit Data" onclick="btnLoading(this)">
-
                                         <i class="mdi mdi-pencil"></i>
-
                                     </a>
-
                                     <form action="{{ route('buku.destroy', $buku->id) }}" method="POST" onsubmit="return confirmDeleteBuku(this)">
-
                                         @csrf
-
                                         @method('DELETE')
-
                                         <button type="submit" class="btn btn-inverse-danger btn-action" title="Hapus Data">
-
                                             <i class="mdi mdi-trash-can"></i>
-
                                         </button>
-
                                     </form>
-
                                 </div>
-
                             </td>
-
                         </tr>
-
                         @empty
-
                         <tr>
-
                             <td colspan="7" class="text-center py-5 text-muted">
-
                                 <i class="mdi mdi-book-open-variant mdi-48px d-block mb-2 opacity-25"></i>
-
                                 <p>Belum ada data buku dalam database ini.</p>
-
                             </td>
-
                         </tr>
-
                         @endforelse
-
                     </tbody>
-
                 </table>
-
             </div>
-
-
 
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pt-3 border-top">
-
                 <p class="text-muted small mb-3 mb-md-0">
-
                     Menampilkan <strong>{{ $bukus->count() }}</strong> entri buku dalam sistem.
-
                 </p>
-
                 <div class="pagination-container">
-
                     @if(method_exists($bukus, 'links'))
-
                         {{ $bukus->links() }}
-
                     @endif
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 </div>
 
 @endsection
@@ -332,13 +257,11 @@ $('#btnPrintSelected').on('click', function() {
 
         if (selectedIds.length <= 0) {
             Swal.fire({ icon: 'warning', title: 'Pilih Buku', text: 'Silakan centang buku yang ingin dicetak labelnya.', confirmButtonColor: '#b66dff' });
-            // Reset loading jika batal
             $(this).removeClass('disabled').html('<i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (' + selectedIds.length + ')');
         } else {
             var url = "{{ route('buku.cetak_label') }}?id=" + selectedIds.join(",");
             window.open(url, '_blank');
             
-            // Beri jeda sebentar lalu kembalikan tombol ke status awal
             setTimeout(() => {
                 $(this).removeClass('disabled').html('<i class="mdi mdi-printer btn-icon-prepend"></i> Cetak (' + selectedIds.length + ')');
             }, 1000);

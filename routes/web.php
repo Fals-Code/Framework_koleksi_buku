@@ -9,6 +9,7 @@ use App\Http\Controllers\PDFController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PenjualanController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -45,6 +46,10 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     Route::delete('/barang/{id}', [BarangController::class, 'destroy'])->name('barang.destroy');
     Route::get('/barang-tabel-html', [BarangController::class, 'tabelHtml'])->name('barang.tabel_html');
     Route::get('/warehouse-system', [BarangController::class, 'latihan'])->name('latihan.index');
+
+    Route::get('/kasir', [PenjualanController::class, 'index'])->name('kasir.index');
+    Route::get('/kasir/cari-barang/{kode}', [PenjualanController::class, 'cariBarang'])->name('kasir.cari');
+    Route::post('/kasir/simpan', [PenjualanController::class, 'simpan'])->name('kasir.simpan');
     
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);
 

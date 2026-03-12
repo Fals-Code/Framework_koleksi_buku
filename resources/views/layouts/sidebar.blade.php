@@ -59,6 +59,17 @@
 </li>
 
     <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">TRANSAKSI</span>
+    </li>
+
+    <li class="nav-item {{ request()->is('kasir') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('kasir.index') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Kasir POS</span>
+        <i class="mdi mdi-cash-register menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>
     </li>
 

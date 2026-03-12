@@ -98,9 +98,9 @@
                             <input type="number" name="harga" class="form-control form-control-custom" style="border-radius: 0 12px 12px 0 !important;" placeholder="0" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-gradient-primary btn-lg w-100 fw-bold shadow-sm rounded-pill py-3">
-                        <i class="mdi mdi-content-save me-2"></i>SIMPAN DATA
-                    </button>
+<button type="submit" id="btnSimpanBarang" onclick="handleSimpanLoading(this)" class="btn btn-gradient-primary btn-lg w-100 fw-bold shadow-sm rounded-pill py-3">
+    <span class="btn-text"><i class="mdi mdi-content-save me-2"></i>SIMPAN DATA</span>
+</button>
                 </form>
             </div>
         </div>
@@ -115,7 +115,7 @@
                         <table class="table table-modern w-100" id="tabelBarang">
 <thead>
     <tr>
-        <th width="30"><input type="checkbox" id="checkAll"></th> <th>Ref ID</th> <th>Produk</th> <th class="text-end">Harga</th> <th>Added At</th> </tr>
+        <th width="30"><input type="checkbox" id="checkAll"></th> <th>Ref ID</th> <th>Produk</th> <th class ="text-end">Harga</th> <th>Added At</th> </tr>
 </thead>
                             <tbody></tbody>
                         </table>
@@ -188,6 +188,12 @@
 
 @push('script-page')
 <script>
+    function handleSimpanLoading(btn) {
+        const form = btn.closest('form');
+        if (form.checkValidity()) {
+            btn.classList.add('btn-loading');
+        }
+    }
     $(document).ready(function() {
         window.selectedIds = new Set();
 

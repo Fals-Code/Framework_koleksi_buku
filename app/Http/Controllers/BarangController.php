@@ -127,4 +127,10 @@ public function latihan()
 {
     return view('latihan');
 }
+
+public function tabelHtml()
+{
+    $barang = DB::table('barang')->orderBy('id_barang', 'asc')->get();
+    return view('barang.tabel_html', compact('barang'));
+}
 }

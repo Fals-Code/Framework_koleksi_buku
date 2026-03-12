@@ -44,6 +44,13 @@
       </a>
     </li>
 
+<li class="nav-item {{ request()->is('barang-tabel-html') ? 'active' : '' }}">
+  <a class="nav-link" href="{{ route('barang.tabel_html') }}" onclick="btnLoading(this)">
+    <span class="menu-title">Tabel HTML Biasa</span>
+    <i class="mdi mdi-table-large menu-icon"></i>
+  </a>
+</li>
+
 <li class="nav-item {{ request()->routeIs('latihan.*') ? 'active' : '' }}">
   <a class="nav-link" href="{{ route('latihan.index') }}" onclick="btnLoading(this)">
     <span class="menu-title">Warehouse System</span>

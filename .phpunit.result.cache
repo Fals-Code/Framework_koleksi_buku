@@ -1,0 +1,1 @@
+{"version":2,"defects":{"Tests\\Feature\\KasirTest::it_can_search_barang_for_autocomplete":8,"Tests\\Feature\\KasirTest::it_can_search_by_code_directly":8,"Tests\\Feature\\KasirTest::it_returns_error_if_barang_not_found":8},"times":[]}

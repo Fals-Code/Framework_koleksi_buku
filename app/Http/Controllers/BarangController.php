@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\SystemNotification;
 
 class BarangController extends Controller
 {
@@ -43,14 +44,28 @@ public function index(Request $request)
         ]);
 
         try {
-            Barang::create([
+            $barang = Barang::create([
                 'nama' => $request->nama,
                 'harga' => $request->harga,
                 'timestamp' => now()
             ]);
 
+            auth()->user()->notify(new SystemNotification([
+                'title' => 'Barang Baru',
+                'message' => 'Barang "' . $barang->nama . '" berhasil ditambahkan.',
+                'link' => route('barang.index'),
+                'type' => 'success'
+            ]));
+
             return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
         } catch (\Exception $e) {
+            auth()->user()->notify(new SystemNotification([
+                'title' => 'Gagal Tambah Barang',
+                'message' => 'Gagal menyimpan barang: ' . $e->getMessage(),
+                'link' => route('barang.index'),
+                'type' => 'danger'
+            ]));
+
             return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
@@ -82,11 +97,27 @@ public function cetakLabel(Request $request)
     
 public function destroy($id)
 {
+    $barang = DB::table('barang')->where('id_barang', $id)->first();
+    $nama = $barang ? $barang->nama : $id;
     $deleted = DB::table('barang')->where('id_barang', $id)->delete();
 
     if ($deleted) {
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Hapus Barang',
+            'message' => 'Barang "' . $nama . '" telah dihapus.',
+            'link' => route('barang.index'),
+            'type' => 'danger'
+        ]));
+
         return response()->json(['message' => 'Data berhasil dihapus!']);
     }
+
+    auth()->user()->notify(new SystemNotification([
+        'title' => 'Gagal Hapus Barang',
+        'message' => 'Barang dengan kode "' . $id . '" tidak ditemukan.',
+        'link' => route('barang.index'),
+        'type' => 'danger'
+    ]));
 
     return response()->json(['message' => 'Gagal menghapus data'], 404);
 }
@@ -106,8 +137,15 @@ public function update(Request $request, $id)
             ->update([
                 'nama' => $request->nama,
                 'harga' => $request->harga,
-                'timestamp' => now() // Gunakan kolom timestamp Anda
+                'timestamp' => now()
             ]);
+
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Update Barang',
+            'message' => 'Data barang "' . $request->nama . '" berhasil diperbarui.',
+            'link' => route('barang.index'),
+            'type' => 'info'
+        ]));
 
         return response()->json([
             'status' => 'success',
@@ -115,7 +153,13 @@ public function update(Request $request, $id)
         ]);
         
     } catch (\Exception $e) {
-        // Ini akan mengirimkan pesan error asli ke console log browser jika gagal
+        auth()->user()->notify(new SystemNotification([
+            'title' => 'Gagal Update Barang',
+            'message' => 'Gagal mengubah barang: ' . $e->getMessage(),
+            'link' => route('barang.index'),
+            'type' => 'danger'
+        ]));
+
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage()

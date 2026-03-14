@@ -49,6 +49,7 @@ Route::middleware(['auth', 'check.session'])->group(function () {
 
     Route::get('/kasir', [PenjualanController::class, 'index'])->name('kasir.index');
     Route::get('/kasir/cari-barang/{kode}', [PenjualanController::class, 'cariBarang'])->name('kasir.cari');
+    Route::get('/kasir/search-barang', [PenjualanController::class, 'searchBarang'])->name('kasir.search');
     Route::post('/kasir/simpan', [PenjualanController::class, 'simpan'])->name('kasir.simpan');
     
     Route::get('/get-next-kode/{idkategori}', [BukuController::class, 'getNextKode']);

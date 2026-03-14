@@ -149,6 +149,68 @@
         margin-top: 4px;
         min-height: 16px;
     }
+
+    /* Autocomplete Suggestions */
+    #suggestionContainer {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        border: 1px solid #eee;
+        margin-top: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+    }
+    .suggestion-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-bottom: 1px solid #f8f8f8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover {
+        background: #f0f7ff;
+        padding-left: 20px;
+    }
+    .suggestion-item .item-name {
+        font-weight: 600;
+        color: #333;
+    }
+    .suggestion-item .item-code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: #6a11cb;
+        background: rgba(106, 17, 203, 0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .suggestion-item .item-price {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        color: #27ae60;
+    }
+
+    /* Qty Input in Table */
+    .qty-input-table {
+        width: 70px !important;
+        padding: 5px 8px !important;
+        border-radius: 8px !important;
+        text-align: center;
+        border: 1.5px solid #eee !important;
+        font-weight: bold;
+    }
+    .qty-input-table:focus {
+        border-color: #6a11cb !important;
+        box-shadow: none !important;
+    }
 </style>
 
 <div class="page-header flex-wrap">
@@ -180,7 +242,8 @@
                     <div class="col-md-3">
                         <label class="small fw-bold text-muted">KODE BARANG</label>
                         <div class="input-kode-wrapper" id="kodeWrapper">
-                            <input type="text" id="kodeBarang" class="form-control form-control-kasir" placeholder="Scan / Ketik kode..." autofocus>
+                            <input type="text" id="kodeBarang" class="form-control form-control-kasir" placeholder="Ketik nama atau kode..." autocomplete="off" autofocus>
+                            <div id="suggestionContainer"></div>
                             <div class="kode-spinner">
                                 <span class="spinner-border spinner-border-sm text-primary"></span>
                             </div>
@@ -259,18 +322,42 @@
 @endsection
 
 @push('script-page')
-{{-- Axios CDN --}}
+{{-- Axios CDN (dicoba load, jika gagal akan pakai fallback jQuery) --}}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+// ============================================
+// AXIOS FALLBACK: Jika CDN diblokir browser,
+// gunakan jQuery $.ajax sebagai pengganti
+// ============================================
+if (typeof axios === 'undefined') {
+    console.warn('[Kasir] Axios CDN diblokir browser, menggunakan jQuery fallback.');
+    var axios = {
+        get: function(url) {
+            return $.ajax({ url: url, type: 'GET', dataType: 'json' });
+        },
+        post: function(url, data) {
+            return $.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                dataType: 'json',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            });
+        }
+    };
+}
+
 $(document).ready(function() {
 
     // ============================================
     // STATE
     // ============================================
-    let cart = []; // Array of { kode, nama, harga, jumlah, subtotal }
-    let currentBarang = null; // barang yang sedang di-input
-    let isSearching = false; // flag pencegah request ganda
+    let cart = [];
+    let currentBarang = null;
+    let isSearching = false;
+    let debounceTimer;
 
     // ============================================
     // UTILITAS
@@ -292,19 +379,16 @@ $(document).ready(function() {
     function showLoader() {
         isSearching = true;
         $('#kodeWrapper').addClass('loading');
-        $('#kodeBarang').prop('readonly', true);
         $('#searchStatus').html('<span class="text-primary"><i class="mdi mdi-loading mdi-spin me-1"></i>Mencari barang...</span>');
     }
 
     function hideLoader() {
         isSearching = false;
         $('#kodeWrapper').removeClass('loading');
-        $('#kodeBarang').prop('readonly', false);
     }
 
     // ============================================
-    // Logika Tombol TAMBAH: Aktif hanya jika
-    // barang ditemukan DAN jumlah > 0
+    // Logika Tombol TAMBAH
     // ============================================
     function toggleTambahBtn() {
         let jumlah = parseInt($('#jumlahBarang').val()) || 0;
@@ -312,32 +396,94 @@ $(document).ready(function() {
         $('#btnTambahItem').prop('disabled', !aktif);
     }
 
-    // Cek setiap kali input Jumlah berubah
     $('#jumlahBarang').on('input change', function() {
         toggleTambahBtn();
     });
 
     // ============================================
+    // FUNGSI: Autocomplete (Suggest)
+    // ============================================
+    function fetchSuggestions(query) {
+        if (query.length < 2) {
+            $('#suggestionContainer').hide().empty();
+            return;
+        }
+
+        axios.get('/kasir/search-barang?query=' + query)
+            .then(function(response) {
+                let items = response.data || [];
+                let container = $('#suggestionContainer');
+                container.empty();
+
+                if (items.length > 0) {
+                    items.forEach(function(item) {
+                        let html = `
+                            <div class="suggestion-item" data-kode="${item.id_barang}">
+                                <div>
+                                    <div class="item-name">${item.nama}</div>
+                                    <span class="item-code">${item.id_barang}</span>
+                                </div>
+                                <div class="item-price">Rp ${formatRupiah(item.harga)}</div>
+                            </div>
+                        `;
+                        container.append(html);
+                    });
+                    container.show();
+                } else {
+                    container.hide();
+                }
+            })
+            .catch(function(err) {
+                console.error('Error fetching suggestions', err);
+            });
+    }
+
+    $('#kodeBarang').on('input', function() {
+        let query = $(this).val();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+            fetchSuggestions(query);
+        }, 300);
+    });
+
+    // Pilih item dari suggestion
+    $(document).on('click', '.suggestion-item', function() {
+        let kode = $(this).data('kode');
+        $('#kodeBarang').val(kode);
+        $('#suggestionContainer').hide().empty();
+        cariBarang(kode);
+    });
+
+    // Klik di luar sembunyikan suggestion
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#kodeWrapper').length) {
+            $('#suggestionContainer').hide();
+        }
+    });
+
+    // ============================================
     // FUNGSI: Cari barang via Axios GET
+    // (Axios CDN atau jQuery fallback)
     // ============================================
     function cariBarang(kode) {
-        if (isSearching) return; // cegah double request
+        if (isSearching) return;
         if (kode === '') return;
 
-        // Reset state
         currentBarang = null;
         $('#namaBarang').val('');
         $('#hargaBarang').val('');
         $('#btnTambahItem').prop('disabled', true);
 
-        // Tampilkan loader
         showLoader();
 
         // Axios GET (Promise style sesuai modul)
-        axios.get('/kasir/cari-barang/' + kode)
-            .then(function(response) {
-                // Success Handler: barang ditemukan
-                let data = response.data.data;
+        let req = axios.get('/kasir/cari-barang/' + kode);
+        
+        req.then(function(response) {
+                // Tangani perbedaan format response antara Axios asli vs jQuery fallback
+                let resData = response.data || response;
+                let data = resData.data;
+
                 currentBarang = {
                     kode: data.id_barang,
                     nama: data.nama,
@@ -358,19 +504,20 @@ $(document).ready(function() {
                 toggleTambahBtn();
             })
             .catch(function(error) {
-                // Error Handler: barang tidak ditemukan
                 currentBarang = null;
                 $('#namaBarang').val('');
                 $('#hargaBarang').val('');
                 $('#btnTambahItem').prop('disabled', true);
 
-                // Status error
                 $('#searchStatus').html('<span class="text-danger"><i class="mdi mdi-alert-circle me-1"></i>Barang tidak ditemukan</span>');
 
-                // SweetAlert2: notifikasi error
-                let msg = error.response && error.response.data
-                    ? error.response.data.message
-                    : 'Gagal mencari barang.';
+                // Tangani format error dari Axios asli vs jQuery
+                let msg = 'Gagal mencari barang.';
+                if (error.response && error.response.data) {
+                    msg = error.response.data.message;
+                } else if (error.responseJSON) {
+                    msg = error.responseJSON.message;
+                }
 
                 Swal.fire({
                     icon: 'error',
@@ -379,14 +526,16 @@ $(document).ready(function() {
                     confirmButtonColor: '#6a11cb'
                 });
 
-                // Kosongkan & fokus kembali ke input kode
                 $('#kodeBarang').val('');
                 setTimeout(function() { $('#kodeBarang').focus(); }, 100);
-            })
-            .finally(function() {
-                // Sembunyikan loader (selalu dijalankan)
-                hideLoader();
             });
+
+        // Ensure hideLoader is called for both real Axios (.finally) and jQuery fallback (.always)
+        if (typeof req.finally === 'function') {
+            req.finally(function() { hideLoader(); });
+        } else if (typeof req.always === 'function') {
+            req.always(function() { hideLoader(); });
+        }
     }
 
     // ============================================
@@ -398,6 +547,7 @@ $(document).ready(function() {
             e.stopPropagation();
             let kode = $(this).val().trim();
             cariBarang(kode);
+            $('#suggestionContainer').hide();
         }
     });
 
@@ -482,8 +632,10 @@ $(document).ready(function() {
                     <td><span class="kode-tag">${item.kode}</span></td>
                     <td class="fw-bold text-dark">${item.nama}</td>
                     <td class="text-end"><span class="price-val">Rp ${formatRupiah(item.harga)}</span></td>
-                    <td class="text-center fw-bold">${item.jumlah}</td>
-                    <td class="text-end"><span class="subtotal-val">Rp ${formatRupiah(item.subtotal)}</span></td>
+                    <td class="text-center">
+                        <input type="number" class="form-control qty-input-table" value="${item.jumlah}" min="1" data-index="${index}">
+                    </td>
+                    <td class="text-end"><span class="subtotal-val" id="subtotal-${index}">Rp ${formatRupiah(item.subtotal)}</span></td>
                     <td class="text-center">
                         <button type="button" class="btn-hapus-row" data-index="${index}" title="Hapus">
                             <i class="mdi mdi-close"></i>
@@ -496,6 +648,23 @@ $(document).ready(function() {
 
         $('#totalDisplay').text('Rp ' + formatRupiah(total));
     }
+
+    // Update Qty di Tabel
+    $('#bodyTransaksi').on('input change', '.qty-input-table', function() {
+        let idx = $(this).data('index');
+        let newQty = parseInt($(this).val()) || 1;
+        if (newQty < 1) newQty = 1;
+
+        cart[idx].jumlah = newQty;
+        cart[idx].subtotal = cart[idx].harga * newQty;
+
+        // Update subtotal display row
+        $(`#subtotal-${idx}`).text('Rp ' + formatRupiah(cart[idx].subtotal));
+
+        // Update total payout
+        let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+        $('#totalDisplay').text('Rp ' + formatRupiah(total));
+    });
 
     // Hapus baris
     $('#bodyTransaksi').on('click', '.btn-hapus-row', function() {
@@ -510,12 +679,13 @@ $(document).ready(function() {
     // ============================================
     function resetInput() {
         currentBarang = null;
-        $('#kodeBarang').val('').prop('readonly', false);
+        $('#kodeBarang').val('');
         $('#namaBarang').val('');
         $('#hargaBarang').val('');
         $('#jumlahBarang').val(1);
         $('#btnTambahItem').prop('disabled', true);
         $('#searchStatus').html('');
+        $('#suggestionContainer').hide().empty();
         // Fokus kembali ke input Kode Barang
         setTimeout(function() { $('#kodeBarang').focus(); }, 50);
     }
@@ -567,19 +737,25 @@ $(document).ready(function() {
 
                         btn.prop('disabled', true).removeClass('btn-loading');
 
+                        // Tangani format response Axios vs jQuery
+                        let resData = response.data || response;
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Transaksi Berhasil!',
-                            text: response.data.message,
+                            text: resData.message,
                             confirmButtonColor: '#6a11cb'
                         });
                     })
                     .catch(function(error) {
                         btn.prop('disabled', false).removeClass('btn-loading');
 
-                        let msg = error.response && error.response.data
-                            ? error.response.data.message
-                            : 'Terjadi kesalahan saat menyimpan transaksi.';
+                        let msg = 'Terjadi kesalahan saat menyimpan transaksi.';
+                        if (error.response && error.response.data) {
+                            msg = error.response.data.message;
+                        } else if (error.responseJSON) {
+                            msg = error.responseJSON.message;
+                        }
 
                         Swal.fire({
                             icon: 'error',

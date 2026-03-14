@@ -6,6 +6,7 @@ use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\SystemNotification;
 
 class PenjualanController extends Controller
 {
@@ -35,6 +36,26 @@ class PenjualanController extends Controller
             'status'  => 'error',
             'message' => 'Barang dengan kode "' . $kode . '" tidak ditemukan.'
         ], 404);
+    }
+
+    /**
+     * Search barang based on query (for autocomplete)
+     */
+    public function searchBarang(Request $request)
+    {
+        $query = $request->get('query');
+        
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        $barang = DB::table('barang')
+            ->where('id_barang', 'LIKE', "%{$query}%")
+            ->orWhere('nama', 'LIKE', "%{$query}%")
+            ->limit(10)
+            ->get();
+
+        return response()->json($barang);
     }
 
     /**
@@ -71,6 +92,13 @@ class PenjualanController extends Controller
 
             DB::commit();
 
+            auth()->user()->notify(new SystemNotification([
+                'title' => 'Transaksi Berhasil',
+                'message' => 'Penjualan Rp ' . number_format($request->total, 0, ',', '.') . ' (' . count($request->items) . ' item) berhasil disimpan.',
+                'link' => route('kasir.index'),
+                'type' => 'success'
+            ]));
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Transaksi berhasil disimpan!',
@@ -79,6 +107,13 @@ class PenjualanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            auth()->user()->notify(new SystemNotification([
+                'title' => 'Transaksi Gagal',
+                'message' => 'Gagal menyimpan transaksi: ' . $e->getMessage(),
+                'link' => route('kasir.index'),
+                'type' => 'danger'
+            ]));
 
             return response()->json([
                 'status'  => 'error',

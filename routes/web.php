@@ -10,6 +10,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\KantinController;
+use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -64,4 +66,26 @@ Route::middleware(['auth', 'check.session'])->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Vendor Management (Internal Tabs)
+    Route::prefix('vendor')->group(function () {
+        Route::get('/dashboard', [VendorController::class, 'dashboard'])->name('vendor.dashboard');
+        Route::get('/menu', [VendorController::class, 'menuIndex'])->name('vendor.menu.index');
+        Route::get('/menu/create', [VendorController::class, 'menuCreate'])->name('vendor.menu.create');
+        Route::post('/menu', [VendorController::class, 'menuStore'])->name('vendor.menu.store');
+        Route::get('/menu/{id}/edit', [VendorController::class, 'menuEdit'])->name('vendor.menu.edit');
+        Route::put('/menu/{id}', [VendorController::class, 'menuUpdate'])->name('vendor.menu.update');
+        Route::delete('/menu/{id}', [VendorController::class, 'menuDestroy'])->name('vendor.menu.destroy');
+        Route::get('/orders', [VendorController::class, 'orders'])->name('vendor.orders');
+        Route::get('/api/orders/count', [VendorController::class, 'getNewOrdersCount'])->name('vendor.api.orders.count');
+        Route::post('/orders/{id}/status', [VendorController::class, 'orderUpdateStatus'])->name('vendor.order.status');
+    });
 });
+
+Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');
+Route::post('/kantin/checkout', [KantinController::class, 'checkout'])->name('kantin.checkout');
+Route::get('/kantin/status/{id}', [KantinController::class, 'status'])->name('kantin.status');
+Route::get('/kantin/success/{id}', [KantinController::class, 'orderSuccess'])->name('kantin.success');
+Route::get('/kantin/receipt/{id}', [KantinController::class, 'receipt'])->name('kantin.receipt');
+Route::get('/kantin/track/{id}', [KantinController::class, 'track'])->name('kantin.track');
+Route::post('/midtrans/callback', [KantinController::class, 'callback']);

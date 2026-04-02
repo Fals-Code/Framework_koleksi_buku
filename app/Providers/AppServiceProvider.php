@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,12 +24,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // forceScheme dihapus sementara untuk debug
+
         View::composer('*', function ($view) {
+
             $notifCount = 0;
             $notifBarang = [];
 
             try {
                 if (Schema::hasTable('barang')) {
+
                     $notifCount = DB::table('barang')
                         ->whereDate('created_at', Carbon::today())
                         ->count();
@@ -40,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
                         ->get();
                 }
             } catch (\Exception $e) {
-                // Diamkan jika database belum siap
+                // Abaikan jika database belum siap
             }
 
             $view->with([

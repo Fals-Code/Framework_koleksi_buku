@@ -3,11 +3,11 @@
     <li class="nav-item nav-profile mb-2">
       <a href="#" class="nav-link">
         <div class="nav-profile-image">
-          <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=b66dff&color=fff" alt="profile" />
+          <img src="https://ui-avatars.com/api/?name={{ urlencode($name = (session('vendor_name') ?? (Auth::check() ? Auth::user()->name : 'Guest'))) }}&background=b66dff&color=fff" alt="profile" />
           <span class="login-status online"></span>
         </div>
         <div class="nav-profile-text d-flex flex-column" style="min-width: 0; width: 100%;">
-          <span class="font-weight-bold mb-1 text-dark">{{ Auth::user()->name }}</span>
+          <span class="font-weight-bold mb-1 text-dark">{{ $name }}</span>
         </div>
       </a>
     </li>
@@ -19,44 +19,22 @@
       </a>
     </li>
     
-    <li class="nav-item nav-category mt-2">
-       <span class="nav-link text-muted small fw-bold">DATA MASTER</span>
-    </li>
-    
-    <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('kategori.index') }}" onclick="btnLoading(this)">
-        <span class="menu-title">Kategori</span>
-        <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+    <li class="nav-item {{ request()->routeIs('kategori.*', 'buku.*', 'barang.*', 'latihan.*') || request()->is('barang-tabel-html') ? 'active' : '' }}">
+      <a class="nav-link" data-bs-toggle="collapse" href="#master-data" aria-expanded="{{ request()->routeIs('kategori.*', 'buku.*', 'barang.*', 'latihan.*') || request()->is('barang-tabel-html') ? 'true' : 'false' }}" aria-controls="master-data">
+        <span class="menu-title">Data Master</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-database menu-icon"></i>
       </a>
+      <div class="collapse {{ request()->routeIs('kategori.*', 'buku.*', 'barang.*', 'latihan.*') || request()->is('barang-tabel-html') ? 'show' : '' }}" id="master-data">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('kategori.*') ? 'active' : '' }}" href="{{ route('kategori.index') }}">Kategori</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('buku.*') ? 'active' : '' }}" href="{{ route('buku.index') }}">Koleksi Buku</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('barang.*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Tag Harga UMKM</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->is('barang-tabel-html') ? 'active' : '' }}" href="{{ route('barang.tabel_html') }}">Tabel HTML Biasa</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('latihan.*') ? 'active' : '' }}" href="{{ route('latihan.index') }}">Warehouse System</a></li>
+        </ul>
+      </div>
     </li>
-
-    <li class="nav-item {{ request()->routeIs('buku.*') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('buku.index') }}" onclick="btnLoading(this)">
-        <span class="menu-title">Koleksi Buku</span>
-        <i class="mdi mdi-book-open-page-variant menu-icon"></i>
-      </a>
-    </li>
-
-    <li class="nav-item {{ request()->routeIs('barang.*') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('barang.index') }}" onclick="btnLoading(this)">
-        <span class="menu-title">Tag Harga UMKM</span>
-        <i class="mdi mdi-tag-multiple menu-icon"></i>
-      </a>
-    </li>
-
-<li class="nav-item {{ request()->is('barang-tabel-html') ? 'active' : '' }}">
-  <a class="nav-link" href="{{ route('barang.tabel_html') }}" onclick="btnLoading(this)">
-    <span class="menu-title">Tabel HTML Biasa</span>
-    <i class="mdi mdi-table-large menu-icon"></i>
-  </a>
-</li>
-
-<li class="nav-item {{ request()->routeIs('latihan.*') ? 'active' : '' }}">
-  <a class="nav-link" href="{{ route('latihan.index') }}" onclick="btnLoading(this)">
-    <span class="menu-title">Warehouse System</span>
-    <i class="mdi mdi-archive menu-icon "></i>
-  </a>
-</li>
 
     <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">TRANSAKSI</span>
@@ -79,6 +57,44 @@
         <i class="mdi mdi-file-document-outline menu-icon"></i>
       </a>
     </li>
+
+    <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">MODULE KANTIN</span>
+    </li>
+    
+    <li class="nav-item {{ request()->is('kantin*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('kantin.index') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Order Kantin</span>
+        <i class="mdi mdi-food menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('vendor.*') ? 'active' : '' }}">
+      <a class="nav-link" data-bs-toggle="collapse" href="#kantin-mgmt" aria-expanded="{{ request()->routeIs('vendor.*') ? 'true' : 'false' }}" aria-controls="kantin-mgmt">
+        <span class="menu-title">Manajemen Kantin</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-store menu-icon"></i>
+      </a>
+      <div class="collapse {{ request()->routeIs('vendor.*') ? 'show' : '' }}" id="kantin-mgmt">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.dashboard') ? 'active' : '' }}" href="{{ route('vendor.dashboard') }}">Dashboard Kantin</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.menu.*') ? 'active' : '' }}" href="{{ route('vendor.menu.index') }}">Kelola Menu</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.orders') ? 'active' : '' }}" href="{{ route('vendor.orders') }}">Pesanan Masuk</a></li>
+        </ul>
+      </div>
+    </li>
+
+    @if(!config('midtrans.is_production'))
+    <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">TESTING TOOLS</span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="https://simulator.sandbox.midtrans.com/" target="_blank">
+        <span class="menu-title">Midtrans Simulator</span>
+        <i class="mdi mdi-flask menu-icon text-warning"></i>
+      </a>
+    </li>
+    @endif
   </ul>
 </nav>
 

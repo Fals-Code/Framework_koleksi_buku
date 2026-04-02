@@ -211,6 +211,24 @@
         border-color: #6a11cb !important;
         box-shadow: none !important;
     }
+
+    /* Scanner UI */
+    #reader {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none !important;
+    }
+    #reader__status_span { display: none; }
+    #reader__dashboard_section_csr button {
+        background: #6a11cb !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        margin-top: 10px !important;
+    }
 </style>
 
 <div class="page-header flex-wrap">
@@ -242,7 +260,12 @@
                     <div class="col-md-3">
                         <label class="small fw-bold text-muted">KODE BARANG</label>
                         <div class="input-kode-wrapper" id="kodeWrapper">
-                            <input type="text" id="kodeBarang" class="form-control form-control-kasir" placeholder="Ketik nama atau kode..." autocomplete="off" autofocus>
+                            <div class="input-group">
+                                <input type="text" id="kodeBarang" class="form-control form-control-kasir" placeholder="Ketik nama atau kode..." autocomplete="off" autofocus>
+                                <button class="btn btn-outline-primary border-1.5" type="button" id="btnOpenScanner" style="border-radius: 0 12px 12px 0 !important; border-left: none;">
+                                    <i class="mdi mdi-camera"></i>
+                                </button>
+                            </div>
                             <div id="suggestionContainer"></div>
                             <div class="kode-spinner">
                                 <span class="spinner-border spinner-border-sm text-primary"></span>
@@ -319,11 +342,29 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL SCANNER --}}
+<div class="modal fade" id="scannerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none;">
+            <div class="modal-header bg-gradient-primary text-white border-none py-3">
+                <h5 class="modal-title fw-bold"><i class="mdi mdi-barcode-scan me-2"></i>Scan Barcode Barang</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div id="reader"></div>
+                <p class="text-muted mt-3 small">Arahkan barcode barang ke arah kamera</p>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('script-page')
 {{-- Axios CDN (dicoba load, jika gagal akan pakai fallback jQuery) --}}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{{-- HTML5-QRCode CDN --}}
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script>
 // ============================================
@@ -358,6 +399,7 @@ $(document).ready(function() {
     let currentBarang = null;
     let isSearching = false;
     let debounceTimer;
+    let html5QrCode = null;
 
     // ============================================
     // UTILITAS
@@ -417,11 +459,14 @@ $(document).ready(function() {
 
                 if (items.length > 0) {
                     items.forEach(function(item) {
+                        let displayCode = item.barcode || item.id_barang;
+                        let searchKey = item.barcode || item.id_barang;
+                        
                         let html = `
-                            <div class="suggestion-item" data-kode="${item.id_barang}">
+                            <div class="suggestion-item" data-search-key="${searchKey}">
                                 <div>
                                     <div class="item-name">${item.nama}</div>
-                                    <span class="item-code">${item.id_barang}</span>
+                                    <span class="item-code">${displayCode}</span>
                                 </div>
                                 <div class="item-price">Rp ${formatRupiah(item.harga)}</div>
                             </div>
@@ -448,10 +493,10 @@ $(document).ready(function() {
 
     // Pilih item dari suggestion
     $(document).on('click', '.suggestion-item', function() {
-        let kode = $(this).data('kode');
-        $('#kodeBarang').val(kode);
+        let key = $(this).data('search-key');
+        $('#kodeBarang').val(key);
         $('#suggestionContainer').hide().empty();
-        cariBarang(kode);
+        cariBarang(key);
     });
 
     // Klik di luar sembunyikan suggestion
@@ -467,7 +512,12 @@ $(document).ready(function() {
     // ============================================
     function cariBarang(kode) {
         if (isSearching) return;
-        if (kode === '') return;
+        
+        // Cek apakah kode kosong, null, atau undefined
+        if (!kode || kode === '' || kode === 'null' || kode === 'undefined') {
+            console.warn('[Kasir] Pencarian dibatalkan: Kode tidak valid.', kode);
+            return;
+        }
 
         currentBarang = null;
         $('#namaBarang').val('');
@@ -486,6 +536,7 @@ $(document).ready(function() {
 
                 currentBarang = {
                     kode: data.id_barang,
+                    barcode: data.barcode,
                     nama: data.nama,
                     harga: data.harga
                 };
@@ -539,6 +590,100 @@ $(document).ready(function() {
     }
 
     // ============================================
+    // BARCODE SCANNER LOGIC
+    // ============================================
+    const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
+    
+    $('#btnOpenScanner').on('click', function() {
+        scannerModal.show();
+    });
+
+    $('#scannerModal').on('shown.bs.modal', function () {
+        if (!html5QrCode) {
+            // Konfigurasi format yang didukung (Mendukung Barcode Retail)
+            const formatsToSupport = [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ];
+            html5QrCode = new Html5Qrcode("reader", { formatsToSupport: formatsToSupport });
+        }
+        
+        // Optimasi parameter pemindaian: FPS lebih tinggi dan qrbox persegi panjang
+        // Cek izin dan apakah sedang scanning
+        if (html5QrCode && html5QrCode.isScanning) {
+            console.log("Scanner is already running.");
+            return;
+        }
+
+        const config = { 
+            fps: 20, 
+            qrbox: { width: 320, height: 180 }, 
+            aspectRatio: 1.0,
+            disableFlip: false,
+            videoConstraints: {
+                facingMode: { ideal: "environment" }
+            }
+        };
+        
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config,
+            (decodedText, decodedResult) => {
+                // Berhasil scan
+                $('#kodeBarang').val(decodedText);
+                
+                // Tutup modal scanner
+                scannerModal.hide();
+                
+                // Cari barang (dengan delay kecil agar modal tertutup mulus)
+                setTimeout(() => {
+                    cariBarang(decodedText);
+                }, 300);
+                
+                // Play feedback sound
+                try {
+                    const audio = new Audio('https://www.soundjay.com/buttons/beep-07.wav');
+                    audio.play();
+                } catch(e) {}
+            },
+            (errorMessage) => {
+                // Terus mencari tanpa log error ke console (mengurangi noise)
+            }
+        ).catch((err) => {
+            console.error("Gagal start scanner:", err);
+            let errMsg = "Gagal akses kamera!";
+            if (err.name === 'AbortError') {
+                errMsg = "Kamera sedang digunakan aplikasi lain (Zoom/GMeet/WA) atau timeout.";
+            } else if (err.name === 'NotAllowedError') {
+                errMsg = "Izin kamera ditolak browser!";
+            }
+
+            $('#reader').html(`<div class="alert alert-danger text-center">
+                <b>${errMsg}</b><br>
+                <small>${err}</small><br>
+                <button class="btn btn-sm btn-outline-danger mt-2" onclick="location.reload()">Reload Halaman</button>
+            </div>`);
+        });
+    });
+
+    $('#scannerModal').on('hidden.bs.modal', function () {
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                console.log("Scanner stopped.");
+                // Bersihkan tampilan agar tidak nyangkut saat dibuka lagi
+                $('#reader').empty();
+            }).catch((err) => {
+                console.warn("Gagal stop scanner:", err);
+            });
+        }
+    });
+
+    // ============================================
     // EVENT: Enter di Kode Barang → Cari Barang
     // ============================================
     $('#kodeBarang').on('keydown', function(e) {
@@ -570,7 +715,8 @@ $(document).ready(function() {
         } else {
             // Tambah baru
             cart.push({
-                kode: currentBarang.kode,
+                kode: currentBarang.kode, // id_barang
+                barcode: currentBarang.barcode, 
                 nama: currentBarang.nama,
                 harga: currentBarang.harga,
                 jumlah: jumlah,

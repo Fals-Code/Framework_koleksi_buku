@@ -23,7 +23,11 @@ class PenjualanController extends Controller
      */
     public function cariBarang($kode)
     {
-        $barang = DB::table('barang')->where('id_barang', $kode)->first();
+        // Mencari berdasarkan kolom barcode atau id_barang (jika barcode tidak ada)
+        $barang = DB::table('barang')
+            ->where('barcode', $kode)
+            ->orWhere('id_barang', $kode)
+            ->first();
 
         if ($barang) {
             return response()->json([
@@ -50,7 +54,8 @@ class PenjualanController extends Controller
         }
 
         $barang = DB::table('barang')
-            ->where('id_barang', 'LIKE', "%{$query}%")
+            ->where('barcode', 'LIKE', "%{$query}%")
+            ->orWhere('id_barang', 'LIKE', "%{$query}%")
             ->orWhere('nama', 'LIKE', "%{$query}%")
             ->limit(10)
             ->get();

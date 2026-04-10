@@ -2,35 +2,116 @@
 
 @section('content')
 <style>
+    :root {
+        --purple-brand: #b66dff;
+        --purple-light: rgba(182, 109, 255, 0.1);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    
+    .vendor-card {
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid #f0f0f0;
+        border-radius: 20px;
+        background: white;
+    }
+    .vendor-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-shadow);
+        border-color: var(--purple-brand);
+    }
+    .vendor-icon-box {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--purple-light);
+        color: var(--purple-brand);
+    }
+    
     .menu-card {
-        transition: transform 0.3s;
+        transition: all 0.3s ease;
         border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        overflow: hidden;
     }
     .menu-card:hover {
         transform: translateY(-5px);
+        box-shadow: var(--card-shadow);
     }
-    .img-container {
-        width: 80px;
-        height: 80px;
+    
+    .item-img-container {
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
         overflow: hidden;
-        border-radius: 12px;
+        flex-shrink: 0;
     }
-    .img-container img {
+    .item-img-container img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.5s ease;
     }
-    .badge-stock {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.6rem;
+    .menu-card:hover .item-img-container img {
+        transform: scale(1.1);
     }
-    .vendor-badge {
-        font-size: 0.8rem;
-        background: rgba(182, 109, 255, 0.1);
-        color: #b66dff;
-        padding: 4px 12px;
-        border-radius: 20px;
+    
+    .qty-badge {
+        background: var(--purple-brand);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .sticky-cart {
+        top: 25px;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        background: var(--glass-bg);
+        border: 1px solid rgba(255,255,255,0.5);
+    }
+    
+    .btn-qty {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+    
+    .category-label {
+        color: var(--purple-brand);
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+    
+    .cart-item-row {
+        border-bottom: 1px solid #f8f9fa;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+    .cart-item-row:last-child {
+        border-bottom: none;
     }
 </style>
 
@@ -42,75 +123,95 @@
     </h3>
     <nav aria-label="breadcrumb">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">
-                <span></span>Order <i class="mdi mdi-check icon-sm text-primary align-middle"></i>
+            <li class="breadcrumb-item">
+                <a href="{{ route('kantin.history') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    <i class="mdi mdi-history me-1"></i> Pesanan Saya
+                </a>
             </li>
         </ul>
     </nav>
 </div>
 
 <div class="row" id="order-app">
-    <!-- Vendor Selection -->
-    <div class="col-md-4" id="vendor-selection-area">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Pilih Warung</h4>
-                <p class="text-muted small">Pilih salah satu warung untuk mulai memesan</p>
-                <div class="list-group">
+    <!-- Vendor Selection Grid -->
+    <div class="col-12 mb-5" id="vendor-selection-area">
+        <div class="card bg-transparent border-0 shadow-none">
+            <div class="card-body p-0">
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1">Pilih Warung Favorit</h4>
+                        <p class="text-muted small mb-0">Temukan makanan lezat dari berbagai warung di kantin</p>
+                    </div>
+                </div>
+                
+                <div class="row">
                     @foreach($vendors as $v)
-                    <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3 border-0 mb-2 rounded shadow-sm" onclick="selectVendor({{ $v->id }}, '{{ $v->nama_warung }}')">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-light p-2 rounded me-3">
-                                <i class="mdi mdi-store text-primary"></i>
+                    <div class="col-md-4 col-lg-3 mb-4">
+                        <div class="card vendor-card h-100" onclick="selectVendor({{ $v->id }}, '{{ $v->nama_warung }}')">
+                            <div class="card-body p-4 text-center">
+                                <div class="vendor-icon-box mx-auto mb-3">
+                                    <i class="mdi mdi-store mdi-36px"></i>
+                                </div>
+                                <h5 class="fw-bold mb-2">{{ $v->nama_warung }}</h5>
+                                <div class="d-flex justify-content-center gap-2 mb-3">
+                                    <span class="badge bg-light text-primary rounded-pill border">
+                                        {{ $v->menu->count() }} Menu
+                                    </span>
+                                    <span class="badge bg-light text-success rounded-pill border">
+                                        <i class="mdi mdi-star"></i> 4.8
+                                    </span>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-4">Buka Warung</button>
                             </div>
-                            <span class="fw-bold">{{ $v->nama_warung }}</span>
                         </div>
-                        <span class="badge bg-gradient-primary rounded-pill text-white border-0">{{ $v->menu->count() }} Menu</span>
-                    </button>
+                    </div>
                     @endforeach
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Menu Selection -->
+    <!-- Menu Selection Area -->
     <div class="col-md-8" id="menu-area" style="display: none;">
-        <div class="card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                <h4 class="card-title mb-0">Menu: <span id="selected-vendor-name" class="text-primary fw-bold"></span></h4>
-                <button class="btn btn-sm btn-outline-secondary" onclick="resetStep()">
-                    <i class="mdi mdi-swap-horizontal me-1"></i> Ganti Warung
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-4 px-4 border-0">
+                <div>
+                    <span class="category-label d-block mb-1">Daftar Menu</span>
+                    <h4 class="card-title fw-bold mb-0" id="selected-vendor-name"></h4>
+                </div>
+                <button class="btn btn-inverse-dark btn-sm rounded-pill px-3" onclick="resetStep()">
+                    <i class="mdi mdi-arrow-left me-1"></i> Ganti Warung
                 </button>
             </div>
-            <div class="card-body">
-
-
+            <div class="card-body px-4 pb-4 pt-2">
                 <div class="row" id="menu-list">
                     @foreach($vendors as $v)
                     <div class="vendor-menu col-12" id="vendor-{{ $v->id }}-menu" style="display: none;">
                         <div class="row">
                             @foreach($v->menu as $m)
-                            <div class="col-md-6 mb-4 menu-item">
-                                <div class="card menu-card border h-100">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card menu-card border border-light h-100">
                                     <div class="card-body p-3">
-                                        <div class="d-flex align-items-start">
-                                            <div class="img-container me-3 border">
+                                        <div class="d-flex align-items-center">
+                                            <div class="item-img-container me-3 border">
                                                 <img src="{{ $m->foto ? asset('storage/' . $m->foto) : 'https://placehold.co/100x100?text=' . urlencode($m->nama_makanan) }}" alt="{{ $m->nama_makanan }}">
                                             </div>
                                             <div class="flex-grow-1">
-                                                <div class="d-flex justify-content-between">
-                                                    <h5 class="mb-1 fw-bold">{{ $m->nama_makanan }}</h5>
-                                                    <span class="badge {{ $m->stok > 0 ? 'bg-light text-success' : 'bg-light text-danger' }} badge-stock">
-                                                        {{ $m->stok > 0 ? 'Stok: ' . $m->stok : 'Habis' }}
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="mb-1 fw-bold text-dark">{{ $m->nama_makanan }}</h6>
+                                                        <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.75rem;">{{ $m->deskripsi }}</p>
+                                                    </div>
+                                                    <span class="badge {{ $m->stok > 0 ? 'bg-light text-success' : 'bg-light text-danger' }} border-0 px-2 py-1" style="font-size: 0.65rem;">
+                                                        {{ $m->stok > 0 ? $m->stok . ' tersedia' : 'Habis' }}
                                                     </span>
                                                 </div>
-                                                <p class="text-muted small mb-2 text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 32px;">{{ $m->deskripsi }}</p>
-                                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                                    <span class="fw-bold text-dark fs-5">Rp {{ number_format($m->harga, 0, ',', '.') }}</span>
+                                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                                    <span class="fw-bold text-primary fs-5">Rp{{ number_format($m->harga, 0, ',', '.') }}</span>
                                                     <button class="btn btn-gradient-primary btn-sm rounded-pill px-3" 
                                                             {{ $m->stok <= 0 ? 'disabled' : '' }}
                                                             onclick="addToCart({{ $m->id }}, '{{ $m->nama_makanan }}', {{ $m->harga }}, {{ $v->id }}, {{ $m->stok }})">
-                                                        <i class="mdi mdi-plus-circle-outline me-1"></i> Tambah
+                                                        <i class="mdi mdi-plus me-1"></i> Tambah
                                                     </button>
                                                 </div>
                                             </div>
@@ -127,38 +228,51 @@
         </div>
     </div>
 
-    <!-- Cart Area -->
+    <!-- Improved Cart Area -->
     <div class="col-md-4" id="cart-area" style="display: none;">
-        <div class="card sticky-top" style="top: 20px; z-index: 100;">
-            <div class="card-body">
-                <h4 class="card-title d-flex align-items-center">
-                    <i class="mdi mdi-cart-outline me-2 text-primary"></i> Keranjang
-                </h4>
+        <div class="card sticky-top sticky-cart shadow-lg border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title mb-0 fw-bold">
+                        <i class="mdi mdi-basket-outline me-2 text-primary"></i> Pesanan Anda
+                    </h4>
+                    <span id="items-count-badge" class="badge bg-primary rounded-pill">0 Item</span>
+                </div>
                 
-                <!-- Customer Name -->
-                <div class="form-group mt-3">
-                    <label class="small fw-bold">Nama Pemesan <span class="text-danger">*</span></label>
-                    <input type="text" id="customer_name" class="form-control form-control-sm border-primary" placeholder="Siapa yang pesan?">
+                <div class="form-group mb-4">
+                    <label class="small fw-bold text-dark mb-2">Pilih Nama Anda <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0 text-primary"><i class="mdi mdi-account"></i></span>
+                        <input type="text" id="customer_name" class="form-control border-start-0 ps-0" placeholder="Contoh: Budi Santoso">
+                    </div>
                 </div>
 
-                <div id="cart-items" class="mt-4 mb-3" style="max-height: 300px; overflow-y: auto;">
-                    <!-- Cart items -->
+                <div id="cart-items" class="pr-1 mb-4" style="max-height: 250px; overflow-y: auto;">
+                    <!-- Items injected here by JS -->
                 </div>
 
-                <div class="form-group mb-3">
-                    <label class="small fw-bold">Catatan (Opsional)</label>
-                    <textarea id="order_notes" class="form-control form-control-sm" rows="2" placeholder="Contoh: Gak pake sambel ya"></textarea>
+                <div class="form-group mb-4">
+                    <label class="small fw-bold text-dark mb-2">Catatan Tambahan</label>
+                    <textarea id="order_notes" class="form-control form-control-sm rounded-3" rows="2" placeholder="Gak pake pedes, ya..."></textarea>
                 </div>
 
-                <hr>
-                <div class="d-flex justify-content-between mb-3">
-                    <span class="fw-bold">Total Pembayaran</span>
-                    <span class="fw-bold text-primary fs-4" id="cart-total">Rp 0</span>
+                <div class="bg-light rounded-4 p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Subtotal</span>
+                        <span class="fw-bold" id="cart-subtotal">Rp 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-dark">Total Pembayaran</span>
+                        <span class="fw-bold text-primary fs-4" id="cart-total">Rp 0</span>
+                    </div>
                 </div>
-                <button class="btn btn-gradient-primary w-100 py-3 fw-bold" id="btn-checkout" onclick="checkout()">
-                    <i class="mdi mdi-credit-card me-2"></i> BAYAR SEKARANG
+                
+                <button class="btn btn-gradient-primary w-100 py-3 rounded-pill fw-bold shadow-sm" id="btn-checkout" onclick="checkout()">
+                    <i class="mdi mdi-credit-card-outline me-2"></i> BAYAR SEKARANG
                 </button>
-                <p class="text-center small text-muted mt-2 mb-0">Klik bayar via Midtrans</p>
+                <p class="text-center x-small text-muted mt-3 mb-0">
+                    <i class="mdi mdi-shield-check-outline me-1"></i> Pembayaran aman via Midtrans
+                </p>
             </div>
         </div>
     </div>
@@ -295,25 +409,53 @@
     function updateCartUI() {
         let html = '';
         let total = 0;
+        let itemCount = 0;
+        
         cart.forEach((item, index) => {
             let subtotal = item.price * item.quantity;
             total += subtotal;
+            itemCount += item.quantity;
+            
             html += `
-                <div class="d-flex justify-content-between align-items-center mb-3 bg-light p-2 rounded">
-                    <div style="flex-grow: 1;">
-                        <div class="fw-bold" style="font-size: 0.9rem;">${item.name}</div>
-                        <div class="small text-muted text-primary fw-bold">Rp ${item.price.toLocaleString()}</div>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-inverse-danger px-2 py-1" onclick="removeFromCart(${index})">-</button>
-                        <span class="mx-2 fw-bold">${item.quantity}</span>
-                        <button class="btn btn-sm btn-inverse-primary px-2 py-1" onclick="addToCart(${item.id}, '${item.name}', ${item.price}, ${currentVendorId}, ${item.maxStock})">+</button>
+                <div class="cart-item-row">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div style="flex-grow: 1;">
+                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">${item.name}</div>
+                            <div class="small text-muted fw-bold">Rp ${item.price.toLocaleString()}</div>
+                        </div>
+                        <div class="d-flex align-items-center bg-white rounded-3 shadow-sm p-1">
+                            <button class="btn btn-qty btn-light text-danger" onclick="removeFromCart(${index})">
+                                <i class="mdi mdi-minus"></i>
+                            </button>
+                            <span class="mx-3 fw-bold text-dark" style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                            <button class="btn btn-qty btn-light text-primary" onclick="addToCart(${item.id}, '${item.name}', ${item.price}, ${currentVendorId}, ${item.maxStock})">
+                                <i class="mdi mdi-plus"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
         });
-        $('#cart-items').html(html || '<div class="text-center py-4 text-muted"><i class="mdi mdi-cart-off fs-1"></i><p class="mt-2 mb-0">Keranjang Kosong</p></div>');
+        
+        $('#cart-items').html(html || `
+            <div class="text-center py-5 text-muted">
+                <div class="mb-3">
+                    <i class="mdi mdi-cart-off" style="font-size: 3rem; opacity: 0.2;"></i>
+                </div>
+                <p class="small mb-0">Keranjang Anda masih kosong</p>
+                <p class="x-small">Mulai pilih menu lezat di sebelah kiri!</p>
+            </div>
+        `);
+        
+        $('#items-count-badge').text(itemCount + ' Item');
+        $('#cart-subtotal').text('Rp ' + total.toLocaleString());
         $('#cart-total').text('Rp ' + total.toLocaleString());
+        
+        // Simple scale animation for totals
+        if (total > 0) {
+            $('#cart-total').css('transform', 'scale(1.1)').css('transition', '0.2s');
+            setTimeout(() => $('#cart-total').css('transform', 'scale(1)'), 2000);
+        }
     }
 
     function removeFromCart(index) {

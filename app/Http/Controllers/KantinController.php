@@ -249,4 +249,14 @@ class KantinController extends Controller
         $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])->findOrFail($id);
         return view('kantin.customer.receipt', compact('pesanan'));
     }
+
+    public function history()
+    {
+        $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
+        return view('kantin.customer.history', compact('pesanan'));
+    }
 }

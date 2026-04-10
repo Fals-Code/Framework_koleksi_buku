@@ -31,7 +31,7 @@
           <li class="nav-item"> <a class="nav-link {{ request()->routeIs('buku.*') ? 'active' : '' }}" href="{{ route('buku.index') }}">Koleksi Buku</a></li>
           <li class="nav-item"> <a class="nav-link {{ request()->routeIs('barang.*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Tag Harga UMKM</a></li>
           <li class="nav-item"> <a class="nav-link {{ request()->is('barang-tabel-html') ? 'active' : '' }}" href="{{ route('barang.tabel_html') }}">Tabel HTML Biasa</a></li>
-          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('latihan.*') ? 'active' : '' }}" href="{{ route('latihan.index') }}">Warehouse System</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('latihan.*') ? 'active' : '' }}" href="{{ route('latihan.index') }}">Studi Kasus nomor 4 W4</a></li>
         </ul>
       </div>
     </li>
@@ -62,10 +62,17 @@
        <span class="nav-link text-muted small fw-bold">MODULE KANTIN</span>
     </li>
     
-    <li class="nav-item {{ request()->is('kantin*') ? 'active' : '' }}">
+    <li class="nav-item {{ request()->is('kantin') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kantin.index') }}" onclick="btnLoading(this)">
         <span class="menu-title">Order Kantin</span>
         <i class="mdi mdi-food menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('kantin.history') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('kantin.history') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Riwayat Pesanan</span>
+        <i class="mdi mdi-history menu-icon"></i>
       </a>
     </li>
 

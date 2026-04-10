@@ -5,72 +5,74 @@
     <div class="page-header">
         <h3 class="page-title">
             <span class="page-title-icon bg-gradient-primary text-white me-2">
-                <i class="mdi mdi-archive"></i>
-            </span> Warehouse & Vendor Management
+                <i class="mdi mdi-map-marker"></i>
+            </span> Latihan Studi Kasus
         </h3>
         <nav aria-label="breadcrumb">
             <ul class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">
-                    <span></span>Studi Kasus 4 <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
+                    <span></span>Studi Kasus 4 <i class="mdi mdi-check icon-sm text-primary align-middle"></i>
                 </li>
             </ul>
         </nav>
     </div>
 
     <div class="row">
+        <!-- Card Pertama: Select HTML Biasa -->
         <div class="col-md-6 grid-margin stretch-card">
             <div class="card shadow-sm" style="border-radius: 15px;">
                 <div class="card-body">
                     <h4 class="card-title text-primary">Select</h4>
-                    <p class="card-description text-muted">Input <code>ID RAK</code> penyimpanan secara dinamis.</p>
+                    <p class="card-description text-muted">Studi kasus menggunakan elemen <code>&lt;select&gt;</code> HTML standar.</p>
                     
                     <div class="form-group mb-4">
-                        <label class="fw-bold mb-2">Nama Rak Baru:</label>
+                        <label class="fw-bold mb-2">Kota:</label>
                         <div class="input-group">
-                            <input type="text" id="inputRak" class="form-control" placeholder="Contoh: RAK-A1" style="border-radius: 10px 0 0 10px;">
-                            <button type="button" id="btnTambahRak" class="btn btn-gradient-primary fw-bold" style="border-radius: 0 10px 10px 0;">TAMBAH</button>
+                            <input type="text" id="inputKotaBiasa" class="form-control" placeholder="Masukkan nama kota..." style="border-radius: 10px 0 0 10px;">
+                            <button type="button" id="btnTambahKotaBiasa" class="btn btn-gradient-primary fw-bold" style="border-radius: 0 10px 10px 0;">TAMBAHKAN</button>
                         </div>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="fw-bold mb-2">Daftar Lokasi Rak:</label>
-                        <select id="selectRak" class="form-control text-dark" style="border-radius: 10px; height: 45px;">
-                            <option value="">-- Pilih Lokasi Rak --</option>
+                        <label class="fw-bold mb-2">Select Kota:</label>
+                        <select id="selectKotaBiasa" class="form-control text-dark" style="border-radius: 10px; height: 45px;">
+                            <option value="">-- Pilih Kota --</option>
                         </select>
                     </div>
                     
                     <div class="p-3 bg-light rounded-3 text-center border">
-                        <span class="small text-muted d-block mb-1">Lokasi Rak Terpilih:</span>
-                        <b id="terpilihRak" class="text-primary h5">-</b>
+                        <span class="small text-muted d-block mb-1">Kota Terpilih:</span>
+                        <b id="displayKotaBiasa" class="text-primary h5">-</b>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Card Kedua: Select2 -->
         <div class="col-md-6 grid-margin stretch-card">
             <div class="card shadow-sm" style="border-radius: 15px;">
                 <div class="card-body">
                     <h4 class="card-title text-info">select 2</h4>
-                    <p class="card-description text-muted">Input <code>SUPPLIER</code> dengan fitur pencarian cepat.</p>
+                    <p class="card-description text-muted">Studi kasus menggunakan library <code>Select2</code> untuk fitur yang lebih kaya.</p>
 
                     <div class="form-group mb-4">
-                        <label class="fw-bold mb-2">Nama Supplier Baru:</label>
+                        <label class="fw-bold mb-2">Kota:</label>
                         <div class="input-group">
-                            <input type="text" id="inputVendor" class="form-control" placeholder="Contoh: PT. Maju Jaya" style="border-radius: 10px 0 0 10px;">
-                            <button type="button" id="btnTambahVendor" class="btn btn-gradient-info text-white fw-bold" style="border-radius: 0 10px 10px 0;">REGISTRASI</button>
+                            <input type="text" id="inputKotaSelect2" class="form-control" placeholder="Masukkan nama kota..." style="border-radius: 10px 0 0 10px;">
+                            <button type="button" id="btnTambahKotaSelect2" class="btn btn-gradient-info text-white fw-bold" style="border-radius: 0 10px 10px 0;">TAMBAHKAN</button>
                         </div>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="fw-bold mb-2">Cari Nama Supplier:</label>
-                        <select id="selectVendor" class="form-control select2-custom w-100">
-                            <option value="">-- Ketik Nama PT --</option>
+                        <label class="fw-bold mb-2">Select Kota:</label>
+                        <select id="selectKotaSelect2" class="form-control select2-kota w-100">
+                            <option value="">-- Pilih Kota --</option>
                         </select>
                     </div>
 
                     <div class="p-3 bg-light rounded-3 text-center border">
-                        <span class="small text-muted d-block mb-1">Supplier Terpilih:</span>
-                        <b id="terpilihVendor" class="text-info h5">-</b>
+                        <span class="small text-muted d-block mb-1">Kota Terpilih:</span>
+                        <b id="displayKotaSelect2" class="text-info h5">-</b>
                     </div>
                 </div>
             </div>
@@ -80,68 +82,99 @@
 @endsection
 
 @push('script-page')
+<!-- Select2 CSS & JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    $('#btnTambahRak').click(function() {
-        let val = $('#inputRak').val().trim();
-        if(val !== "") {
-            $('#selectRak').append(new Option(val, val));
-            $('#inputRak').val('');
+    // --- Card Pertama: Select Biasa ---
+    
+    // Logika Penambahan Opsi Kota (Biasa)
+    $('#btnTambahKotaBiasa').on('click', function() {
+        let namaKota = $('#inputKotaBiasa').val().trim();
+        
+        if(namaKota !== "") {
+            // Menggunakan .append() sesuai instruksi
+            $('#selectKotaBiasa').append(`<option value="${namaKota}">${namaKota}</option>`);
             
+            // Reset input
+            $('#inputKotaBiasa').val('');
+            
+            // Notifikasi (Optional Premium UI)
             Swal.fire({
                 icon: 'success',
-                title: 'Berhasil!',
-                text: 'Rak ' + val + ' ditambahkan ke daftar.',
-                timer: 1500,
-                showConfirmButton: false
+                title: 'Berhasil',
+                text: 'Kota ' + namaKota + ' ditambahkan.',
+                timer: 1000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
             });
         }
     });
 
-    $('#selectRak').change(function() {
-        $('#terpilihRak').text($(this).val() || "-");
+    // Logika Event Change (Biasa) - Menggunakan $(this).val() sesuai instruksi
+    $('#selectKotaBiasa').on('change', function() {
+        let terpilih = $(this).val();
+        $('#displayKotaBiasa').text(terpilih || "-");
     });
 
-    $('.select2-custom').select2({
-        placeholder: "-- Cari Nama PT --",
+
+    // --- Card Kedua: Select2 ---
+
+    // Inisialisasi Select2
+    $('.select2-kota').select2({
+        placeholder: "-- Pilih Kota --",
         allowClear: true
     });
 
-    $('#btnTambahVendor').click(function() {
-        let val = $('#inputVendor').val().trim();
-        if(val !== "") {
-            let newOption = new Option(val, val, false, false);
-            $('#selectVendor').append(newOption).trigger('change');
-            $('#inputVendor').val('');
-
+    // Logika Penambahan Opsi Kota (Select2)
+    $('#btnTambahKotaSelect2').on('click', function() {
+        let namaKota = $('#inputKotaSelect2').val().trim();
+        
+        if(namaKota !== "") {
+            // Menggunakan .append() dan trigger change agar Select2 terupdate
+            let newOption = new Option(namaKota, namaKota, false, false);
+            $('#selectKotaSelect2').append(newOption).trigger('change');
+            
+            // Reset input
+            $('#inputKotaSelect2').val('');
+            
             Swal.fire({
                 icon: 'success',
-                title: 'Registrasi Berhasil',
-                text: 'Vendor ' + val + ' kini tersedia di Select2.',
-                timer: 1500,
-                showConfirmButton: false
+                title: 'Berhasil',
+                text: 'Kota ' + namaKota + ' ditambahkan ke Select2.',
+                timer: 1000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
             });
         }
     });
 
-    $('#selectVendor').on('change', function() {
-        $('#terpilihVendor').text($(this).val() || "-");
+    // Logika Event Change (Select2) - Menggunakan $(this).val() sesuai instruksi
+    $('#selectKotaSelect2').on('change', function() {
+        let terpilih = $(this).val();
+        $('#displayKotaSelect2').text(terpilih || "-");
     });
 });
 </script>
 
 <style>
+    /* Styling khusus agar Select2 serasi dengan tema premium Bootstrap 5 */
     .select2-container--default .select2-selection--single {
         border: 1px solid #ebedf2;
         height: 45px;
         border-radius: 10px;
         padding-top: 8px;
+        font-size: 0.9rem;
     }
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 42px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d;
     }
 </style>
 @endpush

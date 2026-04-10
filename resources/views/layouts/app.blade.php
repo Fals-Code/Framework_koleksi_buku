@@ -181,10 +181,98 @@
                         url: `/notifications/${currentNotifId}/read`,
                         method: 'POST',
                         data: { _token: '{{ csrf_token() }}' },
-                        success: function() { currentNotifId = null; }
+                        success: function() { 
+                            currentNotifId = null; 
+                            fetchLatestNotifications(); // Update UI immediately
+                        }
                     });
                 }
             });
+
+            // Polling for live notifications
+            let lastNotifId = null;
+            function fetchLatestNotifications() {
+                $.ajax({
+                    url: "{{ route('notifications.latest') }}",
+                    method: 'GET',
+                    success: function(data) {
+                        updateNotificationUI(data);
+                        
+                        // Check for new notification to show toast
+                        if (data.notifications.length > 0) {
+                            let newest = data.notifications[0];
+                            if (lastNotifId && newest.id !== lastNotifId) {
+                                showNotificationToast(newest);
+                            }
+                            lastNotifId = newest.id;
+                        }
+                    }
+                });
+            }
+
+            function updateNotificationUI(data) {
+                const badge = $('#notifCountBadge');
+                if (data.unread_count > 0) {
+                    badge.show().text(data.unread_count > 9 ? '9+' : data.unread_count);
+                } else {
+                    badge.hide();
+                }
+
+                const container = $('#notifListContainer');
+                if (data.notifications.length > 0) {
+                    let html = '';
+                    data.notifications.forEach(notif => {
+                        const bg = notif.type === 'success' ? 'bg-gradient-success' : 
+                                   (notif.type === 'danger' ? 'bg-gradient-danger' : 'bg-gradient-info');
+                        const icon = notif.type === 'success' ? 'mdi-check-circle' : 
+                                   (notif.type === 'danger' ? 'mdi-delete-alert' : 'mdi-information');
+                        
+                        html += `
+                            <a class="dropdown-item preview-item py-3" href="javascript:void(0);" 
+                               onclick="showNotifDetail('${notif.title}', '${notif.message}', '${notif.created_at}', '${notif.id}')">
+                                <div class="preview-thumbnail">
+                                    <div class="preview-icon ${bg} rounded-circle"><i class="mdi ${icon} text-white"></i></div>
+                                </div>
+                                <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                                    <h6 class="preview-subject font-weight-normal mb-1 text-dark fw-bold">${notif.title}</h6>
+                                    <p class="text-muted ellipsis mb-0 small">${notif.message}</p>
+                                    <small class="text-primary mt-1" style="font-size: 9px;">${notif.created_at}</small>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                        `;
+                    });
+                    container.html(html);
+                } else {
+                    container.html('<div class="p-4 text-center"><i class="mdi mdi-bell-off-outline text-muted fs-3"></i><p class="text-muted small mt-2">Belum ada aktivitas tercatat</p></div>');
+                }
+            }
+
+            function showNotificationToast(notif) {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: notif.type || 'info',
+                    title: notif.title,
+                    text: notif.message
+                });
+            }
+
+            // Initial and interval fetch
+            @auth
+                fetchLatestNotifications();
+                setInterval(fetchLatestNotifications, 3000); // Poll every 3 seconds
+            @endauth
         });
         function showNotifDetail(title, message, time, id = null) {
             currentNotifId = id;

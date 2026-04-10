@@ -60,6 +60,7 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     Route::post('/notifications/{id}/read', [HomeController::class, 'markAsRead']);
     Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::get('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('notifications.clear_all');
+    Route::get('/notifications/latest', [NotificationController::class, 'getLatest'])->name('notifications.latest');
     
     Route::get('/laporan-buku', [PDFController::class, 'cetakLaporanBuku'])->name('laporan.buku');
     Route::get('/label-buku', [PDFController::class, 'cetakLabelBuku'])->name('laporan.label');
@@ -82,8 +83,9 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     });
 });
 
-Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');
-Route::post('/kantin/checkout', [KantinController::class, 'checkout'])->name('kantin.checkout');
+    Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');
+    Route::get('/kantin/history', [KantinController::class, 'history'])->name('kantin.history');
+    Route::post('/kantin/checkout', [KantinController::class, 'checkout'])->name('kantin.checkout');
 Route::get('/kantin/status/{id}', [KantinController::class, 'status'])->name('kantin.status');
 Route::get('/kantin/success/{id}', [KantinController::class, 'orderSuccess'])->name('kantin.success');
 Route::get('/kantin/receipt/{id}', [KantinController::class, 'receipt'])->name('kantin.receipt');

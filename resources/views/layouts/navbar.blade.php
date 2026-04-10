@@ -61,14 +61,12 @@
       <li class="nav-item dropdown">
         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
           <i class="mdi mdi-bell-outline"></i>
-          @if(auth()->user()->unreadNotifications->count() > 0)
-            <span class="count-symbol bg-danger pulse-animation"></span>
-          @endif
+          <span id="notifCountBadge" class="count-symbol bg-danger pulse-animation" style="{{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'display: none;' }}"></span>
         </a>
         <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list shadow-lg border-0" aria-labelledby="notificationDropdown" style="width: 350px; border-radius: 15px;">
           <h6 class="p-3 mb-0 fw-bold">Aktivitas Terbaru</h6>
           <div class="dropdown-divider"></div>
-          <div class="notif-scrollable" style="max-height: 350px; overflow-y: auto;">
+          <div id="notifListContainer" class="notif-scrollable" style="max-height: 350px; overflow-y: auto;">
             @forelse(auth()->user()->notifications->take(10) as $notif)
               <a class="dropdown-item preview-item py-3" href="javascript:void(0);" 
                  onclick="showNotifDetail('{{ $notif->data['title'] }}', '{{ $notif->data['message'] }}', '{{ $notif->created_at->diffForHumans() }}', '{{ $notif->id }}')">

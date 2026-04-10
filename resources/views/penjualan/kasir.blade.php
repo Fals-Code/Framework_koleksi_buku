@@ -2,341 +2,389 @@
 
 @section('content')
 <style>
-    .content-wrapper { animation: fadeIn 0.6s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .kasir-card {
-        border: none !important;
-        border-radius: 20px !important;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.03) !important;
-        background: #ffffff;
+    :root {
+        --pos-primary: #6a11cb;
+        --pos-secondary: #b66dff;
+        --pos-bg: #f8f9fa;
+        --pos-card-bg: rgba(255, 255, 255, 0.9);
+        --pos-glass-bg: rgba(255, 255, 255, 0.7);
+        --pos-border: rgba(255, 255, 255, 0.3);
+        --pos-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
     }
 
-    .form-control-kasir {
-        border-radius: 12px !important;
-        border: 1.5px solid #f0f0f0 !important;
-        padding: 12px 15px !important;
-        transition: all 0.3s;
-        background: #fff !important;
-        font-size: 14px;
+    .content-wrapper { 
+        animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 1.5rem !important;
+        background: #f4f7ff !important;
     }
-    .form-control-kasir:focus {
-        border-color: #6a11cb !important;
-        box-shadow: 0 0 0 0.2rem rgba(106, 17, 203, 0.1) !important;
-    }
-    .form-control-kasir[readonly] {
-        background: #fafafa !important;
-        color: #888;
+    
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
     }
 
-    /* Tabel transaksi */
-    .table-trx thead th {
+    .pos-container {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+
+    .pos-left { flex: 1; min-width: 0; }
+    .pos-right { width: 400px; flex-shrink: 0; position: sticky; top: 1.5rem; }
+
+    .glass-card {
+        background: var(--pos-card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--pos-border);
+        border-radius: 24px;
+        box-shadow: var(--pos-shadow);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .glass-card:hover {
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+    }
+
+    /* Total Section */
+    .summary-card {
         background: linear-gradient(135deg, #6a11cb 0%, #b66dff 100%);
-        color: #fff;
+        color: white;
+        border: none;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-card .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1rem;
+        opacity: 0.8;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-card .total-amount {
+        font-size: 3rem;
+        font-weight: 800;
+        font-family: 'Outfit', sans-serif;
+        line-height: 1;
+        margin-bottom: 0;
+    }
+
+    /* Table Section */
+    .cart-card {
+        min-height: calc(100vh - 12rem);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table-container {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .table-pos thead th {
+        background: transparent;
+        border-bottom: 2px solid #f0f0f0;
+        color: #888;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 11px;
-        letter-spacing: 1px;
-        padding: 14px 16px;
-        border: none;
-    }
-    .table-trx tbody tr {
-        transition: all 0.2s;
-    }
-    .table-trx tbody tr:hover {
-        background-color: rgba(106, 17, 203, 0.04) !important;
-    }
-    .table-trx tbody td {
-        padding: 13px 16px;
-        vertical-align: middle;
-        border-bottom: 1px solid #f5f5f5;
+        letter-spacing: 0.05rem;
+        padding: 1.25rem 1rem;
     }
 
-    .kode-tag {
+    .table-pos tbody tr {
+        transition: all 0.2s;
+        border-bottom: 1px solid #f8f8f8;
+    }
+
+    .table-pos tbody tr:hover {
+        background: rgba(106, 17, 203, 0.02);
+        transform: scale(1.002);
+    }
+
+    .table-pos td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+    }
+
+    .item-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .item-name {
+        font-weight: 700;
+        color: #2d3436;
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .item-code-badge {
+        font-size: 0.7rem;
         background: rgba(106, 17, 203, 0.1);
         color: #6a11cb;
-        padding: 4px 12px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 12px;
-        font-family: 'JetBrains Mono', monospace;
-    }
-    .price-val {
-        color: #27ae60;
-        font-weight: 700;
-        font-family: 'JetBrains Mono', monospace;
-    }
-    .subtotal-val {
-        color: #e67e22;
-        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        width: fit-content;
+        font-weight: 600;
         font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Total bar */
-    .total-bar {
-        background: linear-gradient(135deg, #6a11cb 0%, #b66dff 100%);
+    /* Input Controls */
+    .pos-input-group {
+        background: white;
         border-radius: 16px;
-        padding: 20px 28px;
-        color: #fff;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        border: 1.5px solid #eee;
+        transition: all 0.3s;
     }
-    .total-bar .label { font-size: 14px; opacity: 0.85; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-    .total-bar .amount { font-size: 32px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
 
-    /* Empty state */
-    .empty-trx {
-        padding: 50px 20px;
-        text-align: center;
-        color: #ccc;
+    .pos-input-group:focus-within {
+        border-color: #6a11cb;
+        box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1);
     }
-    .empty-trx i { font-size: 52px; margin-bottom: 12px; display: block; }
 
-    /* Btn loading */
-    .btn-loading .btn-text { display: none; }
-    .btn-loading .btn-spinner { display: inline-flex !important; align-items: center; }
+    .pos-input-group input {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+    }
 
-    /* Row animation */
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-    .row-anim { animation: slideIn 0.35s ease-out; }
-
-    /* Hapus button */
-    .btn-hapus-row {
-        width: 30px; height: 30px;
-        border-radius: 50%;
+    .scan-btn {
+        background: #f8f9fa;
+        color: #6a11cb;
         border: none;
-        background: rgba(231, 76, 60, 0.1);
-        color: #e74c3c;
-        font-size: 16px;
-        display: flex; align-items: center; justify-content: center;
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: all 0.2s;
-        cursor: pointer;
-    }
-    .btn-hapus-row:hover {
-        background: #e74c3c;
-        color: #fff;
-        transform: scale(1.1);
     }
 
-    /* Input kode focus highlight */
-    #kodeBarang {
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 700;
-        font-size: 16px;
-        letter-spacing: 1px;
+    .scan-btn:hover {
+        background: #6a11cb;
+        color: white;
     }
 
-    /* Loader pada input kode */
-    .input-kode-wrapper {
-        position: relative;
-    }
-    .input-kode-wrapper .kode-spinner {
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        display: none;
-    }
-    .input-kode-wrapper.loading .kode-spinner {
-        display: block;
-    }
-    .input-kode-wrapper.loading #kodeBarang {
-        padding-right: 40px !important;
-        background: #f8f8ff !important;
-    }
-
-    /* Status indicator */
-    .search-status {
-        font-size: 11px;
-        margin-top: 4px;
-        min-height: 16px;
-    }
-
-    /* Autocomplete Suggestions */
+    /* Suggestions */
     #suggestionContainer {
         position: absolute;
         top: 100%;
         left: 0;
         right: 0;
-        z-index: 1000;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        border-radius: 16px;
+        margin-top: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        z-index: 1000;
         border: 1px solid #eee;
-        margin-top: 5px;
-        max-height: 300px;
-        overflow-y: auto;
+        overflow: hidden;
         display: none;
     }
+
     .suggestion-item {
-        padding: 12px 15px;
+        padding: 1rem 1.5rem;
         cursor: pointer;
-        transition: all 0.2s;
-        border-bottom: 1px solid #f8f8f8;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        transition: all 0.2s;
     }
-    .suggestion-item:last-child { border-bottom: none; }
+
     .suggestion-item:hover {
-        background: #f0f7ff;
-        padding-left: 20px;
-    }
-    .suggestion-item .item-name {
-        font-weight: 600;
-        color: #333;
-    }
-    .suggestion-item .item-code {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        color: #6a11cb;
-        background: rgba(106, 17, 203, 0.05);
-        padding: 2px 6px;
-        border-radius: 4px;
-    }
-    .suggestion-item .item-price {
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 700;
-        color: #27ae60;
+        background: #f4f7ff;
+        padding-left: 2rem;
     }
 
-    /* Qty Input in Table */
+    /* Qty Input */
+    .qty-control {
+        display: flex;
+        align-items: center;
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 2px;
+        width: fit-content;
+    }
+
     .qty-input-table {
-        width: 70px !important;
-        padding: 5px 8px !important;
-        border-radius: 8px !important;
+        width: 45px;
         text-align: center;
-        border: 1.5px solid #eee !important;
-        font-weight: bold;
-    }
-    .qty-input-table:focus {
-        border-color: #6a11cb !important;
-        box-shadow: none !important;
+        border: none;
+        background: transparent;
+        font-weight: 700;
+        font-size: 0.9rem;
     }
 
-    /* Scanner UI */
-    #reader {
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-        border: none !important;
+    /* Empty Cart */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        color: #ccc;
     }
-    #reader__status_span { display: none; }
-    #reader__dashboard_section_csr button {
-        background: #6a11cb !important;
-        color: white !important;
-        border: none !important;
-        padding: 8px 15px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        margin-top: 10px !important;
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Action Buttons */
+    .btn-checkout {
+        background: white;
+        color: #6a11cb;
+        border: none;
+        border-radius: 16px;
+        padding: 1.25rem;
+        font-weight: 800;
+        font-size: 1.1rem;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-checkout:not(:disabled):hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        color: #550bb1;
+    }
+
+    .btn-checkout:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Animations */
+    .row-anim {
+        animation: slideInLeft 0.4s ease-out forwards;
+    }
+
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 1100px) {
+        .pos-container { flex-direction: column; }
+        .pos-right { width: 100%; position: static; }
     }
 </style>
 
-<div class="page-header flex-wrap">
-    <div class="header-left">
-        <h3 class="page-title text-dark fw-bold">
-            <span class="page-title-icon bg-gradient-primary text-white me-2 shadow-sm">
-                <i class="mdi mdi-cash-register"></i>
-            </span> Kasir POS
-        </h3>
-    </div>
-    <div class="header-right d-flex align-items-center mt-2 mt-sm-0">
-        <span class="badge bg-light text-dark p-2 px-3" style="border-radius: 10px;">
-            <i class="mdi mdi-clock-outline me-1"></i> <span id="jamSekarang"></span>
-        </span>
-    </div>
-</div>
+<div class="pos-container">
+    {{-- BAGIAN KIRI: TABEL BARANG --}}
+    <div class="pos-left">
+        <div class="glass-card cart-card">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white bg-opacity-50">
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">Keranjang Belanja</h4>
+                    <p class="text-muted small mb-0">Kelola item transaksi hari ini</p>
+                </div>
+                <div class="badge bg-light text-dark p-2 px-3 border" style="border-radius: 12px;">
+                    <i class="mdi mdi-clock-outline me-1"></i> <span id="jamSekarang"></span>
+                </div>
+            </div>
 
-<div class="row">
-    {{-- FORM INPUT BARANG --}}
-    <div class="col-12 grid-margin">
-        <div class="card kasir-card">
-            <div class="card-body">
-                <h5 class="fw-bold mb-1 text-dark">
-                    <i class="mdi mdi-barcode-scan text-primary me-2"></i>Input Barang
-                </h5>
-                <p class="text-muted small mb-4">Tekan <kbd>Enter</kbd> di Kode Barang untuk mencari otomatis via Axios</p>
+            <div class="table-container">
+                <table class="table table-pos mb-0" id="tabelTransaksi">
+                    <thead>
+                        <tr>
+                            <th width="50" class="text-center">#</th>
+                            <th>ITEM DETAIL</th>
+                            <th width="120" class="text-end">HARGA</th>
+                            <th width="100" class="text-center">QTY</th>
+                            <th width="140" class="text-end">SUBTOTAL</th>
+                            <th width="60"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyTransaksi">
+                        <!-- Items will be rendered here -->
+                    </tbody>
+                </table>
 
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label class="small fw-bold text-muted">KODE BARANG</label>
-                        <div class="input-kode-wrapper" id="kodeWrapper">
-                            <div class="input-group">
-                                <input type="text" id="kodeBarang" class="form-control form-control-kasir" placeholder="Ketik nama atau kode..." autocomplete="off" autofocus>
-                                <button class="btn btn-outline-primary border-1.5" type="button" id="btnOpenScanner" style="border-radius: 0 12px 12px 0 !important; border-left: none;">
-                                    <i class="mdi mdi-camera"></i>
-                                </button>
-                            </div>
-                            <div id="suggestionContainer"></div>
-                            <div class="kode-spinner">
-                                <span class="spinner-border spinner-border-sm text-primary"></span>
-                            </div>
-                        </div>
-                        <div class="search-status" id="searchStatus"></div>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="small fw-bold text-muted">NAMA BARANG</label>
-                        <input type="text" id="namaBarang" class="form-control form-control-kasir" readonly placeholder="-">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="small fw-bold text-muted">HARGA</label>
-                        <input type="text" id="hargaBarang" class="form-control form-control-kasir" readonly placeholder="-">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="small fw-bold text-muted">JUMLAH</label>
-                        <input type="number" id="jumlahBarang" class="form-control form-control-kasir text-center fw-bold" value="1" min="1">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" id="btnTambahItem" class="btn btn-gradient-primary w-100 fw-bold rounded-pill py-3" disabled>
-                            <i class="mdi mdi-cart-plus me-1"></i> TAMBAH
-                        </button>
-                    </div>
+                <div class="empty-state" id="emptyTrx">
+                    <i class="mdi mdi-cart-remove"></i>
+                    <h5 class="fw-bold text-dark opacity-50">Keranjang Kosong</h5>
+                    <p class="mb-0 small">Mulai transaksi dengan mencari produk di samping</p>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- TABEL TRANSAKSI --}}
-    <div class="col-12 grid-margin">
-        <div class="card kasir-card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-trx mb-0" id="tabelTransaksi">
-                        <thead>
-                            <tr>
-                                <th width="60">No</th>
-                                <th width="120">Kode</th>
-                                <th>Nama Barang</th>
-                                <th class="text-end" width="140">Harga</th>
-                                <th class="text-center" width="80">Qty</th>
-                                <th class="text-end" width="160">Subtotal</th>
-                                <th width="50"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="bodyTransaksi">
-                        </tbody>
-                    </table>
+    {{-- BAGIAN KANAN: INPUT & SUMMARY --}}
+    <div class="pos-right">
+        {{-- TOTAL DISPLAY --}}
+        <div class="glass-card summary-card">
+            <div class="label">Total Pembayaran</div>
+            <h2 class="total-amount" id="totalDisplay">Rp 0</h2>
+            <div class="mt-4 pt-4 border-top border-white border-opacity-20">
+                <button type="button" id="btnBayar" class="btn-checkout" disabled>
+                    <span class="btn-text">PROSES PEMBAYARAN</span>
+                    <span class="btn-spinner d-none">
+                        <span class="spinner-border spinner-border-sm me-2"></span> MEMPROSES...
+                    </span>
+                </button>
+            </div>
+        </div>
 
-                    <div class="empty-trx" id="emptyTrx">
-                        <i class="mdi mdi-cart-outline"></i>
-                        <p class="mb-0 fw-bold">Belum ada barang</p>
-                        <small>Masukkan kode barang di atas untuk mulai transaksi</small>
+        {{-- INPUT BARANG --}}
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3 text-dark d-flex align-items-center">
+                <i class="mdi mdi-barcode-scan text-primary me-2 fs-4"></i> Input Produk
+            </h5>
+            
+            <div class="mb-4 position-relative" id="kodeWrapper">
+                <label class="small fw-bold text-muted mb-2">CARI NAMA ATAU KODE</label>
+                <div class="pos-input-group">
+                    <input type="text" id="kodeBarang" placeholder="Ketik di sini..." autocomplete="off" autofocus>
+                    <button class="scan-btn" id="btnOpenScanner" title="Buka Kamera">
+                        <i class="mdi mdi-camera"></i>
+                    </button>
+                </div>
+                <div id="suggestionContainer"></div>
+                <div class="search-status mt-2 small" id="searchStatus" style="min-height: 20px;"></div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="p-3 rounded-4 bg-light border border-white">
+                        <label class="small fw-bold text-muted mb-1">PRODUK TERPILIH</label>
+                        <h6 id="namaBarangDisplay" class="fw-bold text-dark mb-0">-</h6>
+                        <div id="hargaBarangDisplay" class="text-primary fw-bold mt-1">Rp 0</div>
+                        
+                        {{-- Hidden inputs for logic --}}
+                        <input type="hidden" id="namaBarang">
+                        <input type="hidden" id="hargaBarang">
                     </div>
                 </div>
-
-                {{-- TOTAL + BAYAR --}}
-                <div class="mt-4">
-                    <div class="total-bar d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="label">TOTAL PEMBAYARAN</div>
-                            <div class="amount" id="totalDisplay">Rp 0</div>
-                        </div>
-                        <button type="button" id="btnBayar" class="btn btn-light btn-lg fw-bold rounded-pill px-5 py-3 shadow-sm" disabled>
-                            <span class="btn-text"><i class="mdi mdi-cash-check me-2"></i>BAYAR</span>
-                            <span class="btn-spinner d-none">
-                                <span class="spinner-border spinner-border-sm me-2"></span> Memproses...
-                            </span>
-                        </button>
+                
+                <div class="col-8">
+                    <label class="small fw-bold text-muted mb-2">JUMLAH BELI</label>
+                    <div class="pos-input-group p-0">
+                        <input type="number" id="jumlahBarang" class="text-center" value="1" min="1">
                     </div>
+                </div>
+                
+                <div class="col-4">
+                    <label class="small fw-bold text-muted mb-2">&nbsp;</label>
+                    <button type="button" id="btnTambahItem" class="btn btn-gradient-primary w-100 h-100 rounded-4" disabled style="min-height: 48px;">
+                        <i class="mdi mdi-plus fs-4"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -346,14 +394,14 @@
 {{-- MODAL SCANNER --}}
 <div class="modal fade" id="scannerModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none;">
-            <div class="modal-header bg-gradient-primary text-white border-none py-3">
-                <h5 class="modal-title fw-bold"><i class="mdi mdi-barcode-scan me-2"></i>Scan Barcode Barang</h5>
+        <div class="modal-content overflow-hidden border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="modal-header bg-gradient-primary text-white border-0 p-4">
+                <h5 class="modal-title fw-bold"><i class="mdi mdi-camera-iris me-2"></i>Scanner Barcode</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4 text-center">
-                <div id="reader"></div>
-                <p class="text-muted mt-3 small">Arahkan barcode barang ke arah kamera</p>
+            <div class="modal-body p-4 text-center bg-light">
+                <div id="reader" style="border-radius: 20px; overflow: hidden; border: none !important;"></div>
+                <p class="text-muted mt-4 small mb-0">Posisikan barcode produk tepat di dalam bingkai kamera</p>
             </div>
         </div>
     </div>
@@ -361,49 +409,17 @@
 @endsection
 
 @push('script-page')
-{{-- Axios CDN (dicoba load, jika gagal akan pakai fallback jQuery) --}}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-{{-- HTML5-QRCode CDN --}}
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script>
-// ============================================
-// AXIOS FALLBACK: Jika CDN diblokir browser,
-// gunakan jQuery $.ajax sebagai pengganti
-// ============================================
-if (typeof axios === 'undefined') {
-    console.warn('[Kasir] Axios CDN diblokir browser, menggunakan jQuery fallback.');
-    var axios = {
-        get: function(url) {
-            return $.ajax({ url: url, type: 'GET', dataType: 'json' });
-        },
-        post: function(url, data) {
-            return $.ajax({
-                url: url,
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                dataType: 'json',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-            });
-        }
-    };
-}
-
 $(document).ready(function() {
-
-    // ============================================
-    // STATE
-    // ============================================
     let cart = [];
     let currentBarang = null;
     let isSearching = false;
     let debounceTimer;
     let html5QrCode = null;
 
-    // ============================================
-    // UTILITAS
-    // ============================================
     function formatRupiah(n) {
         return new Intl.NumberFormat('id-ID').format(n);
     }
@@ -415,36 +431,23 @@ $(document).ready(function() {
     setInterval(updateJam, 1000);
     updateJam();
 
-    // ============================================
-    // LOADER: Tampilkan/sembunyikan spinner
-    // ============================================
     function showLoader() {
         isSearching = true;
-        $('#kodeWrapper').addClass('loading');
-        $('#searchStatus').html('<span class="text-primary"><i class="mdi mdi-loading mdi-spin me-1"></i>Mencari barang...</span>');
+        $('#searchStatus').html('<span class="text-primary"><i class="mdi mdi-loading mdi-spin me-1"></i>Mencari...</span>');
     }
 
     function hideLoader() {
         isSearching = false;
-        $('#kodeWrapper').removeClass('loading');
     }
 
-    // ============================================
-    // Logika Tombol TAMBAH
-    // ============================================
     function toggleTambahBtn() {
         let jumlah = parseInt($('#jumlahBarang').val()) || 0;
         let aktif = (currentBarang !== null && jumlah > 0);
         $('#btnTambahItem').prop('disabled', !aktif);
     }
 
-    $('#jumlahBarang').on('input change', function() {
-        toggleTambahBtn();
-    });
+    $('#jumlahBarang').on('input change', toggleTambahBtn);
 
-    // ============================================
-    // FUNGSI: Autocomplete (Suggest)
-    // ============================================
     function fetchSuggestions(query) {
         if (query.length < 2) {
             $('#suggestionContainer').hide().empty();
@@ -460,15 +463,13 @@ $(document).ready(function() {
                 if (items.length > 0) {
                     items.forEach(function(item) {
                         let displayCode = item.barcode || item.id_barang;
-                        let searchKey = item.barcode || item.id_barang;
-                        
                         let html = `
-                            <div class="suggestion-item" data-search-key="${searchKey}">
+                            <div class="suggestion-item" data-search-key="${displayCode}">
                                 <div>
-                                    <div class="item-name">${item.nama}</div>
-                                    <span class="item-code">${displayCode}</span>
+                                    <div class="fw-bold text-dark">${item.nama}</div>
+                                    <span class="small text-muted font-monospace">${displayCode}</span>
                                 </div>
-                                <div class="item-price">Rp ${formatRupiah(item.harga)}</div>
+                                <div class="text-primary fw-bold">Rp ${formatRupiah(item.harga)}</div>
                             </div>
                         `;
                         container.append(html);
@@ -478,20 +479,15 @@ $(document).ready(function() {
                     container.hide();
                 }
             })
-            .catch(function(err) {
-                console.error('Error fetching suggestions', err);
-            });
+            .catch(err => console.error('Error fetching suggestions', err));
     }
 
     $('#kodeBarang').on('input', function() {
         let query = $(this).val();
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function() {
-            fetchSuggestions(query);
-        }, 300);
+        debounceTimer = setTimeout(() => fetchSuggestions(query), 300);
     });
 
-    // Pilih item dari suggestion
     $(document).on('click', '.suggestion-item', function() {
         let key = $(this).data('search-key');
         $('#kodeBarang').val(key);
@@ -499,38 +495,24 @@ $(document).ready(function() {
         cariBarang(key);
     });
 
-    // Klik di luar sembunyikan suggestion
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#kodeWrapper').length) {
-            $('#suggestionContainer').hide();
-        }
+    $(document).on('click', e => {
+        if (!$(e.target).closest('#kodeWrapper').length) $('#suggestionContainer').hide();
     });
 
-    // ============================================
-    // FUNGSI: Cari barang via Axios GET
-    // (Axios CDN atau jQuery fallback)
-    // ============================================
     function cariBarang(kode) {
-        if (isSearching) return;
-        
-        // Cek apakah kode kosong, null, atau undefined
-        if (!kode || kode === '' || kode === 'null' || kode === 'undefined') {
-            console.warn('[Kasir] Pencarian dibatalkan: Kode tidak valid.', kode);
-            return;
-        }
+        if (isSearching || !kode) return;
 
         currentBarang = null;
+        $('#namaBarangDisplay').text('-');
+        $('#hargaBarangDisplay').text('Rp 0');
         $('#namaBarang').val('');
         $('#hargaBarang').val('');
         $('#btnTambahItem').prop('disabled', true);
 
         showLoader();
 
-        // Axios GET (Promise style sesuai modul)
-        let req = axios.get('/kasir/cari-barang/' + kode);
-        
-        req.then(function(response) {
-                // Tangani perbedaan format response antara Axios asli vs jQuery fallback
+        axios.get('/kasir/cari-barang/' + kode)
+            .then(function(response) {
                 let resData = response.data || response;
                 let data = resData.data;
 
@@ -541,380 +523,166 @@ $(document).ready(function() {
                     harga: data.harga
                 };
 
-                // Isi otomatis field Nama dan Harga (readonly)
+                $('#namaBarangDisplay').text(data.nama);
+                $('#hargaBarangDisplay').text('Rp ' + formatRupiah(data.harga));
                 $('#namaBarang').val(data.nama);
-                $('#hargaBarang').val('Rp ' + formatRupiah(data.harga));
-
-                // Status sukses
-                $('#searchStatus').html('<span class="text-success"><i class="mdi mdi-check-circle me-1"></i>Barang ditemukan</span>');
-
-                // Set fokus ke input Jumlah
+                $('#hargaBarang').val(data.harga);
+                $('#searchStatus').html('<span class="text-success small fw-bold"><i class="mdi mdi-check-circle me-1"></i>Ditemukan</span>');
                 $('#jumlahBarang').val(1).focus().select();
-
-                // Aktifkan tombol TAMBAH
                 toggleTambahBtn();
             })
             .catch(function(error) {
-                currentBarang = null;
-                $('#namaBarang').val('');
-                $('#hargaBarang').val('');
-                $('#btnTambahItem').prop('disabled', true);
-
-                $('#searchStatus').html('<span class="text-danger"><i class="mdi mdi-alert-circle me-1"></i>Barang tidak ditemukan</span>');
-
-                // Tangani format error dari Axios asli vs jQuery
-                let msg = 'Gagal mencari barang.';
-                if (error.response && error.response.data) {
-                    msg = error.response.data.message;
-                } else if (error.responseJSON) {
-                    msg = error.responseJSON.message;
-                }
-
+                $('#searchStatus').html('<span class="text-danger small fw-bold"><i class="mdi mdi-alert-circle me-1"></i>Tidak ditemukan</span>');
                 Swal.fire({
                     icon: 'error',
-                    title: 'Barang Tidak Ditemukan',
-                    text: msg,
+                    title: 'Waduh!',
+                    text: 'Produk tidak ditemukan dalam sistem.',
                     confirmButtonColor: '#6a11cb'
                 });
-
-                $('#kodeBarang').val('');
-                setTimeout(function() { $('#kodeBarang').focus(); }, 100);
-            });
-
-        // Ensure hideLoader is called for both real Axios (.finally) and jQuery fallback (.always)
-        if (typeof req.finally === 'function') {
-            req.finally(function() { hideLoader(); });
-        } else if (typeof req.always === 'function') {
-            req.always(function() { hideLoader(); });
-        }
+                $('#kodeBarang').val('').focus();
+            })
+            .finally(hideLoader);
     }
 
-    // ============================================
-    // BARCODE SCANNER LOGIC
-    // ============================================
     const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
-    
-    $('#btnOpenScanner').on('click', function() {
-        scannerModal.show();
-    });
+    $('#btnOpenScanner').on('click', () => scannerModal.show());
 
     $('#scannerModal').on('shown.bs.modal', function () {
-        if (!html5QrCode) {
-            // Konfigurasi format yang didukung (Mendukung Barcode Retail)
-            const formatsToSupport = [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.QR_CODE
-            ];
-            html5QrCode = new Html5Qrcode("reader", { formatsToSupport: formatsToSupport });
-        }
-        
-        // Optimasi parameter pemindaian: FPS lebih tinggi dan qrbox persegi panjang
-        // Cek izin dan apakah sedang scanning
-        if (html5QrCode && html5QrCode.isScanning) {
-            console.log("Scanner is already running.");
-            return;
-        }
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        if (html5QrCode.isScanning) return;
 
-        const config = { 
-            fps: 20, 
-            qrbox: { width: 320, height: 180 }, 
-            aspectRatio: 1.0,
-            disableFlip: false,
-            videoConstraints: {
-                facingMode: { ideal: "environment" }
-            }
-        };
-        
         html5QrCode.start(
             { facingMode: "environment" }, 
-            config,
-            (decodedText, decodedResult) => {
-                // Berhasil scan
+            { fps: 20, qrbox: { width: 280, height: 280 } },
+            (decodedText) => {
                 $('#kodeBarang').val(decodedText);
-                
-                // Tutup modal scanner
                 scannerModal.hide();
-                
-                // Cari barang (dengan delay kecil agar modal tertutup mulus)
-                setTimeout(() => {
-                    cariBarang(decodedText);
-                }, 300);
-                
-                // Play feedback sound
-                try {
-                    const audio = new Audio('https://www.soundjay.com/buttons/beep-07.wav');
-                    audio.play();
-                } catch(e) {}
-            },
-            (errorMessage) => {
-                // Terus mencari tanpa log error ke console (mengurangi noise)
+                setTimeout(() => cariBarang(decodedText), 300);
             }
-        ).catch((err) => {
-            console.error("Gagal start scanner:", err);
-            let errMsg = "Gagal akses kamera!";
-            if (err.name === 'AbortError') {
-                errMsg = "Kamera sedang digunakan aplikasi lain (Zoom/GMeet/WA) atau timeout.";
-            } else if (err.name === 'NotAllowedError') {
-                errMsg = "Izin kamera ditolak browser!";
-            }
-
-            $('#reader').html(`<div class="alert alert-danger text-center">
-                <b>${errMsg}</b><br>
-                <small>${err}</small><br>
-                <button class="btn btn-sm btn-outline-danger mt-2" onclick="location.reload()">Reload Halaman</button>
-            </div>`);
-        });
+        ).catch(err => $('#reader').html(`<div class="alert alert-danger mx-3">Kamera gagal!</div>`));
     });
 
     $('#scannerModal').on('hidden.bs.modal', function () {
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().then(() => {
-                console.log("Scanner stopped.");
-                // Bersihkan tampilan agar tidak nyangkut saat dibuka lagi
-                $('#reader').empty();
-            }).catch((err) => {
-                console.warn("Gagal stop scanner:", err);
-            });
-        }
+        if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().then(() => $('#reader').empty());
     });
 
-    // ============================================
-    // EVENT: Enter di Kode Barang → Cari Barang
-    // ============================================
-    $('#kodeBarang').on('keydown', function(e) {
-        if (e.key === 'Enter' || e.keyCode === 13) {
+    $('#kodeBarang').on('keydown', e => {
+        if (e.key === 'Enter') {
             e.preventDefault();
-            e.stopPropagation();
-            let kode = $(this).val().trim();
-            cariBarang(kode);
-            $('#suggestionContainer').hide();
+            cariBarang($(e.target).val().trim());
         }
     });
 
-    // ============================================
-    // EVENT: Tombol TAMBAH / Enter di Jumlah
-    // ============================================
     function tambahKeCart() {
         if (!currentBarang) return;
-
         let jumlah = parseInt($('#jumlahBarang').val()) || 1;
-        if (jumlah < 1) jumlah = 1;
-
-        // Cek apakah barang sudah ada di cart
-        let existing = cart.find(function(item) { return item.kode === currentBarang.kode; });
-
+        let existing = cart.find(item => item.kode === currentBarang.kode);
         if (existing) {
-            // Update jumlah & subtotal
             existing.jumlah += jumlah;
             existing.subtotal = existing.harga * existing.jumlah;
         } else {
-            // Tambah baru
-            cart.push({
-                kode: currentBarang.kode, // id_barang
-                barcode: currentBarang.barcode, 
-                nama: currentBarang.nama,
-                harga: currentBarang.harga,
-                jumlah: jumlah,
-                subtotal: currentBarang.harga * jumlah
-            });
+            cart.push({ ...currentBarang, jumlah, subtotal: currentBarang.harga * jumlah });
         }
-
-        // Notifikasi toast
-        Swal.fire({
-            icon: 'success',
-            title: currentBarang.nama + ' ditambahkan!',
-            text: jumlah + ' x Rp ' + formatRupiah(currentBarang.harga),
-            timer: 1200,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-        });
-
         renderTabel();
         resetInput();
     }
 
-    $('#btnTambahItem').on('click', function() {
-        tambahKeCart();
-    });
+    $('#btnTambahItem').on('click', tambahKeCart);
+    $('#jumlahBarang').on('keydown', e => { if (e.key === 'Enter') tambahKeCart(); });
 
-    $('#jumlahBarang').on('keydown', function(e) {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault();
-            e.stopPropagation();
-            tambahKeCart();
-        }
-    });
-
-    // ============================================
-    // RENDER TABEL
-    // ============================================
     function renderTabel() {
         let tbody = $('#bodyTransaksi');
         tbody.empty();
-
         if (cart.length === 0) {
             $('#emptyTrx').show();
             $('#btnBayar').prop('disabled', true);
             $('#totalDisplay').text('Rp 0');
             return;
         }
-
         $('#emptyTrx').hide();
         $('#btnBayar').prop('disabled', false);
-
         let total = 0;
-
-        cart.forEach(function(item, index) {
+        cart.forEach((item, index) => {
             total += item.subtotal;
-            let row = `
-                <tr class="row-anim" data-kode="${item.kode}">
-                    <td class="text-center text-muted fw-bold">${index + 1}</td>
-                    <td><span class="kode-tag">${item.kode}</span></td>
-                    <td class="fw-bold text-dark">${item.nama}</td>
-                    <td class="text-end"><span class="price-val">Rp ${formatRupiah(item.harga)}</span></td>
-                    <td class="text-center">
-                        <input type="number" class="form-control qty-input-table" value="${item.jumlah}" min="1" data-index="${index}">
+            tbody.append(`
+                <tr class="row-anim">
+                    <td class="text-center text-muted fw-bold small">${index + 1}</td>
+                    <td>
+                        <div class="item-info">
+                            <span class="item-name">${item.nama}</span>
+                            <span class="item-code-badge">${item.kode}</span>
+                        </div>
                     </td>
-                    <td class="text-end"><span class="subtotal-val" id="subtotal-${index}">Rp ${formatRupiah(item.subtotal)}</span></td>
+                    <td class="text-end fw-bold text-dark">Rp ${formatRupiah(item.harga)}</td>
+                    <td>
+                        <div class="qty-control mx-auto">
+                            <input type="number" class="qty-input-table" value="${item.jumlah}" min="1" data-index="${index}">
+                        </div>
+                    </td>
+                    <td class="text-end fw-bold text-primary">Rp ${formatRupiah(item.subtotal)}</td>
                     <td class="text-center">
-                        <button type="button" class="btn-hapus-row" data-index="${index}" title="Hapus">
-                            <i class="mdi mdi-close"></i>
-                        </button>
+                        <button type="button" class="btn btn-link text-danger p-0 btn-hapus-row" data-index="${index}"><i class="mdi mdi-delete-outline fs-5"></i></button>
                     </td>
                 </tr>
-            `;
-            tbody.append(row);
+            `);
         });
-
         $('#totalDisplay').text('Rp ' + formatRupiah(total));
     }
 
-    // Update Qty di Tabel
     $('#bodyTransaksi').on('input change', '.qty-input-table', function() {
         let idx = $(this).data('index');
         let newQty = parseInt($(this).val()) || 1;
         if (newQty < 1) newQty = 1;
-
         cart[idx].jumlah = newQty;
         cart[idx].subtotal = cart[idx].harga * newQty;
-
-        // Update subtotal display row
-        $(`#subtotal-${idx}`).text('Rp ' + formatRupiah(cart[idx].subtotal));
-
-        // Update total payout
-        let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-        $('#totalDisplay').text('Rp ' + formatRupiah(total));
-    });
-
-    // Hapus baris
-    $('#bodyTransaksi').on('click', '.btn-hapus-row', function() {
-        let idx = $(this).data('index');
-        cart.splice(idx, 1);
         renderTabel();
     });
 
-    // ============================================
-    // RESET INPUT: Kembalikan semua ke kondisi awal
-    // agar bisa menambahkan barang baru lagi
-    // ============================================
+    $('#bodyTransaksi').on('click', '.btn-hapus-row', function() {
+        cart.splice($(this).data('index'), 1);
+        renderTabel();
+    });
+
     function resetInput() {
         currentBarang = null;
-        $('#kodeBarang').val('');
+        $('#kodeBarang').val('').focus();
+        $('#namaBarangDisplay').text('-');
+        $('#hargaBarangDisplay').text('Rp 0');
         $('#namaBarang').val('');
         $('#hargaBarang').val('');
         $('#jumlahBarang').val(1);
         $('#btnTambahItem').prop('disabled', true);
         $('#searchStatus').html('');
-        $('#suggestionContainer').hide().empty();
-        // Fokus kembali ke input Kode Barang
-        setTimeout(function() { $('#kodeBarang').focus(); }, 50);
     }
 
-    // ============================================
-    // BAYAR → Axios POST
-    // ============================================
     $('#btnBayar').on('click', function() {
         if (cart.length === 0) return;
-
         let btn = $(this);
         let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
-
         Swal.fire({
-            title: 'Proses Pembayaran?',
-            html: `Total: <b class="text-primary">Rp ${formatRupiah(total)}</b><br><small class="text-muted">${cart.length} jenis barang</small>`,
-            icon: 'question',
+            title: 'Bayar?',
+            html: `<h2 class="text-primary fw-bold">Rp ${formatRupiah(total)}</h2>`,
             showCancelButton: true,
             confirmButtonColor: '#6a11cb',
-            cancelButtonColor: '#95a5a6',
-            confirmButtonText: 'Ya, Bayar!',
-            cancelButtonText: 'Batal'
-        }).then(function(result) {
+            confirmButtonText: 'KIRIM'
+        }).then(result => {
             if (result.isConfirmed) {
-
-                // Aktifkan spinner / pencegahan double submit
-                btn.prop('disabled', true).addClass('btn-loading');
-
-                // Siapkan data
-                let payload = {
-                    _token: '{{ csrf_token() }}',
-                    total: total,
-                    items: cart.map(function(item) {
-                        return {
-                            kode: item.kode,
-                            jumlah: item.jumlah,
-                            subtotal: item.subtotal
-                        };
+                btn.prop('disabled', true);
+                $('.btn-spinner').removeClass('d-none');
+                $('.btn-text').addClass('d-none');
+                axios.post('/kasir/simpan', { _token: '{{ csrf_token() }}', total, items: cart.map(i => ({ kode: i.kode, jumlah: i.jumlah, subtotal: i.subtotal })) })
+                    .then(res => {
+                        cart = []; renderTabel(); resetInput();
+                        Swal.fire({ icon: 'success', title: 'Berhasil!' });
                     })
-                };
-
-                // Axios POST (Promise style sesuai modul)
-                axios.post('/kasir/simpan', payload)
-                    .then(function(response) {
-                        // Reset semua
-                        cart = [];
-                        renderTabel();
-                        resetInput();
-
-                        btn.prop('disabled', true).removeClass('btn-loading');
-
-                        // Tangani format response Axios vs jQuery
-                        let resData = response.data || response;
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Transaksi Berhasil!',
-                            text: resData.message,
-                            confirmButtonColor: '#6a11cb'
-                        });
-                    })
-                    .catch(function(error) {
-                        btn.prop('disabled', false).removeClass('btn-loading');
-
-                        let msg = 'Terjadi kesalahan saat menyimpan transaksi.';
-                        if (error.response && error.response.data) {
-                            msg = error.response.data.message;
-                        } else if (error.responseJSON) {
-                            msg = error.responseJSON.message;
-                        }
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: msg,
-                            confirmButtonColor: '#e74c3c'
-                        });
+                    .catch(err => Swal.fire({ icon: 'error', title: 'Gagal!' }))
+                    .finally(() => {
+                        btn.prop('disabled', false); $('.btn-spinner').addClass('d-none'); $('.btn-text').removeClass('d-none');
                     });
             }
         });
     });
 
-    // Inisialisasi
     renderTabel();
 });
 </script>

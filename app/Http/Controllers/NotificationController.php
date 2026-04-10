@@ -30,4 +30,29 @@ class NotificationController extends Controller
 
         return redirect()->back();
     }
+
+    public function getLatest()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        $unreadNotifications = $user->unreadNotifications;
+        
+        $notifications = $unreadNotifications->take(10)->map(function ($notif) {
+            return [
+                'id' => $notif->id,
+                'title' => $notif->data['title'] ?? 'Notification',
+                'message' => $notif->data['message'] ?? '',
+                'type' => $notif->data['type'] ?? 'info',
+                'created_at' => $notif->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'unread_count' => $unreadNotifications->count(),
+            'notifications' => $notifications,
+        ]);
+    }
 }

@@ -3,26 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vendor;
-use App\Models\Menu;
 use App\Models\Pesanan;
-use App\Models\DetailPesanan;
+use App\Services\MidtransService;
+use App\Services\OrderService;
+use App\Http\Requests\Kantin\CheckoutRequest;
 use Illuminate\Http\Request;
-use Midtrans\Snap;
-use Midtrans\Config;
-use Midtrans\Notification;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class KantinController extends Controller
 {
-    public function __construct()
+    protected $midtransService;
+    protected $orderService;
+
+    public function __construct(MidtransService $midtransService, OrderService $orderService)
     {
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$clientKey = config('midtrans.client_key');
-        \Midtrans\Config::$isProduction = config('midtrans.is_production');
-        \Midtrans\Config::$isSanitized = config('midtrans.is_sanitized', true);
-        \Midtrans\Config::$is3ds = config('midtrans.is_3ds', true);
+        $this->midtransService = $midtransService;
+        $this->orderService = $orderService;
     }
 
     public function index()
@@ -31,109 +28,36 @@ class KantinController extends Controller
         return view('kantin.customer.order', compact('vendors'));
     }
 
-    public function checkout(Request $request)
+    public function checkout(CheckoutRequest $request)
     {
         try {
-            // Validasi request secara manual agar bisa menangkap error database atau data
-            $validator = \Validator::make($request->all(), [
-                'vendor_id'        => 'required|exists:vendors,id',
-                'nama_pelanggan'   => 'required|string|max:255',
-                'catatan'          => 'nullable|string',
-                'items'            => 'required|array',
-                'items.*.id'       => 'required|exists:menus,id',
-                'items.*.quantity' => 'required|numeric|min:1',
-            ]);
+            // 1. Create order in DB via Service
+            $pesanan = $this->orderService->createOrder($request->validated());
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors()
-                ], 422);
-            }
-
-            $vendor = Vendor::findOrFail($request->vendor_id);
-            $total_harga = 0;
-            $order_items_data = [];
-            $midtrans_item_details = [];
-
-            foreach ($request->items as $item) {
-                $menu = Menu::findOrFail($item['id']);
-                $quantity = (int) $item['quantity'];
-
-                // VALIDASI STOK
-                if ($menu->stok < $quantity) {
-                    return response()->json([
-                        'message' => 'Stok tidak mencukupi untuk ' . ($menu->nama_makanan ?? $menu->nama_menu),
-                        'error'   => 'insufficient_stock',
-                        'menu_id' => $menu->id
-                    ], 422);
-                }
-
-                $price = (int) $menu->harga;
-                $subtotal = $price * $quantity;
-                
-                $total_harga += $subtotal;
-
-                // Siapkan data untuk DB
-                $order_items_data[] = [
-                    'menu_id'  => $menu->id,
-                    'qty'      => $quantity,
-                    'subtotal' => $subtotal,
+            // 2. Prepare Midtrans Payload
+            $midtransItemDetails = $pesanan->detailPesanan->map(function ($detail) {
+                return [
+                    'id'       => (string) $detail->menu_id,
+                    'price'    => (int) $detail->menu->harga,
+                    'quantity' => (int) $detail->qty,
+                    'name'     => substr($detail->menu->nama_makanan ?? $detail->menu->nama_menu, 0, 50),
                 ];
+            })->toArray();
 
-                // Siapkan data untuk Midtrans
-                $midtrans_item_details[] = [
-                    'id'       => (string) $menu->id,
-                    'price'    => $price,
-                    'quantity' => $quantity,
-                    'name'     => substr($menu->nama_makanan ?? $menu->nama_menu ?? 'Item', 0, 50),
-                ];
-            }
-
-            // Buat record pesanan di database
-            // Pastikan Auth menggunakan guard yang tepat jika ada
-            $userId = \Auth::id() ?? 1; // Fallback ke 1 untuk testing jika guest diperbolehkan
-
-            $pesanan = Pesanan::create([
-                'user_id'        => $userId,
-                'vendor_id'      => $vendor->id,
-                'nama_pelanggan' => $request->nama_pelanggan,
-                'nomor_pesanan'  => 'ORD-' . strtoupper(uniqid()),
-                'total_harga'    => $total_harga,
-                'catatan'        => $request->catatan,
-                'status'         => 'pending'
-            ]);
-
-            // Simpan Detail
-            foreach ($order_items_data as $oi) {
-                DetailPesanan::create([
-                    'pesanan_id' => $pesanan->id,
-                    'menu_id'    => $oi['menu_id'],
-                    'qty'        => $oi['qty'],
-                    'subtotal'   => $oi['subtotal']
-                ]);
-            }
-
-            // Payload Midtrans
             $params = [
                 'transaction_details' => [
                     'order_id'     => $pesanan->nomor_pesanan,
-                    'gross_amount' => (int) $total_harga,
+                    'gross_amount' => (int) $pesanan->total_harga,
                 ],
                 'customer_details' => [
-                    'first_name' => $request->nama_pelanggan,
-                    'email'      => \Auth::user()->email ?? 'guest@example.com',
+                    'first_name' => $pesanan->nama_pelanggan,
+                    'email'      => Auth::user()->email ?? 'guest@example.com',
                 ],
-                'item_details' => $midtrans_item_details,
+                'item_details' => $midtransItemDetails,
             ];
 
-            // Re-konfigurasi Midtrans
-            \Midtrans\Config::$serverKey = config('midtrans.server_key');
-            \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production', false);
-            \Midtrans\Config::$isSanitized = (bool) config('midtrans.is_sanitized', true);
-            \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds', true);
-
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            // 3. Get Snap Token
+            $snapToken = $this->midtransService->getSnapToken($params);
             
             $pesanan->update(['snap_token' => $snapToken]);
 
@@ -144,32 +68,27 @@ class KantinController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Midtrans Checkout Error: ' . $e->getMessage(), [
-                'file'  => $e->getFile(),
-                'line'  => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error('Checkout Error: ' . $e->getMessage());
 
             return response()->json([
-                'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage(),
-                'error'   => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine()
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'error'   => 'checkout_failed'
             ], 500);
         }
     }
 
     public function callback(Request $request)
     {
-        $notif = new Notification();
+        $notif = $this->midtransService->verifyCallback();
 
-        $transaction = $notif->transaction_status;
-        $order_id = $notif->order_id;
+        if (!$notif) {
+            return response()->json(['message' => 'Invalid signature'], 403);
+        }
 
-        $pesanan = Pesanan::where('nomor_pesanan', $order_id)->first();
+        $pesanan = Pesanan::where('nomor_pesanan', $notif->order_id)->first();
 
         if ($pesanan) {
-            $this->handleStatusUpdate($pesanan, $transaction);
+            $this->orderService->handleStatusUpdate($pesanan, $notif->transaction_status);
         }
 
         return response()->json(['status' => 'success']);
@@ -179,23 +98,17 @@ class KantinController extends Controller
     {
         $pesanan = Pesanan::findOrFail($id);
 
-        // If status is still pending, try to check directly with Midtrans
         if ($pesanan->status == 'pending') {
-            try {
-                // Set Midtrans Config (using same logic as checkout)
-                \Midtrans\Config::$serverKey = config('midtrans.server_key');
-                \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production', false);
-                \Midtrans\Config::$isSanitized = (bool) config('midtrans.is_sanitized', true);
-                \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds', true);
+            $statusData = $this->midtransService->getStatus($pesanan->nomor_pesanan);
+            
+            if ($statusData) {
+                $transactionStatus = is_object($statusData) 
+                    ? $statusData->transaction_status 
+                    : ($statusData['transaction_status'] ?? null);
 
-                $status = \Midtrans\Transaction::status($pesanan->nomor_pesanan);
-                
-                // Handle both object and array responses
-                $transactionStatus = is_object($status) ? $status->transaction_status : ($status['transaction_status'] ?? null);
-
-                $this->handleStatusUpdate($pesanan, $transactionStatus);
-            } catch (\Exception $e) {
-                \Log::warning('Manual Midtrans Status Check Failed for ID ' . $id . ': ' . $e->getMessage());
+                if ($transactionStatus) {
+                    $this->orderService->handleStatusUpdate($pesanan, $transactionStatus);
+                }
             }
         }
 
@@ -211,33 +124,6 @@ class KantinController extends Controller
         return view('kantin.customer.success', compact('pesanan'));
     }
 
-    private function handleStatusUpdate($pesanan, $transactionStatus)
-    {
-        $oldStatus = $pesanan->status;
-        $newStatus = $oldStatus;
-
-        if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
-            $newStatus = 'paid';
-        } elseif ($transactionStatus == 'pending') {
-            $newStatus = 'pending';
-        } elseif (in_array($transactionStatus, ['expire', 'cancel', 'deny'])) {
-            $newStatus = 'cancelled';
-        }
-
-        if ($oldStatus != $newStatus) {
-            $pesanan->update(['status' => $newStatus]);
-
-            // KURANGI STOK HANYA JIKA PINDAH KE PAID
-            if ($newStatus == 'paid') {
-                foreach ($pesanan->detailPesanan as $detail) {
-                    $menu = $detail->menu;
-                    if ($menu) {
-                        $menu->decrement('stok', $detail->qty);
-                    }
-                }
-            }
-        }
-    }
     public function track($id)
     {
         $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])->findOrFail($id);

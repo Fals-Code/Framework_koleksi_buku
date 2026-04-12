@@ -400,6 +400,12 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 text-center bg-light">
+                <div class="mb-3 text-start">
+                    <label class="small fw-bold text-muted mb-2"><i class="mdi mdi-video-outline me-1"></i>PILIH PERANGKAT KAMERA</label>
+                    <select id="cameraSelection" class="form-select border-0 shadow-sm rounded-4" style="height: 50px; font-weight: 600;">
+                        <option value="">Mendeteksi kamera...</option>
+                    </select>
+                </div>
                 <div id="reader" style="border-radius: 20px; overflow: hidden; border: none !important;"></div>
                 <p class="text-muted mt-4 small mb-0">Posisikan barcode produk tepat di dalam bingkai kamera</p>
             </div>
@@ -547,23 +553,77 @@ $(document).ready(function() {
     const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
     $('#btnOpenScanner').on('click', () => scannerModal.show());
 
-    $('#scannerModal').on('shown.bs.modal', function () {
+    function startScanner(deviceId = null) {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
         if (html5QrCode.isScanning) return;
 
+        const config = { fps: 20, qrbox: { width: 280, height: 280 } };
+        const cameraParam = deviceId ? deviceId : { facingMode: "environment" };
+
         html5QrCode.start(
-            { facingMode: "environment" }, 
-            { fps: 20, qrbox: { width: 280, height: 280 } },
+            cameraParam, 
+            config,
             (decodedText) => {
                 $('#kodeBarang').val(decodedText);
                 scannerModal.hide();
                 setTimeout(() => cariBarang(decodedText), 300);
             }
-        ).catch(err => $('#reader').html(`<div class="alert alert-danger mx-3">Kamera gagal!</div>`));
+        ).catch(err => {
+            console.error("error starting scanner", err);
+            $('#reader').html(`<div class="alert alert-danger mx-3 small">Kamera gagal atau tidak diizinkan!</div>`);
+        });
+    }
+
+    async function loadCameras() {
+        try {
+            const devices = await Html5Qrcode.getCameras();
+            const select = $('#cameraSelection');
+            select.empty();
+
+            if (devices && devices.length > 0) {
+                const savedCamera = localStorage.getItem('pos_preferred_camera');
+                let foundSaved = false;
+
+                devices.forEach(device => {
+                    const isSelected = device.id === savedCamera;
+                    if (isSelected) foundSaved = true;
+                    select.append(`<option value="${device.id}" ${isSelected ? 'selected' : ''}>${device.label || 'Kamera ' + (select.children().length + 1)}</option>`);
+                });
+
+                // Start with saved camera or first one
+                startScanner(foundSaved ? savedCamera : devices[0].id);
+            } else {
+                select.append('<option value="">Tidak ada kamera ditemukan</option>');
+                $('#reader').html(`<div class="alert alert-warning mx-3 small">Pasang kamera untuk memulai scan</div>`);
+            }
+        } catch (err) {
+            console.error("Error getting cameras", err);
+            $('#cameraSelection').html('<option value="">Gagal memuat kamera</option>');
+        }
+    }
+
+    $('#scannerModal').on('shown.bs.modal', function () {
+        loadCameras();
+    });
+
+    $('#cameraSelection').on('change', function() {
+        const deviceId = $(this).val();
+        if (deviceId) {
+            localStorage.setItem('pos_preferred_camera', deviceId);
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => startScanner(deviceId));
+            } else {
+                startScanner(deviceId);
+            }
+        }
     });
 
     $('#scannerModal').on('hidden.bs.modal', function () {
-        if (html5QrCode && html5QrCode.isScanning) html5QrCode.stop().then(() => $('#reader').empty());
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => {
+                $('#reader').empty();
+            }).catch(err => console.error("Error stopping scanner", err));
+        }
     });
 
     $('#kodeBarang').on('keydown', e => {

@@ -557,11 +557,21 @@ $(document).ready(function() {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
         if (html5QrCode.isScanning) return;
 
-        const config = { fps: 20, qrbox: { width: 280, height: 280 } };
-        const cameraParam = deviceId ? deviceId : { facingMode: "environment" };
+        const config = {
+            fps: 20,
+            qrbox: { width: 320, height: 160 },
+            formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128],
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+            videoConstraints: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "environment"
+            }
+        };
+        const cameraParam = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" };
 
         html5QrCode.start(
-            cameraParam, 
+            cameraParam,
             config,
             (decodedText) => {
                 $('#kodeBarang').val(decodedText);

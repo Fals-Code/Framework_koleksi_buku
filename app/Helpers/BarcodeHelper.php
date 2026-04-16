@@ -57,9 +57,10 @@ class BarcodeHelper
      * @param string $text  Text to encode
      * @param int    $height Barcode height in pixels
      * @param int    $barWidth Width of each bar unit in pixels
+     * @param int    $quietZone Width of the quiet zone (white margin) in module units
      * @return string base64 encoded PNG
      */
-    public static function generateBase64(string $text, int $height = 60, int $barWidth = 2): string
+    public static function generateBase64(string $text, int $height = 60, int $barWidth = 2, int $quietZone = 10): string
     {
         // Build values array
         $values = [self::START_B];
@@ -78,12 +79,14 @@ class BarcodeHelper
         $values[] = $checksum % 103; // Check digit
         $values[] = self::STOP;
 
-        // Build full bar pattern
-        $barPattern = '';
+        // Build full bar pattern with quiet zones before and after
+        $quietBars = str_repeat('0', $quietZone);
+        $barPattern = $quietBars;
         foreach ($values as $v) {
             $barPattern .= self::$patterns[$v];
         }
         $barPattern .= '11'; // Final 2 bars for stop
+        $barPattern .= $quietBars;
 
         // Calculate image dimensions
         $totalBars = strlen($barPattern);

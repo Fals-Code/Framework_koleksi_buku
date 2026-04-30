@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\KantinController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -81,6 +82,14 @@ Route::middleware(['auth', 'check.session'])->group(function () {
         Route::get('/api/orders/count', [VendorController::class, 'getNewOrdersCount'])->name('vendor.api.orders.count');
         Route::post('/orders/{id}/status', [VendorController::class, 'orderUpdateStatus'])->name('vendor.order.status');
     });
+
+    // Customer Routes
+    Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/customer/tambah1', [CustomerController::class, 'create1'])->name('customer.create1');
+    Route::post('/customer/tambah1', [CustomerController::class, 'store1'])->name('customer.store1');
+    Route::get('/customer/tambah2', [CustomerController::class, 'create2'])->name('customer.create2');
+    Route::post('/customer/tambah2', [CustomerController::class, 'store2'])->name('customer.store2');
+    Route::get('/customer/foto-blob/{id}', [CustomerController::class, 'showBlob'])->name('customer.blob');
 });
 
     Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');

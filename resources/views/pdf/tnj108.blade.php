@@ -106,8 +106,8 @@ table {
                             @endphp
 
                             <div class="label-box">
-                                <div class="id-barang">{{ $item->id_barang }}</div>
                                 <div class="barcode-wrap">{!! $barcodeHtml !!}</div>
+                                <div class="id-barang">{{ $item->id_barang }}</div>
                                 <div class="nama-barang">{{ $item->nama }}</div>
                                 <div class="harga-barang">Rp {{ number_format($item->harga, 0, ',', '.') }}</div>
                             </div>

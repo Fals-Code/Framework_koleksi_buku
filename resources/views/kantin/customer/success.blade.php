@@ -57,6 +57,15 @@
                         <span class="fw-bold fs-5 text-primary">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                     </div>
                 </div>
+                
+                <div class="my-4 text-center">
+                    <div class="d-inline-block p-3 bg-white shadow-sm rounded-4 border">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $pesanan->nomor_pesanan }}" 
+                             alt="QR Code Pesanan" 
+                             style="width: 150px; height: 150px; border-radius: 10px;">
+                    </div>
+                    <p class="mt-2 text-muted small fw-bold">Tunjukkan QR ini kepada kasir</p>
+                </div>
 
                 <div class="alert alert-info border-0 rounded-pill py-3">
                     <i class="mdi mdi-information-outline me-2"></i>

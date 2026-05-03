@@ -23,30 +23,43 @@
         overflow: hidden;
     }
 
-    .scanner-wrapper {
-        background: #000;
+    .scanner-view-box {
+        background: #1a1a1a;
         border-radius: 25px;
         position: relative;
         overflow: hidden;
-        border: 4px solid #f8f9fa;
         aspect-ratio: 1/1;
+        width: 100%;
     }
     
-    /* Scanner Overlay Frame */
+    #reader {
+        width: 100%;
+        height: 100%;
+    }
+    
+    #reader video {
+        object-fit: cover !important;
+    }
+
     .scan-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        border: 40px solid rgba(0,0,0,0.3);
         z-index: 10;
         pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+    
     .scan-frame {
-        position: absolute;
-        top: 15%; left: 15%; right: 15%; bottom: 15%;
+        width: 70%;
+        height: 70%;
         border: 2px solid rgba(255, 255, 255, 0.5);
         border-radius: 20px;
         box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+        position: relative;
     }
+    
     .scan-line {
         position: absolute;
         top: 0; left: 0; right: 0;
@@ -55,19 +68,10 @@
         box-shadow: 0 0 15px var(--scan-primary);
         animation: scanLineMove 2.5s linear infinite;
     }
+    
     @keyframes scanLineMove {
-        0% { top: 0%; }
+        0%, 100% { top: 0%; }
         50% { top: 100%; }
-        100% { top: 0%; }
-    }
-
-    .result-card {
-        display: none;
-        animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes slideUp {
-        from { transform: translateY(30px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
     }
 
     .status-badge {
@@ -78,11 +82,18 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    .status-lunas { background: #e6f4ea; color: #1e8e3e; }
+    .status-lunas, .status-completed { background: #e6f4ea; color: #1e8e3e; }
     .status-pending { background: #fff8e1; color: #ff8f00; }
+    .status-cooking, .status-ready { background: #e8f0fe; color: #1a73e8; }
+    .status-cancelled { background: #fce8e6; color: #d93025; }
 
-    #reader { width: 100% !important; border: none !important; }
-    #reader video { border-radius: 20px !important; object-fit: cover !important; }
+    .permission-error-view {
+        display: none;
+        padding: 40px 20px;
+        text-align: center;
+        background: #fff;
+        height: 100%;
+    }
 </style>
 
 <div class="scan-container">
@@ -91,24 +102,33 @@
         <div class="col-lg-5">
             <div class="card vendor-card-premium h-100">
                 <div class="card-body p-5 text-center">
-                    <div class="mb-4">
-                        <h4 class="fw-bold text-dark">Validasi QR</h4>
-                        <p class="text-muted small">Scan QR Code pesanan untuk melihat detail menu.</p>
-                    </div>
+                    <div id="scannerActive">
+                        <div class="mb-4">
+                            <h4 class="fw-bold text-dark">Validasi QR</h4>
+                            <p class="text-muted small">Scan QR Code pesanan untuk melihat detail menu.</p>
+                        </div>
 
-                    <div class="scanner-wrapper mb-4 shadow-lg">
-                        <div id="reader"></div>
-                        <div class="scan-overlay" id="scanOverlay">
-                            <div class="scan-frame">
-                                <div class="scan-line"></div>
+                        <div class="scanner-view-box mb-4 shadow-lg">
+                            <div id="reader"></div>
+                            <div class="scan-overlay" id="scanOverlay">
+                                <div class="scan-frame">
+                                    <div class="scan-line"></div>
+                                </div>
                             </div>
+                        </div>
+
+                        <div id="controls" style="display: none;">
+                            <button class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold shadow" onclick="resumeScanner()">
+                                <i class="mdi mdi-refresh me-2"></i> SCAN LAGI
+                            </button>
                         </div>
                     </div>
 
-                    <div id="controls" style="display: none;">
-                        <button class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold shadow" onclick="resetScanner()">
-                            <i class="mdi mdi-refresh me-2"></i> SCAN LAGI
-                        </button>
+                    <div id="scannerError" class="permission-error-view">
+                        <i class="mdi mdi-camera-off text-danger mb-4" style="font-size: 60px;"></i>
+                        <h4 class="fw-bold text-dark">Kamera Terblokir</h4>
+                        <p class="text-muted small mb-4" id="errMessage">Gagal mengakses kamera.</p>
+                        <button class="btn btn-primary rounded-pill px-4" onclick="initScanner()">COBA LAGI</button>
                     </div>
                 </div>
             </div>
@@ -128,7 +148,7 @@
             </div>
 
             <!-- Result Display -->
-            <div class="card vendor-card-premium h-100 result-card" id="resultCard">
+            <div class="card vendor-card-premium h-100" id="resultCard" style="display: none; animation: slideUp 0.5s ease;">
                 <div class="card-body p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
@@ -141,13 +161,13 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-4 border">
-                                <label class="x-small text-muted d-block fw-bold mb-1 uppercase">PELANGGAN</label>
+                                <label class="x-small text-muted d-block fw-bold mb-1 uppercase" style="font-size: 0.7rem;">PELANGGAN</label>
                                 <span class="fw-bold text-dark fs-5" id="resCustomer">-</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-4 border">
-                                <label class="x-small text-muted d-block fw-bold mb-1 uppercase">TOTAL BAYAR</label>
+                                <label class="x-small text-muted d-block fw-bold mb-1 uppercase" style="font-size: 0.7rem;">TOTAL BAYAR</label>
                                 <span class="fw-bold text-primary fs-5" id="resTotal">Rp 0</span>
                             </div>
                         </div>
@@ -162,19 +182,8 @@
                                     <th class="border-0 text-center">Qty</th>
                                 </tr>
                             </thead>
-                            <tbody id="resItems">
-                                <!-- JS items -->
-                            </tbody>
+                            <tbody id="resItems"></tbody>
                         </table>
-                    </div>
-
-                    <div class="p-3 rounded-4" style="background: #fff9db; border: 1px solid #ffe066;">
-                        <div class="d-flex">
-                            <i class="mdi mdi-information-outline text-warning fs-4 me-3"></i>
-                            <p class="small mb-0 text-dark">
-                                <strong>Catatan:</strong> Segera siapkan menu di atas jika status sudah <span class="fw-bold text-success">LUNAS</span>.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -189,36 +198,66 @@
 
 @push('script-page')
 <script>
-    let html5QrcodeScanner = null;
+    let html5QrCode = null;
+    let isScanning = false;
     const beep = document.getElementById('beep');
 
-    function onScanSuccess(decodedText) {
-        beep.play();
-        
-        // Stop Scanner UI
-        html5QrcodeScanner.clear().then(_ => {
-            $('#controls').fadeIn();
-            $('#scanOverlay').fadeOut();
-        });
+    function initScanner() {
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("reader");
+        }
 
-        // Show Loading
+        $('#scannerError').hide();
+        $('#scannerActive').show();
+        $('#scanOverlay').show();
+        $('#controls').hide();
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess
+        ).then(() => {
+            isScanning = true;
+        }).catch(err => {
+            console.error(err);
+            $('#scannerActive').hide();
+            $('#scannerError').show();
+            $('#errMessage').text(err.name === 'NotAllowedError' ? 
+                "Izin kamera ditolak. Silakan aktifkan izin kamera di browser Anda." : 
+                "Gagal mengakses kamera: " + err.message);
+        });
+    }
+
+    function onScanSuccess(decodedText) {
+        if (!isScanning) return;
+        isScanning = false;
+        
+        beep.play();
+        html5QrCode.pause();
+        
+        $('#scanOverlay').fadeOut();
+        $('#controls').fadeIn();
+
         Swal.fire({
             title: 'Memproses QR...',
             didOpen: () => { Swal.showLoading(); }
         });
 
-        // Fetch Order
         fetch(`/vendor/api/order-detail/${decodedText}`)
             .then(res => res.json())
             .then(res => {
                 Swal.close();
                 if (res.status === 'success') {
                     const data = res.data;
+                    let statusLabel = data.status_label;
+                    if (data.status === 'completed') statusLabel = 'LUNAS';
+                    
                     $('#resOrderNo').text(data.nomor_pesanan);
                     $('#resCustomer').text(data.nama_pelanggan);
-                    $('#resTotal').text('Rp ' + data.total_harga);
-                    
-                    $('#resStatus').text(data.status_label).attr('class', 'status-badge status-' + data.status);
+                    $('#resTotal').text('Rp ' + new Intl.NumberFormat('id-ID').format(data.total_harga));
+                    $('#resStatus').text(statusLabel).attr('class', 'status-badge status-' + data.status);
 
                     let items = '';
                     data.items.forEach(i => {
@@ -233,34 +272,28 @@
                     $('#resultCard').fadeIn();
                 } else {
                     Swal.fire('Gagal', res.message, 'error');
-                    resetScanner();
+                    resumeScanner();
                 }
             })
             .catch(err => {
                 Swal.fire('Error', 'Gagal menghubungi server.', 'error');
-                resetScanner();
+                resumeScanner();
             });
     }
 
-    function initScanner() {
-        $('#scanOverlay').show();
-        html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-            fps: 10, 
-            qrbox: { width: 250, height: 250 },
-            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-        });
-        html5QrcodeScanner.render(onScanSuccess);
-    }
-
-    function resetScanner() {
+    function resumeScanner() {
         $('#resultCard').hide();
         $('#placeholder').show();
         $('#controls').hide();
-        initScanner();
+        $('#scanOverlay').show();
+        if (html5QrCode) {
+            html5QrCode.resume();
+            isScanning = true;
+        }
     }
 
     $(document).ready(function() {
-        initScanner();
+        setTimeout(initScanner, 500);
     });
 </script>
 @endpush

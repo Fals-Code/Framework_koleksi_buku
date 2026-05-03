@@ -220,7 +220,7 @@
 
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-gradient-info btn-lg w-100">
-                                <i class="mdi mdi-check-circle-outline me-2"></i> SIMPAN DATA CUSTOMER
+                                <i class="mdi mdi-check-circle-outline me-2"></i> SIMPAN DATA
                             </button>
                         </div>
                     </div>
@@ -273,7 +273,7 @@
             <div class="modal-footer border-0 p-4 justify-content-center">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">BATAL</button>
                 <button type="button" class="btn btn-gradient-info rounded-pill px-5 py-3" id="btn-save-photo" disabled>
-                    <i class="mdi mdi-image-check me-2"></i> GUNAKAN FOTO INI
+                    <i class="mdi mdi-image-check me-2"></i> SIMPAN FOTO
                 </button>
             </div>
         </div>

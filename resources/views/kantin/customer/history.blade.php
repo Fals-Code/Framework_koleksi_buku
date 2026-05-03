@@ -107,7 +107,12 @@
                             </div>
                             <div class="col-md-3 text-md-end">
                                 <div class="d-grid d-md-flex justify-content-md-end gap-2">
-                                    @if(in_array($order->status, ['pending', 'paid', 'cooking', 'ready']))
+                                    @if($order->status == 'pending')
+                                        <a href="{{ route('kantin.track', $order->id) }}" class="btn btn-warning btn-sm btn-action">
+                                            <i class="mdi mdi-credit-card me-1"></i> Bayar
+                                        </a>
+                                    @endif
+                                    @if(in_array($order->status, ['paid', 'lunas', 'cooking', 'ready']))
                                         <a href="{{ route('kantin.track', $order->id) }}" class="btn btn-gradient-primary btn-sm btn-action">
                                             <i class="mdi mdi-map-marker me-1"></i> Lacak
                                         </a>

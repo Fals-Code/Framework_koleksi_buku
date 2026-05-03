@@ -46,6 +46,13 @@
         <i class="mdi mdi-cash-register menu-icon"></i>
       </a>
     </li>
+    
+    <li class="nav-item {{ request()->routeIs('scan.barcode') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('scan.barcode') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Scan Barcode</span>
+        <i class="mdi mdi-barcode-scan menu-icon"></i>
+      </a>
+    </li>
 
     <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>

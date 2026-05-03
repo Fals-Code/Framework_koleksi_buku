@@ -43,6 +43,21 @@
                                     <p class="mb-0 small">Maaf, pesanan Anda telah dibatalkan atau kedaluwarsa.</p>
                                 </div>
                             </div>
+                        @elseif($pesanan->status == 'pending')
+                            <div class="alert alert-warning rounded-4 border-0 p-4 mb-4 shadow-sm">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white rounded-circle p-2 me-3">
+                                        <i class="mdi mdi-clock-alert text-warning fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-0">Menunggu Pembayaran</h5>
+                                        <p class="text-muted small mb-0">Segera selesaikan pembayaran agar pesanan diproses.</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-gradient-primary w-100 rounded-pill py-3 fw-bold shadow-lg" onclick="payNow()">
+                                    <i class="mdi mdi-credit-card-outline me-2"></i> BAYAR SEKARANG
+                                </button>
+                            </div>
                         @else
                             <div class="tracking-stepper d-flex justify-content-between position-relative">
                                 <div class="step-line position-absolute top-50 start-0 end-0 translate-middle-y bg-light" style="height: 4px; z-index: 0;">
@@ -118,7 +133,7 @@
                     <div class="mt-5 text-center p-4 bg-light rounded-4 border-dashed border-2">
                         <h6 class="fw-bold mb-3 text-dark">QR CODE VALIDASI</h6>
                         <div class="d-inline-block p-3 bg-white rounded-3 shadow-sm mb-3">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ $pesanan->id }}" 
+                            <img src="{{ $qrCodeDataUri }}" 
                                  alt="QR Code Pesanan" 
                                  style="width: 180px; height: 180px;">
                         </div>
@@ -155,8 +170,26 @@
 }
 </style>
 
-@push('scripts')
+@push('script-page')
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
+    function payNow() {
+        if (typeof snap !== 'undefined') {
+            snap.pay("{{ $pesanan->snap_token }}", {
+                onSuccess: function() { location.reload(); },
+                onPending: function() { location.reload(); },
+                onError: function() { location.reload(); },
+                onClose: function() { 
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Pembayaran Tertunda',
+                        text: 'Silakan klik tombol "Bayar Sekarang" kembali jika ingin melanjutkan pembayaran.'
+                    });
+                }
+            });
+        }
+    }
+
     function checkStatus() {
         fetch("{{ route('kantin.status', $pesanan->id) }}")
             .then(response => response.json())

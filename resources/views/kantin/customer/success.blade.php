@@ -48,7 +48,7 @@
                             <h6 class="text-muted small fw-bold mb-3 uppercase tracking-wider">QR PENGAMBILAN</h6>
                             
                             <div class="p-3 bg-white border rounded-4 mb-3" style="box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $pesanan->nomor_pesanan }}" 
+                                <img src="{{ $qrCodeDataUri }}" 
                                      alt="QR Code" style="width: 150px; height: 150px; border-radius: 8px;">
                             </div>
                             

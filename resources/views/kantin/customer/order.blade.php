@@ -341,6 +341,24 @@
                 onSuccess: function() { 
                     localStorage.removeItem('kantin_cart');
                     window.location.href = `/kantin/success/${res.order_id}`; 
+                },
+                onPending: function() {
+                    localStorage.removeItem('kantin_cart');
+                    window.location.href = `/kantin/track/${res.order_id}`;
+                },
+                onError: function() {
+                    alert('Pembayaran gagal, silakan coba lagi.');
+                },
+                onClose: function() {
+                    localStorage.removeItem('kantin_cart');
+                    Swal.fire({
+                        title: 'Pembayaran Belum Selesai',
+                        text: 'Pesanan kamu sudah tersimpan. Kamu bisa melanjutkannya di halaman Lacak Pesanan.',
+                        icon: 'info',
+                        confirmButtonText: 'Lihat Pesanan'
+                    }).then(() => {
+                        window.location.href = `/kantin/track/${res.order_id}`;
+                    });
                 }
             });
         });

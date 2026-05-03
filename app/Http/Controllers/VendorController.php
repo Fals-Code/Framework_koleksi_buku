@@ -199,7 +199,7 @@ class VendorController extends Controller
                 'id' => $pesanan->id,
                 'nomor_pesanan' => $pesanan->nomor_pesanan,
                 'nama_pelanggan' => $pesanan->nama_pelanggan,
-                'total_harga' => number_format($pesanan->total_harga, 0, ',', '.'),
+                'total_harga' => (int) $pesanan->total_harga,
                 'status' => $pesanan->status,
                 'status_label' => strtoupper($pesanan->status),
                 'items' => $pesanan->detailPesanan->map(function($detail) {

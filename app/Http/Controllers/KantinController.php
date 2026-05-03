@@ -10,6 +10,9 @@ use App\Http\Requests\Kantin\CheckoutRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+
 
 class KantinController extends Controller
 {
@@ -141,19 +144,38 @@ class KantinController extends Controller
             }
         }
 
-        return view('kantin.customer.success', compact('pesanan'));
+        // Generate QR Code containing Order ID
+        $writer = new PngWriter();
+        $qrCode = new QrCode((string)$pesanan->id);
+        $result = $writer->write($qrCode);
+        $qrCodeDataUri = $result->getDataUri();
+
+        return view('kantin.customer.success', compact('pesanan', 'qrCodeDataUri'));
+
     }
 
     public function track($id)
     {
         $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])->findOrFail($id);
-        return view('kantin.customer.track', compact('pesanan'));
+        
+        // Generate QR Code containing Order ID for vendor validation
+        $writer = new PngWriter();
+        $qrCode = new QrCode((string)$pesanan->id);
+        $qrCodeDataUri = $writer->write($qrCode)->getDataUri();
+
+        return view('kantin.customer.track', compact('pesanan', 'qrCodeDataUri'));
     }
 
     public function receipt($id)
     {
         $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])->findOrFail($id);
-        return view('kantin.customer.receipt', compact('pesanan'));
+        
+        // Generate QR Code containing Tracking URL
+        $writer = new PngWriter();
+        $qrCode = new QrCode(route('kantin.track', $pesanan->id));
+        $qrCodeDataUri = $writer->write($qrCode)->getDataUri();
+
+        return view('kantin.customer.receipt', compact('pesanan', 'qrCodeDataUri'));
     }
 
     public function history()

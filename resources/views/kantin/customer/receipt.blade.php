@@ -116,7 +116,7 @@
     <div class="footer text-center">
         <p>Terima kasih telah berbelanja!<br>Semoga harimu menyenangkan.</p>
         <div style="margin-top: 10px;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(route('kantin.track', $pesanan->id)) }}" alt="QR Code" style="width: 80px; height: 80px;">
+            <img src="{{ $qrCodeDataUri }}" alt="QR Code" style="width: 80px; height: 80px;">
         </div>
         <p style="margin-top: 5px;">Scan untuk lacak pesanan</p>
     </div>

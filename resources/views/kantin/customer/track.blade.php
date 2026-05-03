@@ -25,6 +25,7 @@
                         @php
                             $status_map = [
                                 'pending'   => 0,
+                                'lunas'      => 1,
                                 'paid'      => 1,
                                 'cooking'   => 2,
                                 'ready'     => 3,
@@ -111,6 +112,20 @@
                                 <span class="h5 fw-bold text-primary mb-0">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </li>
                         </ul>
+                    </div>
+
+                    <!-- QR Code Section for Vendor Validation -->
+                    <div class="mt-5 text-center p-4 bg-light rounded-4 border-dashed border-2">
+                        <h6 class="fw-bold mb-3 text-dark">QR CODE VALIDASI</h6>
+                        <div class="d-inline-block p-3 bg-white rounded-3 shadow-sm mb-3">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ $pesanan->id }}" 
+                                 alt="QR Code Pesanan" 
+                                 style="width: 180px; height: 180px;">
+                        </div>
+                        <p class="small text-muted mb-0">Tunjukkan QR ini kepada penjual untuk pengambilan pesanan.</p>
+                        <div class="badge bg-white text-dark border mt-2 px-3 py-2 rounded-pill fw-bold">
+                            ID: {{ $pesanan->id }}
+                        </div>
                     </div>
 
                     <div class="text-center mt-5">

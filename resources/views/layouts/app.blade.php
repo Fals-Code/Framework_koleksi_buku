@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --primary-gradient: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%); }

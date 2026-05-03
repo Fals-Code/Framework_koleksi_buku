@@ -147,9 +147,68 @@ class VendorController extends Controller
     {
         $vendor_id = $this->getVendorId();
         $count = Pesanan::where('vendor_id', $vendor_id)
-                        ->where('status', 'paid')
+                        ->where('status', 'lunas')
                         ->count();
         
         return response()->json(['count' => $count]);
+    }
+
+    /**
+     * Praktikum 2: Scan QR Code Pesanan
+     */
+    public function scanQR()
+    {
+        return view('kantin.vendor.scan_qr');
+    }
+
+    /**
+     * API for QR Scanner to fetch order details
+     */
+    public function getOrderDetail($id)
+    {
+        $vendor_id = $this->getVendorId();
+        
+        // Cari pesanan secara global (mendukung ID numerik atau Nomor Pesanan string)
+        $pesanan_global = Pesanan::where('id', $id)
+                                 ->orWhere('nomor_pesanan', $id)
+                                 ->first();
+        
+        if (!$pesanan_global) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Pesanan tidak ditemukan. Pastikan QR Code benar.'
+            ], 404);
+        }
+
+        // Jika ada tapi beda vendor
+        if ($pesanan_global->vendor_id != $vendor_id) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Pesanan ini milik warung lain. Silakan arahkan pelanggan ke warung yang tepat.'
+            ], 403);
+        }
+
+        // Load detail pesanan
+        $pesanan = Pesanan::where('id', $pesanan_global->id)
+                         ->with(['detailPesanan.menu'])
+                         ->first();
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => [
+                'id' => $pesanan->id,
+                'nomor_pesanan' => $pesanan->nomor_pesanan,
+                'nama_pelanggan' => $pesanan->nama_pelanggan,
+                'total_harga' => number_format($pesanan->total_harga, 0, ',', '.'),
+                'status' => $pesanan->status,
+                'status_label' => strtoupper($pesanan->status),
+                'items' => $pesanan->detailPesanan->map(function($detail) {
+                    return [
+                        'nama' => $detail->menu->nama_makanan ?? 'Menu Terhapus',
+                        'qty' => $detail->qty
+                    ];
+                })
+            ]
+        ]);
     }
 }

@@ -87,6 +87,7 @@
           <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.dashboard') ? 'active' : '' }}" href="{{ route('vendor.dashboard') }}">Dashboard Kantin</a></li>
           <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.menu.*') ? 'active' : '' }}" href="{{ route('vendor.menu.index') }}">Kelola Menu</a></li>
           <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.orders') ? 'active' : '' }}" href="{{ route('vendor.orders') }}">Pesanan Masuk</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('vendor.scan_qr') ? 'active' : '' }}" href="{{ route('vendor.scan_qr') }}">Scan QR Pesanan</a></li>
         </ul>
       </div>
     </li>

@@ -30,7 +30,7 @@
     }
 
     .status-pending { background: #fff8e1; color: #ff8f00; }
-    .status-paid, .status-cooking { background: #e8f0fe; color: #1a73e8; }
+    .status-paid, .status-lunas, .status-cooking { background: #e8f0fe; color: #1a73e8; }
     .status-ready { background: #e6f4ea; color: #1e8e3e; }
     .status-completed { background: #f1f3f4; color: #5f6368; }
     .status-cancelled { background: #fce8e6; color: #d93025; }

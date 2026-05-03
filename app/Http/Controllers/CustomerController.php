@@ -46,6 +46,11 @@ class CustomerController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'telepon' => $request->telepon,
+            'alamat' => $request->alamat,
+            'provinsi' => $request->provinsi,
+            'kota' => $request->kota,
+            'kecamatan' => $request->kecamatan,
+            'kodepos' => $request->kodepos,
             'foto_blob' => $binaryData,
         ]);
 
@@ -87,6 +92,11 @@ class CustomerController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'telepon' => $request->telepon,
+            'alamat' => $request->alamat,
+            'provinsi' => $request->provinsi,
+            'kota' => $request->kota,
+            'kecamatan' => $request->kecamatan,
+            'kodepos' => $request->kodepos,
             'foto_path' => $filePath,
         ]);
 

@@ -79,10 +79,11 @@ class OrderService
             $newStatus = $this->mapMidtransStatusToInternal($midtransStatus);
 
             if ($oldStatus !== $newStatus) {
-                $pesanan->update(['status' => $newStatus]);
+                $pesanan->status = $newStatus;
+                $pesanan->save();
 
-                // Decrement stock ONLY if turning to 'paid'
-                if ($newStatus === 'paid' && $oldStatus !== 'paid') {
+                // Decrement stock ONLY if turning to 'completed'
+                if ($newStatus === 'completed' && $oldStatus !== 'completed') {
                     $this->decrementStock($pesanan);
                 }
             }
@@ -100,7 +101,7 @@ class OrderService
     protected function mapMidtransStatusToInternal(string $status)
     {
         return match ($status) {
-            'settlement', 'capture' => 'paid',
+            'settlement', 'capture' => 'completed',
             'pending'               => 'pending',
             'expire', 'cancel', 'deny' => 'cancelled',
             default                 => 'pending',

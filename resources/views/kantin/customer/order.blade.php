@@ -1,320 +1,181 @@
 @extends('layouts.app')
 
 @push('style-page')
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --purple-brand: #b66dff;
-        --purple-light: rgba(182, 109, 255, 0.1);
-        --glass-bg: rgba(255, 255, 255, 0.9);
-        --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        --kantin-primary: #ff6b35;
+        --kantin-secondary: #2575fc;
+        --kantin-bg: #f8f9fe;
+        --outfit: 'Outfit', sans-serif;
     }
 
-    /* Layout Containers */
-    .order-container {
-        display: flex;
-        gap: 25px;
-        position: relative;
-    }
+    body { font-family: var(--outfit); }
 
-    /* Adaptive Vendor Navigation */
-    .vendor-nav {
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(0,0,0,0.05);
-        z-index: 100;
-    }
-
-    /* Desktop Sidebar */
-    @media (min-width: 992px) {
-        .vendor-nav {
-            width: 260px;
-            position: sticky;
-            top: 80px;
-            height: fit-content;
-            padding: 20px;
-        }
-        .main-order-content {
-            flex-grow: 1;
-        }
-        .mobile-vendor-nav {
-            display: none;
-        }
-    }
-
-    /* Mobile Header Scroll */
-    @media (max-width: 991px) {
-        .order-container {
-            flex-direction: column;
-            gap: 15px;
-        }
-        .vendor-nav {
-            display: none; /* Hide desktop sidebar */
-        }
-        .mobile-vendor-nav {
-            position: sticky;
-            top: 70px;
-            z-index: 1000;
-            background: white;
-            padding: 10px 0;
-            margin: -10px -10px 10px -10px;
-            border-bottom: 1px solid #eee;
-            overflow-x: auto;
-            white-space: nowrap;
-            display: flex;
-            gap: 10px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-        .mobile-vendor-nav::-webkit-scrollbar {
-            display: none;
-        }
-        .mobile-vendor-item {
-            display: inline-block;
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            background: #f8f9fa;
-            color: #666;
-            border: 1px solid #eee;
-            transition: all 0.3s ease;
-        }
-        .mobile-vendor-item.active {
-            background: var(--purple-brand);
-            color: white;
-            border-color: var(--purple-brand);
-            box-shadow: 0 4px 10px rgba(182, 109, 255, 0.3);
-        }
-    }
-
-    /* Sidebar Items */
-    .vendor-link {
-        display: flex;
-        align-items: center;
-        padding: 12px 15px;
-        border-radius: 15px;
-        color: #555;
-        text-decoration: none;
-        margin-bottom: 8px;
-        transition: all 0.3s ease;
-        font-weight: 600;
-        border: 1px solid transparent;
-    }
-    .vendor-link i {
-        font-size: 1.2rem;
-        margin-right: 12px;
-        opacity: 0.7;
-    }
-    .vendor-link:hover {
-        background: var(--purple-light);
-        color: var(--purple-brand);
-        transform: translateX(5px);
-    }
-    .vendor-link.active {
-        background: var(--purple-brand);
+    /* Modern Hero Section - Safe Version */
+    .hero-premium {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        border-radius: 25px;
+        padding: 50px 40px;
         color: white;
-        box-shadow: 0 4px 15px rgba(182, 109, 255, 0.2);
+        margin-bottom: 30px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(106, 17, 203, 0.1);
     }
-    .vendor-link.active i {
-        opacity: 1;
+    .hero-img {
+        width: 180px;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
     }
 
-    /* Vendor Sections */
-    .vendor-section {
-        margin-bottom: 50px;
-        scroll-margin-top: 130px; /* offset for sticky headers */
-    }
-    .vendor-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    /* Category Chips - Safe Sticky */
+    .vendor-nav-container {
+        position: sticky;
+        top: 70px;
+        z-index: 100;
+        background: rgba(248, 249, 254, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 15px 0;
         margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
     }
-    .vendor-name {
-        font-weight: 800;
-        font-size: 1.5rem;
-        color: #333;
+    .vendor-chips {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .vendor-chips::-webkit-scrollbar { display: none; }
+    
+    .chip {
+        white-space: nowrap;
+        padding: 10px 20px;
+        background: white;
+        border-radius: 50px;
+        font-weight: 600;
+        color: #666;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1.5px solid transparent;
+        text-decoration: none !important;
+        transition: 0.3s;
+    }
+    .chip.active {
+        background: var(--kantin-primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
     }
 
-    /* Menu Cards */
-    .menu-card {
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        border: 1px solid #f1f1f1;
-        border-radius: 20px;
+    /* Menu Cards Premium */
+    .menu-card-v3 {
         background: white;
+        border-radius: 25px;
+        border: none;
         overflow: hidden;
+        transition: 0.3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
     }
-    .menu-card:hover {
+    .menu-card-v3:hover {
         transform: translateY(-8px);
-        box-shadow: var(--card-shadow);
-        border-color: var(--purple-light);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08);
     }
-    
-    .item-img-container {
-        width: 100px;
-        height: 100px;
-        border-radius: 15px;
-        overflow: hidden;
-        flex-shrink: 0;
-        background: #f8f9fa;
+    .img-box {
+        position: relative;
+        height: 200px;
     }
-    .item-img-container img {
+    .img-box img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
     }
-    .menu-card:hover .item-img-container img {
-        transform: scale(1.1);
-    }
-
-    /* Vendor Badge on Card */
-    .vendor-badge-mini {
-        font-size: 0.65rem;
-        background: var(--purple-light);
-        color: var(--purple-brand);
-        padding: 2px 8px;
-        border-radius: 5px;
+    .badge-price {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 5px 15px;
+        border-radius: 50px;
         font-weight: 800;
-        text-transform: uppercase;
-        display: inline-block;
-        margin-bottom: 5px;
+        color: var(--kantin-primary);
     }
 
-    /* Cart Sidebar */
-    .sticky-cart {
-        width: 350px;
+    /* Glass Cart Sidebar - Safe Sticky */
+    .cart-glass-v3 {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        border-radius: 30px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
         position: sticky;
-        top: 80px;
-        height: fit-content;
-    }
-    @media (max-width: 1200px) {
-        .sticky-cart {
-            width: 300px;
-        }
-    }
-    @media (max-width: 991px) {
-        .sticky-cart {
-            width: 100%;
-            position: relative;
-            top: 0;
-            margin-top: 30px;
-        }
+        top: 90px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
     }
 
-    .btn-qty {
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        font-weight: bold;
-        transition: all 0.2s;
+    .btn-add {
+        background: #fff3f0;
+        color: var(--kantin-primary);
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        width: 100%;
+        padding: 10px;
+        transition: 0.3s;
     }
-    .btn-qty:active { transform: scale(0.9); }
-
-    /* Custom Scrollbar for Vendor Nav Desktop */
-    .vendor-nav-list {
-        max-height: calc(100vh - 250px);
-        overflow-y: auto;
-        padding-right: 5px;
+    .btn-add:hover {
+        background: var(--kantin-primary);
+        color: white;
     }
-    .vendor-nav-list::-webkit-scrollbar { width: 4px; }
-    .vendor-nav-list::-webkit-scrollbar-thumb { background: #eee; border-radius: 10px; }
 </style>
 @endpush
 
 @section('content')
-<div class="page-header">
-    <h3 class="page-title">
-        <span class="page-title-icon bg-gradient-primary text-white me-2">
-            <i class="mdi mdi-food"></i>
-        </span> Kantin Vokasi
-    </h3>
-    <nav aria-label="breadcrumb">
-        <ul class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ route('kantin.history') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                    <i class="mdi mdi-history me-1"></i> Pesanan Saya
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
-
-<!-- Mobile Vendor Navigation (Visible only on Mobile) -->
-<div class="mobile-vendor-nav">
-    @foreach($vendors as $v)
-    <a href="#vendor-{{ $v->id }}" class="mobile-vendor-item" id="mobile-nav-{{ $v->id }}">
-        {{ $v->nama_warung }}
-    </a>
-    @endforeach
-</div>
-
-<div class="order-container">
-    <!-- Desktop Vendor Navigation (Visible only on Desktop) -->
-    <aside class="vendor-nav">
-        <h6 class="text-uppercase fw-bold mb-4 small text-muted">Daftar Warung</h6>
-        <div class="vendor-nav-list">
-            @foreach($vendors as $v)
-            <a href="#vendor-{{ $v->id }}" class="vendor-link" id="nav-{{ $v->id }}">
-                <i class="mdi mdi-store-outline"></i>
-                <span class="text-truncate">{{ $v->nama_warung }}</span>
-            </a>
-            @endforeach
+<div class="hero-premium">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold">Kantin Vokasi</h1>
+            <p class="fs-5 opacity-75">Pesan makanan favoritmu dengan cepat dan mudah.</p>
         </div>
-    </aside>
+        <div class="col-md-4 text-center d-none d-md-block">
+            <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" class="hero-img">
+        </div>
+    </div>
+</div>
 
-    <!-- Main Menu Area -->
-    <main class="main-order-content">
+<div class="vendor-nav-container">
+    <div class="vendor-chips">
         @foreach($vendors as $v)
-        <section class="vendor-section" id="vendor-{{ $v->id }}">
-            <div class="vendor-header">
-                <div>
-                    <h2 class="vendor-name mb-0">{{ $v->nama_warung }}</h2>
-                    <p class="text-muted small mb-0">{{ $v->menu->count() }} Pilihan Menu • <i class="mdi mdi-star text-warning"></i> 4.8</p>
-                </div>
-                <span class="badge bg-light text-primary rounded-pill border px-3">Buka</span>
-            </div>
+        <a href="#vendor-{{ $v->id }}" class="chip" id="chip-{{ $v->id }}">
+            {{ $v->nama_warung }}
+        </a>
+        @endforeach
+    </div>
+</div>
 
-            <div class="row">
+<div class="row">
+    <div class="col-lg-8">
+        @foreach($vendors as $v)
+        <section id="vendor-{{ $v->id }}" class="mb-5">
+            <h3 class="fw-bold mb-4">{{ $v->nama_warung }}</h3>
+            <div class="row g-4">
                 @foreach($v->menu as $m)
-                <div class="col-xl-6 col-md-12 mb-4">
-                    <div class="card menu-card h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="item-img-container me-3 border">
-                                    <img src="{{ $m->foto ? asset('storage/' . $m->foto) : 'https://placehold.co/100x100?text=' . urlencode($m->nama_makanan) }}" alt="{{ $m->nama_makanan }}">
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="vendor-badge-mini">{{ $v->nama_warung }}</div>
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="mb-1">
-                                            <h6 class="mb-1 fw-bold text-dark">{{ $m->nama_makanan }}</h6>
-                                            <p class="text-muted small mb-0 line-clamp-2" style="font-size: 0.75rem; height: 32px; overflow: hidden;">{{ $m->deskripsi }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <div>
-                                            <span class="fw-bold text-primary fs-5">Rp{{ number_format($m->harga, 0, ',', '.') }}</span>
-                                            <div class="x-small {{ $m->stok > 0 ? 'text-success' : 'text-danger' }}">
-                                                {{ $m->stok > 0 ? $m->stok . ' tersedia' : 'Habis' }}
-                                            </div>
-                                        </div>
-                                        <button class="btn btn-gradient-primary btn-sm rounded-pill px-3 shadow-sm" 
-                                                {{ $m->stok <= 0 ? 'disabled' : '' }}
-                                                onclick="addToCart({{ $m->id }}, '{{ $m->nama_makanan }}', {{ $m->harga }}, {{ $v->id }}, '{{ $v->nama_warung }}', {{ $m->stok }})">
-                                            <i class="mdi mdi-plus me-1"></i> Tambah
-                                        </button>
-                                    </div>
-                                </div>
+                <div class="col-md-6">
+                    <div class="menu-card-v3">
+                        <div class="img-box">
+                            <img src="{{ $m->foto ? asset('storage/' . $m->foto) : 'https://placehold.co/500x400?text=' . urlencode($m->nama_makanan) }}">
+                            <div class="badge-price">Rp {{ number_format($m->harga, 0, ',', '.') }}</div>
+                        </div>
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <h5 class="fw-bold mb-2">{{ $m->nama_makanan }}</h5>
+                            <p class="small text-muted mb-4">{{ Str::limit($m->deskripsi, 80) }}</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <span class="small fw-bold {{ $m->stok > 0 ? 'text-success' : 'text-danger' }}">
+                                    ● {{ $m->stok > 0 ? $m->stok . ' Tersedia' : 'Habis' }}
+                                </span>
+                                <button class="btn btn-add w-auto px-4" 
+                                        {{ $m->stok <= 0 ? 'disabled' : '' }}
+                                        onclick="addToCartV3({{ $m->id }}, '{{ $m->nama_makanan }}', {{ $m->harga }}, {{ $v->id }}, '{{ $v->nama_warung }}', {{ $m->stok }})">
+                                    Tambah
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -323,98 +184,47 @@
             </div>
         </section>
         @endforeach
-    </main>
+        <div style="height: 100px;"></div>
+    </div>
 
-    <!-- Right Sidebar Cart -->
-    <aside class="sticky-cart">
-        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-            <div class="card-body p-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="card-title mb-0 fw-bold">
-                        <i class="mdi mdi-basket-outline me-2 text-primary"></i> Pesanan Anda
-                    </h4>
-                    <span id="items-count-badge" class="badge bg-primary rounded-pill">0 Item</span>
-                </div>
-                
-                <div class="form-group mb-4">
-                    <label class="small fw-bold text-dark mb-2">Pilih Nama Anda <span class="text-danger">*</span></label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-end-0 text-primary"><i class="mdi mdi-account"></i></span>
-                        <input type="text" id="customer_name" class="form-control bg-light border-start-0 ps-0" placeholder="Contoh: Budi Santoso">
-                    </div>
-                </div>
-
-                <div id="cart-items" class="pr-1 mb-4" style="max-height: 350px; overflow-y: auto;">
-                    <!-- Items JS injected -->
-                </div>
-
-                <div class="form-group mb-4">
-                    <label class="small fw-bold text-dark mb-2">Catatan Tambahan</label>
-                    <textarea id="order_notes" class="form-control form-control-sm rounded-3 border-light bg-light" rows="2" placeholder="Gak pake pedes, ya..."></textarea>
-                </div>
-
-                <div class="bg-light rounded-4 p-3 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">Subtotal</span>
-                        <span class="fw-bold" id="cart-subtotal">Rp 0</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-dark">Total</span>
-                        <span class="fw-bold text-primary fs-4" id="cart-total">Rp 0</span>
-                    </div>
-                </div>
-                
-                <button class="btn btn-gradient-primary w-100 py-3 rounded-pill fw-bold shadow-sm" id="btn-checkout" onclick="checkout()">
-                    <i class="mdi mdi-credit-card-outline me-2"></i> BAYAR SEKARANG
-                </button>
+    <div class="col-lg-4">
+        <div class="cart-glass-v3">
+            <h4 class="fw-bold mb-4">Keranjang</h4>
+            
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-2">NAMA KAMU</label>
+                <input type="text" id="customer_name" class="form-control border-0 bg-light rounded-3" placeholder="Masukkan nama...">
             </div>
-        </div>
-        <p class="text-center x-small text-muted mt-3">
-            <i class="mdi mdi-shield-check-outline me-1"></i> Pembayaran aman via Midtrans
-        </p>
-    </aside>
-</div>
 
-<!-- Warning Modal Vendor Switch -->
-<div class="modal fade" id="vendorWarningModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-body p-5 text-center">
-                <div class="mb-4">
-                    <i class="mdi mdi-store-alert text-warning" style="font-size: 70px;"></i>
-                </div>
-                <h3 class="fw-bold">Ganti Warung?</h3>
-                <p class="text-muted">Oops! Kamu baru bisa memesan dari <strong>satu warung</strong> dalam satu transaksi. Ingin menghapus keranjang saat ini dan mulai pesanan baru di warung ini?</p>
-                <div class="d-grid gap-2 mt-4">
-                    <button type="button" class="btn btn-gradient-primary btn-lg rounded-pill" id="confirm-vendor-switch">
-                        Ya, Hapus & Ganti
-                    </button>
-                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">
-                        Batal, Tetap di Warung Lama
-                    </button>
+            <div id="cartList" class="mb-4" style="max-height: 300px; overflow-y: auto;">
+                <!-- JS Injected -->
+            </div>
+
+            <div class="border-top pt-3 mb-4">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Total Bayar</span>
+                    <h3 class="fw-bold text-primary" id="cartTotalV3">Rp 0</h3>
                 </div>
             </div>
+
+            <button class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold" onclick="doCheckout()">
+                PESAN SEKARANG
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Modal Status Midtrans (Existing) -->
-<div class="modal fade" id="statusModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+<!-- Modal Ganti Warung -->
+<div class="modal fade" id="vendorWarningModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4 rounded-4 border-0">
-            <div class="modal-body">
-                <div id="payment-pending">
-                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
-                    <h4>Menunggu Pembayaran...</h4>
-                    <p class="text-muted">Jendela pembayaran telah dibuka. Segera selesaikan pembayaranmu agar pesanan dapat diproses.</p>
-                </div>
-                <div id="payment-success" style="display: none;">
-                    <i class="mdi mdi-check-circle text-success" style="font-size: 80px;"></i>
-                    <h4 class="mt-3">Pembayaran Berhasil!</h4>
-                    <p>Pesanan Anda sedang diproses oleh vendor.</p>
-                    <div class="alert alert-info mt-3">
-                        Status Pesanan: <strong id="order-status-label">Cooking</strong>
-                    </div>
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-body p-5 text-center">
+                <i class="mdi mdi-alert-circle-outline text-warning mb-4" style="font-size: 60px;"></i>
+                <h4 class="fw-bold">Ganti Warung?</h4>
+                <p class="text-muted">Hapus isi keranjang saat ini untuk memesan dari warung lain?</p>
+                <div class="d-grid gap-2 mt-4">
+                    <button class="btn btn-primary rounded-pill py-2" onclick="confirmSwitch()">Ya, Hapus & Ganti</button>
+                    <button class="btn btn-light rounded-pill py-2" data-bs-dismiss="modal">Batal</button>
                 </div>
             </div>
         </div>
@@ -428,244 +238,112 @@
 <script>
     let cart = JSON.parse(localStorage.getItem('kantin_cart')) || [];
     let currentVendorId = localStorage.getItem('kantin_vendor_id') || null;
-    let currentVendorName = localStorage.getItem('kantin_vendor_name') || '';
-    let pendingSwitch = null;
+    let pendingItem = null;
 
     $(document).ready(function() {
-        updateCartUI();
-        initScrollSpy();
-        
-        // Modal Confirm Event
-        $('#confirm-vendor-switch').on('click', function() {
-            if (pendingSwitch) {
-                cart = [];
-                currentVendorId = pendingSwitch.vendorId;
-                currentVendorName = pendingSwitch.vendorName;
-                saveCart();
-                addToCart(pendingSwitch.id, pendingSwitch.name, pendingSwitch.price, pendingSwitch.vendorId, pendingSwitch.vendorName, pendingSwitch.maxStock);
-                $('#vendorWarningModal').modal('hide');
-                pendingSwitch = null;
-            }
-        });
-
-        // Smooth Scrolling for Nav Links
-        $('a[href^="#"]').on('click', function(e) {
-            e.preventDefault();
-            const target = $(this.getAttribute('href'));
-            if (target.length) {
-                $('html, body').stop().animate({
-                    scrollTop: target.offset().top - 120
-                }, 500);
-            }
-        });
+        renderCartV3();
+        initScrollSpyV3();
     });
 
-    function initScrollSpy() {
-        const sections = document.querySelectorAll('.vendor-section');
-        const navLinks = document.querySelectorAll('.vendor-link');
-        const mobileLinks = document.querySelectorAll('.mobile-vendor-item');
-
-        const observerOptions = {
-            root: null,
-            rootMargin: '-20% 0px -70% 0px', // adjustment for centering
-            threshold: 0
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const id = entry.target.id.split('-')[1];
-                    
-                    // Desktop active class
-                    navLinks.forEach(link => {
-                        link.classList.toggle('active', link.id === `nav-${id}`);
-                    });
-                    
-                    // Mobile active class
-                    mobileLinks.forEach(link => {
-                        link.classList.toggle('active', link.id === `mobile-nav-${id}`);
-                        if (link.classList.contains('active')) {
-                            // Scroll mobile nav into view
-                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                        }
-                    });
+    function initScrollSpyV3() {
+        const sections = document.querySelectorAll('section');
+        const chips = document.querySelectorAll('.chip');
+        $(window).scroll(function() {
+            let current = "";
+            sections.forEach(section => {
+                if (pageYOffset >= section.offsetTop - 150) {
+                    current = section.getAttribute('id');
                 }
             });
-        }, observerOptions);
-
-        sections.forEach(section => observer.observe(section));
+            chips.forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.getAttribute('href').substring(1) === current) {
+                    chip.classList.add('active');
+                }
+            });
+        });
     }
 
-    function addToCart(id, name, price, vendorId, vendorName, maxStock) {
-        // Vendor Validation
+    function addToCartV3(id, name, price, vendorId, vendorName, maxStock) {
         if (currentVendorId && currentVendorId != vendorId && cart.length > 0) {
-            pendingSwitch = { id, name, price, vendorId, vendorName, maxStock };
+            pendingItem = { id, name, price, vendorId, vendorName, maxStock };
             $('#vendorWarningModal').modal('show');
             return;
         }
-
-        // Proceed if same vendor or empty cart
         currentVendorId = vendorId;
-        currentVendorName = vendorName;
-
-        let exists = cart.find(i => i.id === id);
-        if (exists) {
-            if (exists.quantity >= maxStock) {
-                return Swal.fire('Stok Habis', 'Maksimal pembelian dicapai', 'error');
-            }
-            exists.quantity++;
+        let item = cart.find(i => i.id === id);
+        if (item) {
+            if (item.quantity >= maxStock) return alert('Stok habis!');
+            item.quantity++;
         } else {
-            cart.push({ id, name, price, quantity: 1, maxStock: maxStock });
+            cart.push({ id, name, price, quantity: 1, maxStock });
         }
-        
-        updateCartUI();
-        saveCart();
-        
-        // Pulse effect on cart icon
-        $('.mdi-basket-outline').addClass('pulse-animation');
-        setTimeout(() => $('.mdi-basket-outline').removeClass('pulse-animation'), 1000);
+        saveCartV3();
     }
 
-    function saveCart() {
+    function confirmSwitch() {
+        cart = [];
+        $('#vendorWarningModal').modal('hide');
+        if (pendingItem) {
+            addToCartV3(pendingItem.id, pendingItem.name, pendingItem.price, pendingItem.vendorId, pendingItem.vendorName, pendingItem.maxStock);
+            pendingItem = null;
+        }
+    }
+
+    function saveCartV3() {
         localStorage.setItem('kantin_cart', JSON.stringify(cart));
         localStorage.setItem('kantin_vendor_id', currentVendorId);
-        localStorage.setItem('kantin_vendor_name', currentVendorName);
+        renderCartV3();
     }
 
-    function updateCartUI() {
+    function renderCartV3() {
         let html = '';
         let total = 0;
-        let itemCount = 0;
-        
         cart.forEach((item, index) => {
-            let subtotal = item.price * item.quantity;
-            total += subtotal;
-            itemCount += item.quantity;
-            
+            total += item.price * item.quantity;
             html += `
-                <div class="cart-item-row p-3 border rounded-3 mb-2 bg-white shadow-sm border-light">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div style="flex-grow: 1;">
-                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">${item.name}</div>
-                            <div class="small text-primary fw-bold">Rp ${item.price.toLocaleString()}</div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-qty btn-light border" onclick="removeFromCart(${index})">
-                                <i class="mdi mdi-minus text-dark" style="font-size: 10px;"></i>
-                            </button>
-                            <span class="mx-1 fw-bold text-dark" style="min-width: 15px; text-align: center;">${item.quantity}</span>
-                            <button class="btn btn-qty btn-light border" onclick="addToCart(${item.id}, '${item.name}', ${item.price}, ${currentVendorId}, '${currentVendorName}', ${item.maxStock})">
-                                <i class="mdi mdi-plus text-primary" style="font-size: 10px;"></i>
-                            </button>
-                            <button class="btn btn-qty btn-outline-danger border-0 ms-2" onclick="deleteFromCart(${index})">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
-                        </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div style="max-width: 70%;">
+                        <div class="fw-bold small text-truncate">${item.name}</div>
+                        <div class="x-small text-muted">${item.quantity} x Rp ${item.price.toLocaleString()}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-light py-0 px-2" onclick="updateQtyV3(${index}, -1)">-</button>
+                        <button class="btn btn-sm btn-light py-0 px-2" onclick="updateQtyV3(${index}, 1)">+</button>
                     </div>
                 </div>
             `;
         });
-        
-        $('#cart-items').html(html || `
-            <div class="text-center py-5 text-muted bg-light rounded-4">
-                <i class="mdi mdi-cart-outline opacity-25" style="font-size: 4rem;"></i>
-                <p class="small mt-2 mb-0">Keranjang masih kosong</p>
-                <p class="x-small">Pilih menu di sebelah kiri ya!</p>
-            </div>
-        `);
-        
-        $('#items-count-badge').text(itemCount + ' Menu');
-        $('#cart-subtotal').text('Rp ' + total.toLocaleString());
-        $('#cart-total').text('Rp ' + total.toLocaleString());
-        
-        if (itemCount === 0) {
-            currentVendorId = null;
-            currentVendorName = '';
-            saveCart();
-        }
+        $('#cartList').html(html || '<div class="text-center py-4 opacity-50">Keranjang Kosong</div>');
+        $('#cartTotalV3').text('Rp ' + total.toLocaleString());
+        if (cart.length === 0) currentVendorId = null;
     }
 
-    function removeFromCart(index) {
-        if (cart[index].quantity > 1) {
-            cart[index].quantity--;
-        } else {
-            cart.splice(index, 1);
-        }
-        updateCartUI();
-        saveCart();
+    function updateQtyV3(index, delta) {
+        if (delta > 0 && cart[index].quantity >= cart[index].maxStock) return;
+        cart[index].quantity += delta;
+        if (cart[index].quantity <= 0) cart.splice(index, 1);
+        saveCartV3();
     }
 
-    function deleteFromCart(index) {
-        cart.splice(index, 1);
-        updateCartUI();
-        saveCart();
-    }
+    function doCheckout() {
+        const name = $('#customer_name').val();
+        if (!name) return alert('Masukkan nama kamu!');
+        if (cart.length === 0) return alert('Keranjang masih kosong!');
 
-    function checkout() {
-        let customerName = $('#customer_name').val();
-        let notes = $('#order_notes').val();
-
-        if (!customerName) {
-            return Swal.fire('Oops!', 'Tolong isi nama pemesan dulu ya.', 'warning').then(() => $('#customer_name').focus());
-        }
-
-        if (cart.length === 0) return Swal.fire('Keranjang Kosong', 'Pilih menu favoritmu dulu.', 'info');
-
-        btnLoading('#btn-checkout');
-        
-        $.ajax({
-            url: "{{ route('kantin.checkout') }}",
-            method: 'POST',
-            data: {
-                _token: "{{ csrf_token() }}",
-                vendor_id: currentVendorId,
-                nama_pelanggan: customerName,
-                catatan: notes,
-                items: cart
-            },
-            success: function(res) {
-                snap.pay(res.snap_token, {
-                    onSuccess: function() { resetCartAndListen(res.order_id); },
-                    onPending: function() { resetCartAndListen(res.order_id); },
-                    onError: function() { 
-                        Swal.fire('Error', 'Pembayaran gagal', 'error');
-                        restoreCheckoutBtn();
-                    },
-                    onClose: function() { restoreCheckoutBtn(); }
-                });
-            },
-            error: function(xhr) {
-                Swal.fire('Error', xhr.responseJSON.message || 'Gagal checkout', 'error');
-                restoreCheckoutBtn();
-            }
-        });
-    }
-
-    function restoreCheckoutBtn() {
-        $('#btn-checkout').html('<i class="mdi mdi-credit-card-outline me-2"></i> BAYAR SEKARANG').removeClass('disabled').prop('disabled', false);
-    }
-
-    function resetCartAndListen(orderId) {
-        localStorage.removeItem('kantin_cart');
-        localStorage.removeItem('kantin_vendor_id');
-        localStorage.removeItem('kantin_vendor_name');
-        cart = [];
-        updateCartUI();
-        startPolling(orderId);
-    }
-
-    function startPolling(orderId) {
-        $('#statusModal').modal('show');
-        setInterval(() => {
-            $.get(`/kantin/status/${orderId}`, function(res) {
-                if (res.status != 'pending') {
-                    $('#payment-pending').hide();
-                    $('#payment-success').fadeIn();
-                    $('#order-status-label').text(res.status_label);
-                    setTimeout(() => { window.location.href = `/kantin/success/${orderId}`; }, 2000);
+        $.post("{{ route('kantin.checkout') }}", {
+            _token: "{{ csrf_token() }}",
+            vendor_id: currentVendorId,
+            nama_pelanggan: name,
+            items: cart
+        }, function(res) {
+            snap.pay(res.snap_token, {
+                onSuccess: function() { 
+                    localStorage.removeItem('kantin_cart');
+                    window.location.href = `/kantin/success/${res.order_id}`; 
                 }
             });
-        }, 5000);
+        });
     }
 </script>
 @endpush

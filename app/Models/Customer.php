@@ -13,6 +13,11 @@ class Customer extends Model
         'nama',
         'email',
         'telepon',
+        'alamat',
+        'provinsi',
+        'kota',
+        'kecamatan',
+        'kodepos',
         'foto_blob',
         'foto_path',
     ];

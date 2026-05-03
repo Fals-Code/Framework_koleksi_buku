@@ -121,6 +121,26 @@ class KantinController extends Controller
     public function orderSuccess($id)
     {
         $pesanan = Pesanan::with(['vendor', 'detailPesanan.menu'])->findOrFail($id);
+        
+        // Sync status manual dengan Midtrans (Sangat berguna untuk localhost)
+        if ($pesanan->status == 'pending') {
+            try {
+                $statusData = $this->midtransService->getStatus($pesanan->nomor_pesanan);
+                if ($statusData) {
+                    $transactionStatus = is_object($statusData) 
+                        ? $statusData->transaction_status 
+                        : ($statusData['transaction_status'] ?? null);
+
+                    if ($transactionStatus) {
+                        $this->orderService->handleStatusUpdate($pesanan, $transactionStatus);
+                        $pesanan->refresh(); // Ambil data terbaru setelah diupdate
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Gagal sinkron status di Success Page: ' . $e->getMessage());
+            }
+        }
+
         return view('kantin.customer.success', compact('pesanan'));
     }
 

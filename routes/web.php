@@ -13,6 +13,7 @@ use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\KantinController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ScanController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -71,6 +72,8 @@ Route::middleware(['auth', 'check.session'])->group(function () {
 
     // Vendor Management (Internal Tabs)
     Route::prefix('vendor')->group(function () {
+        Route::get('/scan-qr', [VendorController::class, 'scanQR'])->name('vendor.scan_qr');
+        Route::get('/api/order-detail/{id}', [VendorController::class, 'getOrderDetail'])->name('vendor.api.order_detail');
         Route::get('/dashboard', [VendorController::class, 'dashboard'])->name('vendor.dashboard');
         Route::get('/menu', [VendorController::class, 'menuIndex'])->name('vendor.menu.index');
         Route::get('/menu/create', [VendorController::class, 'menuCreate'])->name('vendor.menu.create');
@@ -90,6 +93,9 @@ Route::middleware(['auth', 'check.session'])->group(function () {
     Route::get('/customer/tambah2', [CustomerController::class, 'create2'])->name('customer.create2');
     Route::post('/customer/tambah2', [CustomerController::class, 'store2'])->name('customer.store2');
     Route::get('/customer/foto-blob/{id}', [CustomerController::class, 'showBlob'])->name('customer.blob');
+
+    // Scan Routes
+    Route::get('/scan-barcode', [ScanController::class, 'barcode'])->name('scan.barcode');
 });
 
     Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');

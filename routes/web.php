@@ -96,6 +96,24 @@ Route::middleware(['auth', 'check.session'])->group(function () {
 
     // Scan Routes
     Route::get('/scan-barcode', [ScanController::class, 'barcode'])->name('scan.barcode');
+
+    // NFC Scanner Routes
+    Route::prefix('nfc')->group(function () {
+        Route::get('/', [App\Http\Controllers\NfcController::class, 'index'])->name('nfc.index');
+        Route::get('/write', [App\Http\Controllers\NfcController::class, 'writeCard'])->name('nfc.write');
+        Route::get('/cards', [App\Http\Controllers\NfcController::class, 'cards'])->name('nfc.cards');
+        Route::post('/cards', [App\Http\Controllers\NfcController::class, 'storeCard'])->name('nfc.cards.store')->middleware('throttle:10,1');
+        
+        // API Routes dengan Rate Limiting untuk mencegah spam tap NFC berlebihan
+        Route::middleware('throttle:30,1')->group(function () {
+            Route::post('/lookup', [App\Http\Controllers\NfcController::class, 'lookupCard'])->name('nfc.lookup');
+            Route::post('/peminjaman', [App\Http\Controllers\NfcController::class, 'storePeminjaman'])->name('nfc.peminjaman');
+            Route::post('/pengembalian', [App\Http\Controllers\NfcController::class, 'storePengembalian'])->name('nfc.pengembalian');
+            Route::post('/kunjungan', [App\Http\Controllers\NfcController::class, 'storeKunjungan'])->name('nfc.kunjungan');
+        });
+        
+        Route::get('/history', [App\Http\Controllers\NfcController::class, 'history'])->name('nfc.history');
+    });
 });
 
     Route::get('/kantin', [KantinController::class, 'index'])->name('kantin.index');

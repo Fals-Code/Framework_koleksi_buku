@@ -64,3 +64,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## 📱 Modul: Web NFC Scanner Perpustakaan
+Sistem ini dilengkapi dengan fitur Scanner Kartu NFC menggunakan **Web NFC API**. Fitur ini berjalan langsung melalui browser (khusus Android Chrome) tanpa perlu aplikasi Native.
+
+### Fitur Tersedia
+- **Registrasi Kartu NFC**: Mendaftarkan *serial number* kartu NFC fisik milik mahasiswa.
+- **Peminjaman Buku**: Tap kartu -> Pilih buku -> Otomatis pinjam.
+- **Pengembalian Buku**: Tap kartu -> Tampilkan tagihan peminjaman -> Kembalikan.
+- **Absensi Cerdas**: Tap kartu akan otomatis mendeteksi apakah itu *Tap In* atau *Tap Out*.
+
+### Catatan Penting
+- API Web NFC **hanya berfungsi di Android Chrome (versi 89+)**.
+- Web NFC **mewajibkan environment HTTPS** atau `localhost` agar mendapatkan izin sensor (*Hardware Access*).
+- Jika menguji lewat jaringan lokal menggunakan *ngrok*, pastikan URL diakses dengan prefiks `https://`.

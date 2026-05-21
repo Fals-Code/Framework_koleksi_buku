@@ -55,6 +55,39 @@
     </li>
 
     <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">NFC PERPUSTAKAAN</span>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('nfc.index') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('nfc.index') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Scan NFC</span>
+        <i class="mdi mdi-cellphone-nfc menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('nfc.write') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('nfc.write') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Tulis Kartu NFC</span>
+        <i class="mdi mdi-card-plus menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('nfc.cards') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('nfc.cards') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Data Kartu NFC</span>
+        <i class="mdi mdi-card-account-details menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('nfc.history') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('nfc.history') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Riwayat NFC</span>
+        <i class="mdi mdi-history menu-icon"></i>
+      </a>
+    </li>
+
+
+    <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>
     </li>
 

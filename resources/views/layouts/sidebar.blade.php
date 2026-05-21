@@ -86,6 +86,25 @@
       </a>
     </li>
 
+    <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">ANTRIAN</span>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('antrian.*') ? 'active' : '' }}">
+      <a class="nav-link" data-bs-toggle="collapse" href="#antrian-perpus" aria-expanded="{{ request()->routeIs('antrian.*') ? 'true' : 'false' }}" aria-controls="antrian-perpus">
+        <span class="menu-title">Antrian Perpustakaan</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-format-list-numbered menu-icon"></i>
+      </a>
+      <div class="collapse {{ request()->routeIs('antrian.*') ? 'show' : '' }}" id="antrian-perpus">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('antrian.admin') ? 'active' : '' }}" href="{{ route('antrian.admin') }}">Admin Antrian</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('antrian.guest') ? 'active' : '' }}" href="{{ route('antrian.guest') }}">Pendaftaran</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('antrian.papan') ? 'active' : '' }}" href="{{ route('antrian.papan') }}" target="_blank">Papan Display</a></li>
+        </ul>
+      </div>
+    </li>
+
 
     <li class="nav-item nav-category mt-3">
        <span class="nav-link text-muted small fw-bold">LAPORAN PDF</span>

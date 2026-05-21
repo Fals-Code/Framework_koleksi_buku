@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // forceScheme dihapus sementara untuk debug
+        URL::forceScheme('https');
 
         View::composer('*', function ($view) {
 

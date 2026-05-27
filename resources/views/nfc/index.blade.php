@@ -72,7 +72,7 @@
         <h3 class="page-title text-dark fw-bold">
             <span class="page-title-icon bg-gradient-primary text-white me-2 shadow-sm">
                 <i class="mdi mdi-nfc-variant"></i>
-            </span> NFC Scanner Perpustakaan
+            </span> NFC Scanner Absensi Mahasiswa
         </h3>
     </div>
 </div>

@@ -150,12 +150,10 @@
         $(window).on('load', function() {
             const pre = document.getElementById('preloader');
             if(pre) {
+                pre.style.opacity = '0';
                 setTimeout(() => {
-                    pre.style.opacity = '0';
-                    setTimeout(() => {
-                        pre.style.display = 'none';
-                    }, 500);
-                }, 600); 
+                    pre.style.display = 'none';
+                }, 300);
             }
         });
         let currentNotifId = null;
@@ -272,7 +270,7 @@
             // Initial and interval fetch
             @auth
                 fetchLatestNotifications();
-                setInterval(fetchLatestNotifications, 3000); // Poll every 3 seconds
+                setInterval(fetchLatestNotifications, 30000); // Poll every 30 seconds
             @endauth
         });
         function showNotifDetail(title, message, time, id = null) {

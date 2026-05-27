@@ -208,7 +208,7 @@ class NfcController extends Controller
             Kunjungan::create([
                 'nfc_card_id' => $cardId,
                 'waktu_masuk' => now(),
-                'tujuan' => 'Kunjungan Perpustakaan'
+                'tujuan' => 'Absensi Kelas Mahasiswa'
             ]);
 
             return response()->json([

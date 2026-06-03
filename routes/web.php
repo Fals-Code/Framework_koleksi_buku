@@ -14,6 +14,7 @@ use App\Http\Controllers\KantinController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\AntrianController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -124,3 +125,22 @@ Route::get('/kantin/success/{id}', [KantinController::class, 'orderSuccess'])->n
 Route::get('/kantin/receipt/{id}', [KantinController::class, 'receipt'])->name('kantin.receipt');
 Route::get('/kantin/track/{id}', [KantinController::class, 'track'])->name('kantin.track');
 Route::post('/midtrans/callback', [KantinController::class, 'callback']);
+
+// Sistem Antrian Real-Time
+Route::prefix('antrian')->name('antrian.')->group(function () {
+    // Publik
+    Route::get('/guest', [AntrianController::class, 'pendaftaran'])->name('guest');
+    Route::post('/guest', [AntrianController::class, 'daftar'])->name('daftar');
+    Route::get('/guest/nomor/{id}', [AntrianController::class, 'nomorSaya'])->name('nomor_saya');
+    Route::get('/papan', [AntrianController::class, 'papan'])->name('papan');
+    Route::get('/sse', [AntrianController::class, 'stream'])->name('sse');
+    Route::get('/sse/stream', [AntrianController::class, 'stream'])->name('sse.stream');
+
+    // Admin (Dilindungi middleware auth)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/admin', [AntrianController::class, 'admin'])->name('admin');
+        Route::post('/admin/panggil', [AntrianController::class, 'panggil'])->name('panggil');
+        Route::post('/admin/skip/{id}', [AntrianController::class, 'skip'])->name('skip');
+        Route::post('/admin/panggil-ulang/{id}', [AntrianController::class, 'panggilUlang'])->name('panggil_ulang');
+    });
+});

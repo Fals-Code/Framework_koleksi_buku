@@ -121,6 +121,9 @@
                     <button class="btn btn-gradient-primary rounded-pill px-5 fw-bold" id="btnStartScan" onclick="startNfcScan()">
                         <i class="mdi mdi-play-circle-outline me-2"></i> Mulai Scan
                     </button>
+                    <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold ms-3" id="btnQuickRead" onclick="quickReadUid()">
+                        <i class="mdi mdi-magnify-scan me-2"></i> Quick Read UID
+                    </button>
                 </div>
             </div>
 
@@ -285,6 +288,53 @@
                 resetScanArea();
             }
         });
+    }
+
+    // Quick read-only UID reader for index page (no write)
+    async function quickReadUid() {
+        if (!('NDEFReader' in window)) {
+            // show manual input modal for demo
+            $('#manualScanUid').val('');
+            $('#manualScanModal').modal('show');
+            return;
+        }
+
+        try {
+            const reader = new NDEFReader();
+            await reader.scan();
+
+            Swal.fire({
+                title: 'Menunggu kartu... (Quick Read)',
+                html: '<div class="text-center mt-3"><i class="mdi mdi-cellphone-nfc pulse-animation" style="font-size:60px; color:#b66dff"></i></div><p class="mt-3">Tempelkan kartu untuk mencoba baca UID (read-only).</p>',
+                showConfirmButton: false,
+                allowOutsideClick: false
+            });
+
+            reader.onreading = event => {
+                reader.onreading = null;
+                Swal.close();
+
+                const uid = event.serialNumber || null;
+                if (!uid) {
+                    Swal.fire('Tidak ada UID', 'Perangkat/Tag tidak mengungkapkan UID. Silakan gunakan input manual.', 'info');
+                    $('#manualScanUid').val('');
+                    $('#manualScanModal').modal('show');
+                    return;
+                }
+
+                // show and lookup
+                Swal.fire('UID Terbaca', `<p><strong>${uid}</strong></p>`, 'success');
+                lookupCardData(uid);
+            };
+
+            reader.onreadingerror = () => {
+                Swal.close();
+                Swal.fire('Gagal Baca', 'Tidak dapat membaca kartu. Coba lagi atau gunakan input manual.', 'error');
+            };
+        } catch (e) {
+            console.error(e);
+            Swal.fire('Gagal', 'Akses NFC ditolak atau terjadi kesalahan.', 'error');
+        }
     }
 
     function processTabAction() {

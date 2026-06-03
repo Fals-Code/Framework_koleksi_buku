@@ -18,8 +18,6 @@ class NfcCard extends Model
         'nama_anggota',
         'nim',
         'email',
-        'user_id',
-        'is_active',
     ];
 
     protected $casts = [

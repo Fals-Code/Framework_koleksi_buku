@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use App\Models\Kunjungan;
 use App\Models\Buku;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NfcController extends Controller
 {
@@ -43,19 +44,54 @@ class NfcController extends Controller
      */
     public function storeCard(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'serial_number' => 'required|string|max:100|unique:nfc_cards,serial_number',
             'nama_anggota' => 'required|string|max:200',
             'nim' => 'nullable|string|max:50',
             'email' => 'nullable|email',
         ]);
 
-        NfcCard::create($request->all());
+        try {
+            DB::beginTransaction();
+            $card = NfcCard::create($data);
+            DB::commit();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Kartu NFC berhasil diregistrasi.'
-        ]);
+            Log::info('NFC card registered', [
+                'id' => $card->id,
+                'serial' => $card->serial_number,
+                'by' => auth()->id() ?? 'system'
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Kartu NFC berhasil diregistrasi.',
+                'id' => $card->id
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
+            Log::error('NFC store query error', ['error' => $e->getMessage(), 'data' => $data]);
+
+            // Jika terjadi pelanggaran constraint unik, beri pesan spesifik
+            if ($e->getCode() === '23000') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Serial number sudah terdaftar.'
+                ], 409);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan data.'
+            ], 500);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('NFC store error', ['error' => $e->getMessage(), 'data' => $data]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem.'
+            ], 500);
+        }
     }
 
     /**

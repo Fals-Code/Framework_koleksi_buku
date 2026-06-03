@@ -22,6 +22,18 @@
     }
 
     .ticket-card::before {
+<<<<<<< HEAD
+=======
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
+    }
+
+>>>>>>> 6971a8567b4f20cdd3de32b96134e7267a53c467
     @keyframes popIn {
         from { transform: scale(0.8); opacity: 0; }
         to { transform: scale(1); opacity: 1; }

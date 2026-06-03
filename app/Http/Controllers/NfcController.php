@@ -99,7 +99,7 @@ class NfcController extends Controller
      */
     public function lookupCard(Request $request)
     {
-        $serialNumber = $request->serial_number;
+        $serialNumber = $request->input('serial_number');
 
         $card = NfcCard::where('serial_number', $serialNumber)->first();
 
@@ -144,7 +144,7 @@ class NfcController extends Controller
             'buku_id' => 'required|exists:bukus,id',
         ]);
 
-        $cardId = $request->nfc_card_id;
+        $cardId = $request->input('nfc_card_id');
 
         // Cek apakah user masih memiliki buku yang dipinjam
         $hasActiveBorrow = Peminjaman::where('nfc_card_id', $cardId)
@@ -162,7 +162,7 @@ class NfcController extends Controller
         try {
             Peminjaman::create([
                 'nfc_card_id' => $cardId,
-                'buku_id' => $request->buku_id,
+                'buku_id' => $request->input('buku_id'),
                 'tanggal_pinjam' => now(),
                 'status' => 'dipinjam',
                 'petugas' => auth()->user() ? auth()->user()->name : 'Sistem NFC'
@@ -191,7 +191,7 @@ class NfcController extends Controller
             'peminjaman_id' => 'required|exists:peminjamans,id',
         ]);
 
-        $peminjaman = Peminjaman::findOrFail($request->peminjaman_id);
+        $peminjaman = Peminjaman::findOrFail($request->input('peminjaman_id'));
 
         if ($peminjaman->status === 'dikembalikan') {
             return response()->json([
@@ -220,7 +220,7 @@ class NfcController extends Controller
             'nfc_card_id' => 'required|exists:nfc_cards,id',
         ]);
 
-        $cardId = $request->nfc_card_id;
+        $cardId = $request->input('nfc_card_id');
 
         // Cek apakah ada kunjungan hari ini yang belum tap keluar
         $activeVisit = Kunjungan::where('nfc_card_id', $cardId)
@@ -244,7 +244,7 @@ class NfcController extends Controller
             Kunjungan::create([
                 'nfc_card_id' => $cardId,
                 'waktu_masuk' => now(),
-                'tujuan' => 'Kunjungan Perpustakaan'
+                'tujuan' => 'Absensi Kelas Mahasiswa'
             ]);
 
             return response()->json([

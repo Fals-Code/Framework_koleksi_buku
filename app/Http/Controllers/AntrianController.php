@@ -155,6 +155,12 @@ class AntrianController extends Controller
                 echo 'data: ' . json_encode($data) . PHP_EOL;
                 echo PHP_EOL; // Blank line marks the end of one SSE message.
 
+<<<<<<< HEAD
+=======
+                // Padding to bypass Apache/Ngrok buffering
+                echo ': ' . str_repeat(' ', 4096) . PHP_EOL;
+
+>>>>>>> 6971a8567b4f20cdd3de32b96134e7267a53c467
                 if (ob_get_level() > 0) {
                     ob_flush();
                 }

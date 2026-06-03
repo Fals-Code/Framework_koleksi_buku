@@ -55,7 +55,7 @@
     </li>
 
     <li class="nav-item nav-category mt-3">
-       <span class="nav-link text-muted small fw-bold">NFC PERPUSTAKAAN</span>
+       <span class="nav-link text-muted small fw-bold">ABSENSI KELAS NFC</span>
     </li>
 
     <li class="nav-item {{ request()->routeIs('nfc.index') ? 'active' : '' }}">
@@ -177,6 +177,24 @@
             <a class="nav-link {{ request()->routeIs('customer.create2') ? 'active' : '' }}" 
                href="{{ route('customer.create2') }}">Tambah Customer 2</a>
           </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item nav-category mt-3">
+       <span class="nav-link text-muted small fw-bold">GEOLOCATION</span>
+    </li>
+
+    <li class="nav-item {{ request()->is('kunjungan-toko*') ? 'active' : '' }}">
+      <a class="nav-link" data-bs-toggle="collapse" href="#kunjungan-toko" aria-expanded="{{ request()->is('kunjungan-toko*') ? 'true' : 'false' }}" aria-controls="kunjungan-toko">
+        <span class="menu-title">Kunjungan Toko</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-map-marker menu-icon"></i>
+      </a>
+      <div class="collapse {{ request()->is('kunjungan-toko*') ? 'show' : '' }}" id="kunjungan-toko">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('kunjungan-toko.index') ? 'active' : '' }}" href="{{ route('kunjungan-toko.index') }}">List Toko</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('kunjungan-toko.create') ? 'active' : '' }}" href="{{ route('kunjungan-toko.create') }}">Input Titik Awal Toko</a></li>
+          <li class="nav-item"> <a class="nav-link {{ request()->routeIs('kunjungan-toko.kunjungan') ? 'active' : '' }}" href="{{ route('kunjungan-toko.kunjungan') }}">Titik Kunjungan (Sales)</a></li>
         </ul>
       </div>
     </li>

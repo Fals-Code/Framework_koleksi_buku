@@ -184,6 +184,13 @@
        <span class="nav-link text-muted small fw-bold">GEOLOCATION</span>
     </li>
 
+    <li class="nav-item {{ request()->routeIs('wilayah.*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('wilayah.index') }}" onclick="btnLoading(this)">
+        <span class="menu-title">Wilayah Administrasi</span>
+        <i class="mdi mdi-map menu-icon"></i>
+      </a>
+    </li>
+
     <li class="nav-item {{ request()->is('kunjungan-toko*') ? 'active' : '' }}">
       <a class="nav-link" data-bs-toggle="collapse" href="#kunjungan-toko" aria-expanded="{{ request()->is('kunjungan-toko*') ? 'true' : 'false' }}" aria-controls="kunjungan-toko">
         <span class="menu-title">Kunjungan Toko</span>

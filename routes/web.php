@@ -15,6 +15,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\AntrianController;
+use App\Http\Controllers\WilayahController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () { 
@@ -97,6 +98,11 @@ Route::middleware(['auth', 'check.session'])->group(function () {
 
     // Scan Routes
     Route::get('/scan-barcode', [ScanController::class, 'barcode'])->name('scan.barcode');
+
+    Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah.index');
+    Route::get('/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies'])->name('wilayah.regencies');
+    Route::get('/wilayah/districts/{regencyId}', [WilayahController::class, 'districts'])->name('wilayah.districts');
+    Route::get('/wilayah/villages/{districtId}', [WilayahController::class, 'villages'])->name('wilayah.villages');
 
     // NFC Scanner Routes
     Route::prefix('nfc')->group(function () {

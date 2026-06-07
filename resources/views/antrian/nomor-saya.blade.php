@@ -1,90 +1,353 @@
-@extends('layouts.app')
+@extends('layouts.public-antrian')
 
 @push('style-page')
 <style>
-    /* Sembunyikan elemen admin untuk halaman publik */
-    .navbar, .sidebar, .footer { display: none !important; }
-    .main-panel { width: 100% !important; padding: 0 !important; min-height: 100vh !important; }
-    .page-body-wrapper { padding-top: 0 !important; }
-    .content-wrapper { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .navbar, .sidebar, .footer {
+        display: none !important;
+    }
+
+    .main-panel {
+        width: 100% !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    .page-body-wrapper {
+        padding-top: 0 !important;
+    }
+
+    .content-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 16px !important;
+        background:
+            radial-gradient(circle at top left, rgba(40, 167, 69, 0.14), transparent 32%),
+            linear-gradient(135deg, #f8fafc 0%, #e7ecf5 100%);
+    }
+
+    .ticket-shell {
+        width: 100%;
+        max-width: 520px;
+    }
+
+    .success-mark {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+        box-shadow: 0 12px 24px rgba(34, 197, 94, 0.24);
+        margin-bottom: 18px;
+    }
+
+    .success-mark::before {
+        content: "";
+        width: 18px;
+        height: 32px;
+        border-right: 5px solid #ffffff;
+        border-bottom: 5px solid #ffffff;
+        transform: rotate(45deg) translate(-2px, -3px);
+    }
 
     .ticket-card {
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        padding: 50px 40px;
-        width: 100%;
-        max-width: 450px;
-        text-align: center;
         position: relative;
         overflow: hidden;
-        animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 18px 44px rgba(30, 41, 59, 0.14);
+        animation: ticketIn 0.45s ease-out forwards;
+    }
+
+    .ticket-card::before,
+    .ticket-card::after {
+        content: "";
+        position: absolute;
+        top: 220px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #edf2f8;
+        z-index: 2;
     }
 
     .ticket-card::before {
-<<<<<<< HEAD
-=======
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 6px;
-        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
+        left: -16px;
     }
 
->>>>>>> 6971a8567b4f20cdd3de32b96134e7267a53c467
-    @keyframes popIn {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+    .ticket-card::after {
+        right: -16px;
+    }
+
+    .ticket-header {
+        padding: 34px 32px 26px;
+        text-align: center;
+        border-top: 6px solid #22c55e;
+    }
+
+    .ticket-title {
+        color: #111827;
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .ticket-subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    .ticket-number-area {
+        padding: 28px 32px;
+        text-align: center;
+        border-top: 1px dashed #d7dce5;
+        border-bottom: 1px dashed #d7dce5;
+        background: #fbfdff;
+    }
+
+    .ticket-label {
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        margin-bottom: 8px;
     }
 
     .number-display {
-        font-size: 80px;
+        color: #4b49ac;
+        font-size: clamp(56px, 15vw, 92px);
         font-weight: 900;
-        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        line-height: 1.2;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
     }
 
-    .print-btn {
-        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 4px;
-        font-weight: bold;
-        margin-top: 20px;
+    .ticket-body {
+        padding: 28px 32px 32px;
     }
-    .print-btn:hover {
-        opacity: 0.9;
-        color: white;
+
+    .visitor-name {
+        color: #111827;
+        font-size: 20px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+
+    .visitor-nim {
+        color: #6b7280;
+        text-align: center;
+        margin-bottom: 18px;
+    }
+
+    .ticket-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 22px 0;
+    }
+
+    .info-item {
+        min-height: 76px;
+        padding: 14px;
+        border: 1px solid #eef1f6;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .info-label {
+        display: block;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        color: #111827;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    .next-step {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 8px;
+        color: #24543a;
+        background: #ecfdf3;
+        border: 1px solid #bbf7d0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .next-step-icon {
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 2px solid #16a34a;
+        color: #16a34a;
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1;
+        margin-top: 1px;
+    }
+
+    .ticket-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    .btn-ticket {
+        min-height: 46px;
+        border-radius: 8px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-print-ticket {
+        color: #ffffff;
+        border: 0;
+        background: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%);
+    }
+
+    .btn-print-ticket:hover {
+        color: #ffffff;
+        opacity: 0.92;
+    }
+
+    .btn-secondary-ticket {
+        color: #4b49ac;
+        border: 1px solid #ddd8ff;
+        background: #f6f4ff;
+        text-decoration: none;
+    }
+
+    .btn-secondary-ticket:hover {
+        color: #3a398c;
+        background: #efebff;
+        text-decoration: none;
+    }
+
+    @keyframes ticketIn {
+        from {
+            transform: translateY(18px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .ticket-header,
+        .ticket-number-area,
+        .ticket-body {
+            padding-left: 22px;
+            padding-right: 22px;
+        }
+
+        .ticket-info,
+        .ticket-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .ticket-card::before,
+        .ticket-card::after {
+            top: 214px;
+        }
+    }
+
+    @media print {
+        body {
+            background: #ffffff !important;
+        }
+
+        .content-wrapper {
+            min-height: auto;
+            padding: 0 !important;
+            background: #ffffff !important;
+        }
+
+        .ticket-shell {
+            max-width: 100%;
+        }
+
+        .ticket-card {
+            box-shadow: none !important;
+            border: 1px solid #d7dce5;
+        }
+
+        .ticket-actions {
+            display: none !important;
+        }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="ticket-card">
-    <h4 class="text-uppercase text-muted fw-bold mb-2">Nomor Antrian Anda</h4>
-    
-    <div class="number-display">
-        {{ $antrian->nomor_antrian }}
-    </div>
-    
-    <h5 class="fw-bold mt-4" style="color: #333;">{{ $antrian->nama_pengunjung }}</h5>
-    @if($antrian->nim)
-        <p class="text-muted mb-1">{{ $antrian->nim }}</p>
-    @endif
-    <p class="badge bg-gradient-primary rounded-pill px-3 py-2 mt-2">{{ $antrian->keperluan }}</p>
-    
-    <div class="mt-4 pt-4 border-top">
-        <small class="text-muted d-block">Terdaftar pada: {{ $antrian->waktu_daftar->format('d M Y, H:i') }}</small>
-        <small class="text-muted d-block mt-1">Silakan tunggu panggilan di ruang tunggu.</small>
-    </div>
+<div class="ticket-shell">
+    <div class="ticket-card" role="region" aria-label="Tiket nomor antrian">
+        <div class="ticket-header">
+            <div class="success-mark" aria-hidden="true"></div>
+            <h1 class="ticket-title">Pendaftaran Berhasil</h1>
+            <p class="ticket-subtitle">Simpan nomor ini dan tunggu sampai dipanggil petugas.</p>
+        </div>
 
-    <button class="print-btn w-100" onclick="window.print()">
-        <i class="mdi mdi-printer me-2"></i> Cetak Tiket
-    </button>
+        <div class="ticket-number-area">
+            <div class="ticket-label">Nomor Antrian</div>
+            <div class="number-display">{{ $antrian->nomor_antrian }}</div>
+        </div>
+
+        <div class="ticket-body">
+            <div class="visitor-name">{{ $antrian->nama_pengunjung }}</div>
+            @if($antrian->nim)
+                <div class="visitor-nim">NIM: {{ $antrian->nim }}</div>
+            @endif
+
+            <div class="ticket-info">
+                <div class="info-item">
+                    <span class="info-label">Keperluan</span>
+                    <span class="info-value">{{ $antrian->keperluan ?: 'Lainnya' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Waktu Daftar</span>
+                    <span class="info-value">{{ $antrian->waktu_daftar->format('d M Y, H:i') }}</span>
+                </div>
+            </div>
+
+            <div class="next-step">
+                <span class="next-step-icon" aria-hidden="true">i</span>
+                <div>
+                    Datang ke ruang tunggu perpustakaan dan pantau papan antrian. Nomor akan dipanggil sesuai urutan pendaftaran.
+                </div>
+            </div>
+
+            <div class="ticket-actions">
+                <button type="button" class="btn btn-ticket btn-print-ticket" onclick="window.print()">
+                    Cetak Tiket
+                </button>
+                <a href="{{ route('antrian.guest') }}" class="btn-ticket btn-secondary-ticket">
+                    Ambil Lagi
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

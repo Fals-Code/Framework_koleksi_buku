@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public-antrian')
 
 @push('style-page')
 <style>

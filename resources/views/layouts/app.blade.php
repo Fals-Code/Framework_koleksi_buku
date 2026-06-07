@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --primary-gradient: linear-gradient(135deg, #b66dff 0%, #6a11cb 100%); }
         .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu.navbar-dropdown {
@@ -141,21 +139,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script> --}}
     <script src="{{ asset('assets/js/misc.js') }}"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        $(window).on('load', function() {
+        function hidePreloader() {
             const pre = document.getElementById('preloader');
-            if(pre) {
+            if (pre && pre.style.display !== 'none') {
                 pre.style.opacity = '0';
                 setTimeout(() => {
                     pre.style.display = 'none';
                 }, 300);
             }
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', hidePreloader);
+        window.addEventListener('load', hidePreloader);
+        setTimeout(hidePreloader, 3000);
+
         let currentNotifId = null;
         $(document).ready(function() {
             $('.dropdown-toggle').on('click', function(e) {
@@ -169,10 +173,14 @@
                 if (!$(e.target).closest('.nav-item.dropdown').length) { $('.dropdown-menu').removeClass('show'); }
             });
             @if(session('success'))
-                Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", showConfirmButton: false, timer: 1500, iconColor: '#b66dff' });
+                if (window.Swal) {
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", showConfirmButton: false, timer: 1500, iconColor: '#b66dff' });
+                }
             @endif
             @if(session('error'))
-                Swal.fire({ icon: 'error', title: 'Kesalahan!', text: "{{ session('error') }}", confirmButtonColor: '#b66dff' });
+                if (window.Swal) {
+                    Swal.fire({ icon: 'error', title: 'Kesalahan!', text: "{{ session('error') }}", confirmButtonColor: '#b66dff' });
+                }
             @endif
             $('#detailNotifModal').on('hidden.bs.modal', function () {
                 if (currentNotifId) {
@@ -248,6 +256,10 @@
             }
 
             function showNotificationToast(notif) {
+                if (!window.Swal) {
+                    return;
+                }
+
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',
@@ -282,6 +294,16 @@
             myModal.show();
         }
         function confirmDelete(url) {
+            if (!window.Swal) {
+                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    let form = document.createElement('form');
+                    form.action = url; form.method = 'POST';
+                    form.innerHTML = `@csrf @method('DELETE')`;
+                    document.body.appendChild(form); form.submit();
+                }
+                return;
+            }
+
             Swal.fire({
                 title: 'Apakah Anda yakin?', text: "Data yang dihapus tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true,
                 confirmButtonColor: '#b66dff', cancelButtonColor: '#fe72af', confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'

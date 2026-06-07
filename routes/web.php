@@ -144,14 +144,10 @@ Route::prefix('antrian')->name('antrian.')->group(function () {
         Route::post('/admin/panggil-ulang/{id}', [AntrianController::class, 'panggilUlang'])->name('panggil_ulang');
     });
 });
-<<<<<<< HEAD
-=======
 
-// Fitur Geolocation Kunjungan Toko
 use App\Http\Controllers\KunjunganTokoController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/kunjungan-toko/titik-kunjungan', [KunjunganTokoController::class, 'kunjungan'])->name('kunjungan-toko.kunjungan');
     Route::post('/kunjungan-toko/proses', [KunjunganTokoController::class, 'prosesKunjungan'])->name('kunjungan-toko.proses');
     Route::resource('kunjungan-toko', KunjunganTokoController::class)->except(['show', 'edit', 'update', 'destroy']);
 });
->>>>>>> 6971a8567b4f20cdd3de32b96134e7267a53c467
